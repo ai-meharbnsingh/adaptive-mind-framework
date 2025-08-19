@@ -1,0 +1,316 @@
+# 09_Deployment_Package/prometheus_config.yml
+# Prometheus configuration for Adaptive Mind Framework monitoring
+# Enterprise-grade metrics collection and alerting
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'adaptive-mind-production'
+    environment: 'production'
+
+# Rule files for alerting
+rule_files:
+  - "alert_rules.yml"
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+  # Adaptive Mind Framework Application
+  - job_name: 'adaptive-mind-app'
+    static_configs:
+      - targets: ['adaptive-mind-app:8000']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+    honor_labels: true
+
+    # Custom relabeling for application metrics
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'adaptive_mind_(.*)'
+        target_label: __name__
+        replacement: 'app_${1}'
+
+    # Additional metadata
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 'adaptive-mind-app:8000'
+
+  # Framework Core Metrics
+  - job_name: 'framework-core'
+    static_configs:
+      - targets: ['adaptive-mind-app:8000']
+    scrape_interval: 10s
+    metrics_path: /framework/metrics
+    scrape_timeout: 8s
+
+    # Framework-specific labels
+    relabel_configs:
+      - target_label: service
+        replacement: 'framework-core'
+      - target_label: component
+        replacement: 'resilience-engine'
+
+  # AI Provider Metrics
+  - job_name: 'ai-providers'
+    static_configs:
+      - targets: ['adaptive-mind-app:8000']
+    scrape_interval: 30s
+    metrics_path: /providers/metrics
+    scrape_timeout: 15s
+
+    # Provider-specific configuration
+    params:
+      collect_provider_stats: ['true']
+      include_cost_metrics: ['true']
+
+    relabel_configs:
+      - target_label: service
+        replacement: 'ai-providers'
+
+  # Database Metrics (PostgreSQL)
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 30s
+
+    relabel_configs:
+      - target_label: service
+        replacement: 'database'
+      - target_label: database_type
+        replacement: 'postgresql'
+
+  # Redis Metrics
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+
+    relabel_configs:
+      - target_label: service
+        replacement: 'cache'
+      - target_label: cache_type
+        replacement: 'redis'
+
+  # Node Exporter (System Metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+    relabel_configs:
+      - target_label: service
+        replacement: 'system'
+
+  # Container Metrics (cAdvisor)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s
+    metrics_path: /metrics
+
+    relabel_configs:
+      - target_label: service
+        replacement: 'containers'
+
+  # Azure Application Insights Integration
+  - job_name: 'azure-insights'
+    azure_sd_configs:
+      - subscription_id: "${AZURE_SUBSCRIPTION_ID}"
+        tenant_id: "${AZURE_TENANT_ID}"
+        client_id: "${AZURE_CLIENT_ID}"
+        client_secret: "${AZURE_CLIENT_SECRET}"
+        port: 443
+
+    relabel_configs:
+      - source_labels: [__meta_azure_machine_name]
+        target_label: instance
+      - source_labels: [__meta_azure_machine_resource_group]
+        target_label: resource_group
+
+  # Custom Business Metrics
+  - job_name: 'business-metrics'
+    static_configs:
+      - targets: ['adaptive-mind-app:8000']
+    scrape_interval: 60s
+    metrics_path: /business/metrics
+
+    params:
+      include_cost_analysis: ['true']
+      include_performance_stats: ['true']
+      include_bias_metrics: ['true']
+
+    relabel_configs:
+      - target_label: service
+        replacement: 'business-intelligence'
+
+  # Security Metrics
+  - job_name: 'security-metrics'
+    static_configs:
+      - targets: ['adaptive-mind-app:8000']
+    scrape_interval: 30s
+    metrics_path: /security/metrics
+
+    relabel_configs:
+      - target_label: service
+        replacement: 'security'
+      - target_label: component
+        replacement: 'api-security'
+
+  # Load Balancer Metrics (if using external LB)
+  - job_name: 'nginx-exporter'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 30s
+
+    relabel_configs:
+      - target_label: service
+        replacement: 'load-balancer'
+
+# Remote write configuration for long-term storage
+remote_write:
+  - url: "https://prometheus-remote-write.azurewebsites.net/api/v1/write"
+    basic_auth:
+      username: "${REMOTE_WRITE_USERNAME}"
+      password: "${REMOTE_WRITE_PASSWORD}"
+
+    write_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'adaptive_mind_.*'
+        action: keep
+
+    queue_config:
+      capacity: 10000
+      max_shards: 50
+      min_shards: 1
+      max_samples_per_send: 2000
+      batch_send_deadline: 5s
+      min_backoff: 30ms
+      max_backoff: 100ms
+
+# Storage configuration
+storage:
+  tsdb:
+    retention.time: 30d
+    retention.size: 10GB
+    path: /prometheus/data
+    wal-compression: true
+
+# Global limits
+global:
+  query_log_file: /prometheus/logs/query.log
+
+# Feature flags
+feature_flags:
+  - promql-at-modifier
+  - expand-external-labels
+  - exemplar-storage
+
+# Additional scrape configurations for development
+scrape_configs_dev:
+  # Development-only metrics
+  - job_name: 'dev-debugging'
+    static_configs:
+      - targets: ['localhost:8001']
+    scrape_interval: 5s
+    metrics_path: /debug/metrics
+
+    # Only in development environment
+    honor_labels: true
+
+  # Mock provider metrics for testing
+  - job_name: 'mock-providers'
+    static_configs:
+      - targets: ['localhost:8002']
+    scrape_interval: 10s
+    metrics_path: /mock/metrics
+
+# Alert rule definitions (referenced in rule_files)
+# This would typically be in a separate alert_rules.yml file
+alert_rules_inline: |
+  groups:
+  - name: adaptive_mind_alerts
+    rules:
+    # High error rate alert
+    - alert: HighErrorRate
+      expr: rate(adaptive_mind_errors_total[5m]) > 0.1
+      for: 2m
+      labels:
+        severity: critical
+        service: adaptive-mind
+      annotations:
+        summary: "High error rate detected"
+        description: "Error rate is {{ $value }} errors per second"
+    
+    # High response time alert
+    - alert: HighResponseTime
+      expr: histogram_quantile(0.95, rate(adaptive_mind_request_duration_seconds_bucket[5m])) > 2
+      for: 5m
+      labels:
+        severity: warning
+        service: adaptive-mind
+      annotations:
+        summary: "High response time detected"
+        description: "95th percentile response time is {{ $value }} seconds"
+    
+    # Provider failure alert
+    - alert: ProviderFailure
+      expr: adaptive_mind_provider_failures_total > 10
+      for: 1m
+      labels:
+        severity: critical
+        service: ai-providers
+      annotations:
+        summary: "AI Provider experiencing failures"
+        description: "Provider {{ $labels.provider }} has {{ $value }} failures"
+    
+    # Database connection alert
+    - alert: DatabaseConnectionIssues
+      expr: adaptive_mind_database_connections_failed_total > 5
+      for: 2m
+      labels:
+        severity: warning
+        service: database
+      annotations:
+        summary: "Database connection issues"
+        description: "{{ $value }} database connection failures detected"
+    
+    # Memory usage alert
+    - alert: HighMemoryUsage
+      expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.1
+      for: 5m
+      labels:
+        severity: warning
+        service: system
+      annotations:
+        summary: "High memory usage"
+        description: "Available memory is {{ $value | humanizePercentage }}"
+    
+    # Cost threshold alert
+    - alert: HighCostUsage
+      expr: adaptive_mind_daily_cost_usd > 100
+      for: 10m
+      labels:
+        severity: warning
+        service: cost-management
+      annotations:
+        summary: "Daily cost threshold exceeded"
+        description: "Daily cost is ${{ $value }}"

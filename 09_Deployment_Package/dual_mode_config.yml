@@ -1,0 +1,560 @@
+# 09_Deployment_Package/dual_mode_config.yml
+# Dual-mode deployment configuration for Adaptive Mind Framework
+# Supports both hosted demo and buyer evaluation modes
+
+# Global Configuration
+global:
+  application_name: "Adaptive Mind Framework"
+  version: "2.3.0"
+  environment: "${ENVIRONMENT:-production}"
+  debug_mode: false
+  log_level: "${LOG_LEVEL:-INFO}"
+
+# Deployment Modes Configuration
+deployment_modes:
+  # Hosted Demo Mode - Public demonstration environment
+  hosted_demo:
+    enabled: true
+    description: "Public-facing demo for prospects and marketing"
+
+    # Network Configuration
+    network:
+      domain: "demo.adaptivemind.ai"
+      ssl_enabled: true
+      cdn_enabled: true
+      rate_limiting:
+        enabled: true
+        requests_per_minute: 100
+        burst_limit: 200
+
+    # Security Settings
+    security:
+      api_key_validation: "mock"  # Use mock keys for demo
+      authentication_required: false
+      cors_origins: ["*"]
+      security_headers: true
+
+    # Feature Flags
+    features:
+      real_time_streaming: true
+      bias_detection: true
+      cost_optimization: true
+      provider_ranking: true
+      historical_charts: true
+      roi_calculator: true
+      mock_data_enabled: true
+      live_failover_demo: true
+
+    # API Providers (Demo Mode)
+    providers:
+      openai:
+        enabled: true
+        api_key: "demo_openai_key"
+        mock_responses: true
+        simulated_latency: "100-300ms"
+
+      anthropic:
+        enabled: true
+        api_key: "demo_anthropic_key"
+        mock_responses: true
+        simulated_latency: "150-350ms"
+
+      google:
+        enabled: true
+        api_key: "demo_google_key"
+        mock_responses: true
+        simulated_latency: "120-280ms"
+
+    # Database Configuration
+    database:
+      connection_string: "${DEMO_DATABASE_URL}"
+      pool_size: 10
+      demo_data_preloaded: true
+
+    # Monitoring
+    monitoring:
+      metrics_enabled: true
+      public_metrics: true
+      detailed_logging: false
+
+    # Resource Limits
+    resources:
+      max_concurrent_users: 50
+      max_requests_per_session: 200
+      session_timeout: "30m"
+
+  # Buyer Evaluation Mode - Private enterprise evaluation
+  buyer_evaluation:
+    enabled: true
+    description: "Private evaluation environment for qualified buyers"
+
+    # Network Configuration
+    network:
+      domain: "eval.adaptivemind.ai"
+      ssl_enabled: true
+      cdn_enabled: true
+      rate_limiting:
+        enabled: true
+        requests_per_minute: 1000
+        burst_limit: 2000
+
+    # Security Settings
+    security:
+      api_key_validation: "strict"  # Require real API keys
+      authentication_required: true
+      buyer_authentication: "azure_ad"
+      cors_origins: ["https://eval.adaptivemind.ai"]
+      security_headers: true
+
+      # Enhanced security for buyer evaluation
+      ip_whitelist: "${BUYER_IP_WHITELIST:-}"
+      session_encryption: true
+      audit_logging: true
+
+    # Feature Flags
+    features:
+      real_time_streaming: true
+      bias_detection: true
+      cost_optimization: true
+      provider_ranking: true
+      historical_charts: true
+      roi_calculator: true
+      mock_data_enabled: false  # Use real data
+      live_failover_demo: true
+      enterprise_features: true
+      custom_model_integration: true
+
+    # API Providers (Evaluation Mode)
+    providers:
+      openai:
+        enabled: true
+        api_key: "${BUYER_OPENAI_API_KEY}"
+        mock_responses: false
+        rate_limits:
+          requests_per_minute: 500
+
+      anthropic:
+        enabled: true
+        api_key: "${BUYER_ANTHROPIC_API_KEY}"
+        mock_responses: false
+        rate_limits:
+          requests_per_minute: 300
+
+      google:
+        enabled: true
+        api_key: "${BUYER_GOOGLE_API_KEY}"
+        mock_responses: false
+        rate_limits:
+          requests_per_minute: 400
+
+      # Additional enterprise providers
+      azure_openai:
+        enabled: true
+        endpoint: "${BUYER_AZURE_OPENAI_ENDPOINT}"
+        api_key: "${BUYER_AZURE_OPENAI_KEY}"
+        api_version: "2024-02-15-preview"
+
+    # Database Configuration
+    database:
+      connection_string: "${EVAL_DATABASE_URL}"
+      pool_size: 20
+      demo_data_preloaded: false
+      buyer_data_isolation: true
+
+    # Monitoring
+    monitoring:
+      metrics_enabled: true
+      public_metrics: false
+      detailed_logging: true
+      buyer_analytics: true
+
+    # Resource Limits
+    resources:
+      max_concurrent_users: 200
+      max_requests_per_session: 10000
+      session_timeout: "4h"
+
+# Shared Configuration Across Modes
+shared:
+  # Framework Core Settings
+  framework:
+    resilience_engine:
+      enabled: true
+      failover_threshold_ms: 5000
+      retry_attempts: 3
+      circuit_breaker_enabled: true
+
+    bias_detection:
+      enabled: true
+      detection_threshold: 0.7
+      categories: ["gender", "race", "age", "religion"]
+
+    cost_optimization:
+      enabled: true
+      budget_alerts: true
+      optimization_strategies: ["latency", "cost", "quality"]
+
+  # Telemetry Configuration
+  telemetry:
+    enabled: true
+    collection_interval: "30s"
+    retention_period: "30d"
+
+    events:
+      request_completed: true
+      provider_failover: true
+      bias_detected: true
+      cost_threshold_exceeded: true
+
+  # Caching Configuration
+  caching:
+    enabled: true
+    provider: "redis"
+    connection_string: "${REDIS_URL}"
+
+    strategies:
+      response_caching:
+        enabled: true
+        ttl: "10m"
+        max_size: "100MB"
+
+      provider_status:
+        enabled: true
+        ttl: "30s"
+
+  # Health Checks
+  health_checks:
+    enabled: true
+    interval: "30s"
+
+    endpoints:
+      - path: "/health"
+        timeout: "10s"
+      - path: "/health/database"
+        timeout: "5s"
+      - path: "/health/providers"
+        timeout: "15s"
+      - path: "/health/cache"
+        timeout: "3s"
+
+# Environment-Specific Overrides
+environments:
+  development:
+    global:
+      debug_mode: true
+      log_level: "DEBUG"
+
+    deployment_modes:
+      hosted_demo:
+        network:
+          rate_limiting:
+            requests_per_minute: 1000
+        resources:
+          max_concurrent_users: 10
+
+      buyer_evaluation:
+        security:
+          authentication_required: false
+          ip_whitelist: ""
+
+  staging:
+    global:
+      debug_mode: false
+      log_level: "INFO"
+
+    deployment_modes:
+      hosted_demo:
+        network:
+          domain: "demo-staging.adaptivemind.ai"
+
+      buyer_evaluation:
+        network:
+          domain: "eval-staging.adaptivemind.ai"
+
+  production:
+    global:
+      debug_mode: false
+      log_level: "WARNING"
+
+    deployment_modes:
+      hosted_demo:
+        security:
+          rate_limiting:
+            enabled: true
+            strict_mode: true
+        monitoring:
+          public_metrics: false
+
+      buyer_evaluation:
+        security:
+          enhanced_monitoring: true
+          threat_detection: true
+
+# Azure-Specific Configuration
+azure:
+  # Key Vault Integration
+  key_vault:
+    enabled: true
+    vault_url: "${AZURE_KEY_VAULT_URL}"
+
+    secrets:
+      database_connection: "DATABASE-URL"
+      redis_connection: "REDIS-URL"
+      openai_api_key: "OPENAI-API-KEY"
+      anthropic_api_key: "ANTHROPIC-API-KEY"
+      google_api_key: "GOOGLE-API-KEY"
+
+  # Application Insights
+  application_insights:
+    enabled: true
+    connection_string: "${APPLICATIONINSIGHTS_CONNECTION_STRING}"
+
+    custom_metrics:
+      - "adaptive_mind_requests_total"
+      - "adaptive_mind_response_time"
+      - "adaptive_mind_provider_health"
+      - "adaptive_mind_bias_score"
+      - "adaptive_mind_cost_tracking"
+
+  # Service Bus (for enterprise messaging)
+  service_bus:
+    enabled: false  # Enable for enterprise deployments
+    connection_string: "${AZURE_SERVICE_BUS_CONNECTION_STRING}"
+
+    queues:
+      - name: "bias-detection-queue"
+        max_delivery_count: 3
+      - name: "cost-optimization-queue"
+        max_delivery_count: 5
+
+# Deployment Automation
+automation:
+  # Blue-Green Deployment
+  blue_green:
+    enabled: true
+    health_check_path: "/health"
+    warmup_time: "60s"
+    traffic_shift_percentage: 10
+
+  # Canary Deployment
+  canary:
+    enabled: false  # Alternative to blue-green
+    percentage: 5
+    success_criteria:
+      error_rate_threshold: 0.01
+      response_time_threshold: 2000
+
+  # Auto-scaling
+  scaling:
+    enabled: true
+    min_instances: 2
+    max_instances: 20
+
+    metrics:
+      cpu_threshold: 70
+      memory_threshold: 80
+      request_rate_threshold: 1000
+
+# Security Configuration
+security:
+  # API Security
+  api:
+    request_size_limit: "10MB"
+    response_size_limit: "50MB"
+    timeout: "30s"
+
+  # Content Security Policy
+  csp:
+    enabled: true
+    policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;"
+
+  # HTTPS Configuration
+  https:
+    force_ssl: true
+    hsts_enabled: true
+    hsts_max_age: "31536000"
+
+  # Input Validation
+  validation:
+    max_prompt_length: 2000
+    allowed_file_types: [".txt", ".json", ".csv"]
+    sanitize_inputs: true
+
+# Monitoring and Alerting
+monitoring:
+  # Prometheus Integration
+  prometheus:
+    enabled: true
+    port: 9090
+    path: "/metrics"
+
+    custom_metrics:
+      - name: "adaptive_mind_requests_total"
+        type: "counter"
+        description: "Total number of requests"
+
+      - name: "adaptive_mind_request_duration_seconds"
+        type: "histogram"
+        description: "Request duration in seconds"
+        buckets: [0.1, 0.5, 1.0, 2.0, 5.0, 10.0]
+
+      - name: "adaptive_mind_provider_health"
+        type: "gauge"
+        description: "Provider health status (1=healthy, 0=unhealthy)"
+
+      - name: "adaptive_mind_bias_score"
+        type: "gauge"
+        description: "Bias detection score"
+
+      - name: "adaptive_mind_daily_cost_usd"
+        type: "gauge"
+        description: "Daily API cost in USD"
+
+  # Grafana Integration
+  grafana:
+    enabled: true
+    dashboards:
+      - "adaptive-mind-overview"
+      - "adaptive-mind-performance"
+      - "adaptive-mind-security"
+      - "adaptive-mind-business"
+
+  # Alerting Rules
+  alerts:
+    - name: "high_error_rate"
+      condition: "rate(adaptive_mind_errors_total[5m]) > 0.1"
+      severity: "critical"
+
+    - name: "high_response_time"
+      condition: "histogram_quantile(0.95, rate(adaptive_mind_request_duration_seconds_bucket[5m])) > 2"
+      severity: "warning"
+
+    - name: "provider_failure"
+      condition: "adaptive_mind_provider_health < 1"
+      severity: "critical"
+
+    - name: "cost_threshold"
+      condition: "adaptive_mind_daily_cost_usd > 100"
+      severity: "warning"
+
+# Business Intelligence
+business_intelligence:
+  # ROI Tracking
+  roi_tracking:
+    enabled: true
+    baseline_cost_per_request: 0.002
+    cost_savings_calculation: true
+
+  # Usage Analytics
+  analytics:
+    enabled: true
+    user_journey_tracking: true
+    feature_usage_tracking: true
+    conversion_tracking: true
+
+  # Reporting
+  reporting:
+    enabled: true
+    daily_reports: true
+    weekly_summaries: true
+    monthly_business_reviews: true
+
+    export_formats: ["pdf", "excel", "json"]
+
+# Integration Configuration
+integrations:
+  # Webhook Configuration
+  webhooks:
+    enabled: true
+    endpoints:
+      - name: "buyer_session_started"
+        url: "${WEBHOOK_BUYER_SESSION_URL}"
+        events: ["session_start"]
+
+      - name: "high_value_demo"
+        url: "${WEBHOOK_HIGH_VALUE_DEMO_URL}"
+        events: ["cost_savings_calculated"]
+
+  # CRM Integration
+  crm:
+    enabled: false  # Enable when CRM is available
+    provider: "salesforce"
+    api_endpoint: "${CRM_API_ENDPOINT}"
+
+  # Email Notifications
+  email:
+    enabled: true
+    provider: "azure_communication_services"
+
+    templates:
+      - name: "buyer_evaluation_access"
+        subject: "Your Adaptive Mind Framework Evaluation Access"
+      - name: "demo_summary"
+        subject: "Your Demo Summary and Next Steps"
+
+# Data Management
+data_management:
+  # Data Retention
+  retention:
+    demo_sessions: "7d"
+    buyer_sessions: "90d"
+    metrics_data: "1y"
+    audit_logs: "7y"
+
+  # Data Privacy
+  privacy:
+    gdpr_compliance: true
+    data_anonymization: true
+    right_to_deletion: true
+
+  # Backup Strategy
+  backup:
+    enabled: true
+    frequency: "daily"
+    retention: "30d"
+    encryption: true
+
+# Performance Optimization
+performance:
+  # Connection Pooling
+  connection_pooling:
+    database:
+      min_connections: 5
+      max_connections: 50
+      connection_timeout: "30s"
+
+    redis:
+      min_connections: 2
+      max_connections: 20
+
+  # Request Optimization
+  request_optimization:
+    compression_enabled: true
+    keep_alive_timeout: "75s"
+    max_keep_alive_requests: 100
+
+  # Caching Strategy
+  caching_strategy:
+    levels: ["browser", "cdn", "application", "database"]
+    cache_headers: true
+    etag_support: true
+
+# Compliance and Governance
+compliance:
+  # Standards Compliance
+  standards:
+    soc2: true
+    iso27001: true
+    hipaa: false  # Enable if handling healthcare data
+
+  # Audit Configuration
+  audit:
+    enabled: true
+    log_all_requests: true
+    sensitive_data_masking: true
+
+  # Governance
+  governance:
+    data_classification: true
+    access_controls: "rbac"
+    policy_enforcement: true

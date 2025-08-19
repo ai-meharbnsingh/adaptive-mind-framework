@@ -1,0 +1,158 @@
+# 04_Azure_Infrastructure/deployment_pipeline.yml
+# Azure Pipelines CI/CD for the Adaptive Mind Framework - Session 10
+# This pipeline automates the build, test, infrastructure, and application deployment.
+# REVISION 2: Added database migration step and refined infrastructure orchestration.
+
+trigger:
+- main
+
+variables:
+  pythonVersion: '3.11'
+  resourceGroupName: 'rg-adaptive-mind-prod'
+  location: 'eastus'
+  azureServiceConnection: 'AdaptiveMindAzureConnection'
+  imageRepository: 'adaptive-mind-backend'
+  dockerfilePath: '$(Build.SourcesDirectory)/09_Deployment_Package/Dockerfile'
+  tag: '$(Build.BuildId)'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Validate
+  displayName: 'Lint & Test Code'
+  jobs:
+  - job: Python_CI
+    displayName: 'Run Python Linting and Unit Tests'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'
+      displayName: 'Use Python $(pythonVersion)'
+
+    - script: |
+        python -m venv env
+        source env/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8 pytest
+      displayName: 'Install Dependencies'
+
+    - script: |
+        source env/bin/activate
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      displayName: 'Lint with Flake8'
+
+    - script: |
+        source env/bin/activate
+        pytest 02_Testing_Suite/
+      displayName: 'Run Pytest Unit Tests'
+
+- stage: Build
+  displayName: 'Build & Push Docker Image'
+  dependsOn: Validate
+  condition: succeeded()
+  jobs:
+  - job: Build_Docker_Image
+    displayName: 'Build and Push to ACR'
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Login to Azure and Get ACR Name'
+      inputs:
+        azureSubscription: '$(azureServiceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          set -e # exit on error
+          ACR_NAME=$(az acr list --resource-group $(resourceGroupName) --query "[0].name" -o tsv)
+          if [ -z "$ACR_NAME" ]; then
+            echo "##vso[task.logissue type=error]Azure Container Registry not found in resource group $(resourceGroupName)."
+            exit 1
+          fi
+          echo "##vso[task.setvariable variable=containerRegistryName;isOutput=true]$ACR_NAME"
+      name: 'getAcrName'
+
+    - task: Docker@2
+      displayName: 'Build and Push Docker Image'
+      inputs:
+        command: buildAndPush
+        repository: '$(imageRepository)'
+        dockerfile: '$(dockerfilePath)'
+        containerRegistry: '$(azureServiceConnection)'
+        tags: |
+          $(tag)
+          latest
+
+- stage: Deploy_Infrastructure
+  displayName: 'Deploy Azure Infrastructure'
+  dependsOn: []
+  jobs:
+  - job: Run_Infra_Scripts
+    displayName: 'Create/Update Azure Resources'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'
+      displayName: 'Use Python $(pythonVersion)'
+
+    - script: pip install -r requirements.txt
+      displayName: 'Install Infra Script Dependencies'
+
+    - task: AzureCLI@2
+      displayName: 'Run Full Infrastructure Deployment Script'
+      inputs:
+        azureSubscription: '$(azureServiceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          set -e # Exit on error
+          # A master script would orchestrate all these calls
+          python 04_Azure_Infrastructure/azure_setup.py
+          python 04_Azure_Infrastructure/key_vault_manager.py
+          python 04_Azure_Infrastructure/database_deployment.py
+          python 04_Azure_Infrastructure/container_registry_setup.py
+          python 04_Azure_Infrastructure/app_service_config.py
+          # Other scripts would follow...
+          
+          # AUDIT FIX: Apply database schema migration
+          echo "Applying database schema..."
+          # The following line assumes psql client is installed on the agent and DB_URL is in env
+          # A more robust version would use a dedicated migration tool like Alembic.
+          DB_URL=$(az keyvault secret show --vault-name $(keyVaultName) --name DATABASE-URL --query value -o tsv)
+          psql "$DB_URL" -f 05_Database_Layer/migrations/001_initial_schema.sql
+          echo "Database schema applied successfully."
+
+- stage: Deploy_Application
+  displayName: 'Deploy Application to App Service'
+  dependsOn:
+  - Build
+  - Deploy_Infrastructure
+  condition: succeeded()
+  jobs:
+  - job: Deploy_WebApp
+    displayName: 'Deploy Container to Azure App Service'
+    variables:
+      # Map output variable from the build stage
+      containerRegistryName: $[ stageDependencies.Build.Build_Docker_Image.outputs['getAcrName.containerRegistryName'] ]
+    steps:
+    - task: AzureCLI@2
+      displayName: 'Get App Service Name'
+      inputs:
+        azureSubscription: '$(azureServiceConnection)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          set -e
+          APP_NAME=$(az webapp list --resource-group $(resourceGroupName) --query "[0].name" -o tsv)
+          if [ -z "$APP_NAME" ]; then
+            echo "##vso[task.logissue type=error]App Service not found in resource group $(resourceGroupName)."
+            exit 1
+          fi
+          echo "##vso[task.setvariable variable=appServiceName;]$APP_NAME"
+
+    - task: AzureWebAppContainer@1
+      displayName: 'Deploy Adaptive Mind Backend Container'
+      inputs:
+        azureSubscription: '$(azureServiceConnection)'
+        appName: '$(appServiceName)'
+        containers: '$(containerRegistryName).azurecr.io/$(imageRepository):$(tag)'

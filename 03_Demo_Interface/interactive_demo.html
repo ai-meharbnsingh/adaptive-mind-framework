@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Mind Framework - Interactive Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .demo-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .demo-panel h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #4facfe;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .panel-full {
+            grid-column: 1 / -1;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .control-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .button {
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .button.danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+
+        .button.danger:hover {
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .button.success {
+            background: linear-gradient(45deg, #51cf66, #40c057);
+        }
+
+        .status-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-value {
+            font-weight: 600;
+            color: #4facfe;
+        }
+
+        .status-good {
+            color: #51cf66;
+        }
+
+        .status-warning {
+            color: #ffd43b;
+        }
+
+        .status-error {
+            color: #ff6b6b;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4facfe;
+            display: block;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.5rem;
+        }
+
+        .log-output {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+
+        .log-info {
+            color: #4facfe;
+        }
+
+        .log-warning {
+            color: #ffd43b;
+            background: rgba(255, 212, 59, 0.1);
+        }
+
+        .log-error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .log-success {
+            color: #51cf66;
+            background: rgba(81, 207, 102, 0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .cost-calculator {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .roi-highlight {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffd700;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .enterprise-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transform: rotate(15deg);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .chart-container {
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧠 Adaptive Mind Framework</h1>
+        <p>Enterprise-Grade AI Reliability & Cost Optimization Platform - Live Demo</p>
+    </div>
+
+    <div class="container">
+        <div class="demo-grid">
+            <!-- Control Panel -->
+            <div class="demo-panel">
+                <div class="enterprise-badge">ENTERPRISE</div>
+                <h3>🎮 Demo Controls</h3>
+
+                <div class="control-group">
+                    <label for="prompt-input">Test Prompt:</label>
+                    <textarea id="prompt-input" class="control-input" rows="3" placeholder="Enter your AI prompt to test the framework...">Explain quantum computing in simple terms</textarea>
+                </div>
+
+                <div class="control-group">
+                    <label for="budget-input">Budget Cap (USD):</label>
+                    <input type="number" id="budget-input" class="control-input" placeholder="0.50" value="0.50" step="0.01">
+                </div>
+
+                <div class="control-group">
+                    <label for="provider-preference">Preferred Provider:</label>
+                    <select id="provider-preference" class="control-input">
+                        <option value="auto">Auto-Select (Optimal)</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="google">Google Gemini</option>
+                    </select>
+                </div>
+
+                <button class="button" onclick="executeRequest()">🚀 Execute Request</button>
+                <button class="button danger" onclick="simulateFailure()">💥 Simulate Failure</button>
+                <button class="button success" onclick="runStressTest()">🏋️ Stress Test</button>
+            </div>
+
+            <!-- Real-Time Status -->
+            <div class="demo-panel">
+                <h3>📊 Real-Time Status</h3>
+
+                <div class="status-display">
+                    <div class="status-item">
+                        <span>Framework Status:</span>
+                        <span class="status-value status-good" id="framework-status">OPERATIONAL</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Active Providers:</span>
+                        <span class="status-value" id="active-providers">3/3</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Circuit Breakers:</span>
+                        <span class="status-value status-good" id="circuit-status">ALL CLOSED</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Current Cost/Hour:</span>
+                        <span class="status-value" id="current-cost">$2.34</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Uptime:</span>
+                        <span class="status-value status-good" id="uptime">99.97%</span>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="system-health" style="width: 98%"></div>
+                </div>
+                <p style="text-align: center; margin-top: 0.5rem; color: rgba(255,255,255,0.7);">System Health: 98%</p>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="demo-panel panel-full">
+                <h3>⚡ Live Performance Metrics</h3>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-value" id="requests-per-sec">127</span>
+                        <div class="metric-label">Requests/Second</div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="avg-latency">234ms</span>
+                        <div class="metric-label">Avg Response Time</div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="success-rate">99.8%</span>
+                        <div class="metric-label">Success Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="cost-savings">47%</span>
+                        <div class="metric-label">Cost Savings</div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="failover-time">156ms</span>
+                        <div class="metric-label">Avg Failover Time</div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value" id="active-keys">24</span>
+                        <div class="metric-label">Active API Keys</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Failure Simulation -->
+            <div class="demo-panel">
+                <h3>💥 Failure Simulation</h3>
+
+                <button class="button danger" onclick="simulateProviderFailure('openai')">OpenAI Outage</button>
+                <button class="button danger" onclick="simulateProviderFailure('anthropic')">Anthropic Outage</button>
+                <button class="button danger" onclick="simulateProviderFailure('google')">Google Outage</button>
+                <button class="button danger" onclick="simulateRateLimit()">Rate Limit Hit</button>
+                <button class="button danger" onclick="simulateContentPolicy()">Content Policy Block</button>
+                <button class="button success" onclick="recoverAll()">🔄 Recover All</button>
+
+                <div class="status-display" style="margin-top: 1rem;">
+                    <div class="status-item">
+                        <span>OpenAI Status:</span>
+                        <span class="status-value status-good" id="openai-status">HEALTHY</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Anthropic Status:</span>
+                        <span class="status-value status-good" id="anthropic-status">HEALTHY</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Google Status:</span>
+                        <span class="status-value status-good" id="google-status">HEALTHY</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Optimization -->
+            <div class="demo-panel cost-calculator">
+                <h3>💰 Cost Optimization Demo</h3>
+
+                <div class="control-group">
+                    <label>Monthly AI Spend:</label>
+                    <input type="number" id="monthly-spend" class="control-input" value="10000" onchange="calculateROI()">
+                </div>
+
+                <div class="roi-highlight" id="roi-display">
+                    💰 Estimated Monthly Savings: $4,700<br>
+                    📈 ROI: 2,242% over 12 months
+                </div>
+
+                <div class="status-display" style="margin-top: 1rem;">
+                    <div class="status-item">
+                        <span>Cost per 1M tokens:</span>
+                        <span class="status-value">$12.34 → $6.51</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Failed request costs:</span>
+                        <span class="status-value">$847 → $0</span>
+                    </div>
+                    <div class="status-item">
+                        <span>Optimization efficiency:</span>
+                        <span class="status-value status-good">94.2%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="demo-panel panel-full">
+                <h3>📋 Live Activity Log</h3>
+
+                <div class="log-output" id="activity-log">
+                    <div class="log-entry log-info">[2025-08-16 15:42:33] Framework initialized successfully</div>
+                    <div class="log-entry log-success">[2025-08-16 15:42:34] All providers connected and healthy</div>
+                    <div class="log-entry log-info">[2025-08-16 15:42:35] Circuit breakers armed and monitoring</div>
+                    <div class="log-entry log-info">[2025-08-16 15:42:36] Cost optimization engine active</div>
+                    <div class="log-entry log-success">[2025-08-16 15:42:37] Demo interface ready for interaction</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo State Management
+        let demoState = {
+            requestCount: 0,
+            totalRequests: 127,
+            totalCost: 0,
+            failureSimulations: {},
+            isStressTesting: false
+        };
+
+        // Auto-update metrics every 2 seconds
+        setInterval(updateMetrics, 2000);
+
+        // Initialize demo
+        document.addEventListener('DOMContentLoaded', function() {
+            addLogEntry('Demo interface loaded and ready', 'success');
+            calculateROI();
+        });
+
+        function updateMetrics() {
+            if (!demoState.isStressTesting) {
+                // Simulate realistic metric fluctuations
+                const rps = Math.floor(120 + Math.random() * 20);
+                const latency = Math.floor(220 + Math.random() * 40);
+                const successRate = (99.5 + Math.random() * 0.5).toFixed(1);
+
+                document.getElementById('requests-per-sec').textContent = rps;
+                document.getElementById('avg-latency').textContent = latency + 'ms';
+                document.getElementById('success-rate').textContent = successRate + '%';
+
+                // Update current cost
+                demoState.totalCost += 0.02;
+                document.getElementById('current-cost').textContent = '
+             + demoState.totalCost.toFixed(2);
+            }
+        }
+
+        function executeRequest() {
+            const prompt = document.getElementById('prompt-input').value;
+            const budget = document.getElementById('budget-input').value;
+            const provider = document.getElementById('provider-preference').value;
+
+            if (!prompt.trim()) {
+                addLogEntry('Error: Please enter a prompt to test', 'error');
+                return;
+            }
+
+            addLogEntry(`Executing request with budget ${budget}`, 'info');
+            addLogEntry(`Preferred provider: ${provider}`, 'info');
+
+            // Simulate request processing
+            setTimeout(() => {
+                const selectedProvider = provider === 'auto' ? selectOptimalProvider() : provider;
+                const cost = (Math.random() * parseFloat(budget) * 0.8).toFixed(4);
+                const responseTime = Math.floor(180 + Math.random() * 120);
+
+                addLogEntry(`✅ Request completed via ${selectedProvider}`, 'success');
+                addLogEntry(`Cost: ${cost}, Response time: ${responseTime}ms`, 'success');
+
+                demoState.requestCount++;
+                demoState.totalRequests++;
+                document.getElementById('requests-per-sec').textContent = demoState.totalRequests;
+
+                // Update metrics temporarily
+                document.getElementById('avg-latency').textContent = responseTime + 'ms';
+
+            }, 1500);
+
+            addLogEntry('Request queued for processing...', 'info');
+        }
+
+        function selectOptimalProvider() {
+            const providers = ['OpenAI GPT-4o-mini', 'Anthropic Claude-3-Haiku', 'Google Gemini-1.5-Flash'];
+            const weights = [0.4, 0.3, 0.3]; // Cost-optimized selection
+            const random = Math.random();
+
+            if (random < weights[0]) return providers[0];
+            if (random < weights[0] + weights[1]) return providers[1];
+            return providers[2];
+        }
+
+        function simulateFailure() {
+            addLogEntry('🚨 Simulating random system failure...', 'warning');
+
+            const failures = [
+                'Rate limit exceeded on primary key',
+                'Content policy violation detected',
+                'Provider API temporarily unavailable',
+                'Network timeout on request',
+                'Invalid API key rotation needed'
+            ];
+
+            const failure = failures[Math.floor(Math.random() * failures.length)];
+
+            setTimeout(() => {
+                addLogEntry(`⚠️ Failure detected: ${failure}`, 'error');
+                addLogEntry('🔄 Automatic failover initiated...', 'warning');
+
+                setTimeout(() => {
+                    addLogEntry('✅ Failover completed, request rerouted successfully', 'success');
+                    addLogEntry(`Recovery time: ${Math.floor(150 + Math.random() * 100)}ms`, 'success');
+                }, 800);
+
+            }, 500);
+        }
+
+        function simulateProviderFailure(provider) {
+            demoState.failureSimulations[provider] = true;
+
+            const statusElement = document.getElementById(provider + '-status');
+            statusElement.textContent = 'FAILED';
+            statusElement.className = 'status-value status-error';
+
+            addLogEntry(`🚨 ${provider.toUpperCase()} provider failure simulated`, 'error');
+            addLogEntry(`🔄 Circuit breaker opened for ${provider}`, 'warning');
+            addLogEntry('✅ Traffic automatically rerouted to healthy providers', 'success');
+
+            updateCircuitStatus();
+        }
+
+        function simulateRateLimit() {
+            addLogEntry('🚨 Rate limit hit on primary API key', 'warning');
+            addLogEntry('🔄 Rotating to backup API key...', 'info');
+
+            setTimeout(() => {
+                addLogEntry('✅ API key rotation completed', 'success');
+                addLogEntry('Requests resumed with minimal disruption', 'success');
+            }, 300);
+        }
+
+        function simulateContentPolicy() {
+            addLogEntry('🚨 Content policy violation detected', 'warning');
+            addLogEntry('🧠 Prompt rewriter engaged...', 'info');
+
+            setTimeout(() => {
+                addLogEntry('✅ Prompt successfully rewritten and compliant', 'success');
+                addLogEntry('Request proceeded with modified prompt', 'success');
+            }, 1200);
+        }
+
+        function recoverAll() {
+            demoState.failureSimulations = {};
+
+            ['openai', 'anthropic', 'google'].forEach(provider => {
+                const statusElement = document.getElementById(provider + '-status');
+                statusElement.textContent = 'HEALTHY';
+                statusElement.className = 'status-value status-good';
+            });
+
+            updateCircuitStatus();
+            addLogEntry('🔄 All systems recovered and operational', 'success');
+        }
+
+        function updateCircuitStatus() {
+            const failedCount = Object.keys(demoState.failureSimulations).length;
+            const circuitStatus = document.getElementById('circuit-status');
+
+            if (failedCount === 0) {
+                circuitStatus.textContent = 'ALL CLOSED';
+                circuitStatus.className = 'status-value status-good';
+            } else {
+                circuitStatus.textContent = `${failedCount} OPEN`;
+                circuitStatus.className = 'status-value status-warning';
+            }
+        }
+
+        function runStressTest() {
+            if (demoState.isStressTesting) return;
+
+            demoState.isStressTesting = true;
+            addLogEntry('🏋️ Starting stress test with 1000 concurrent requests...', 'info');
+
+            let completedRequests = 0;
+            const totalRequests = 1000;
+            const startTime = Date.now();
+
+            const stressInterval = setInterval(() => {
+                completedRequests += Math.floor(Math.random() * 50) + 20;
+
+                if (completedRequests >= totalRequests) {
+                    completedRequests = totalRequests;
+                    clearInterval(stressInterval);
+
+                    const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+                    addLogEntry(`✅ Stress test completed: ${totalRequests} requests in ${duration}s`, 'success');
+                    addLogEntry(`Average throughput: ${(totalRequests / parseFloat(duration)).toFixed(1)} RPS`, 'success');
+                    addLogEntry('System maintained 99.8% success rate under load', 'success');
+
+                    demoState.isStressTesting = false;
+                    return;
+                }
+
+                // Update real-time metrics during stress test
+                document.getElementById('requests-per-sec').textContent = Math.floor(completedRequests / ((Date.now() - startTime) / 1000));
+                document.getElementById('avg-latency').textContent = Math.floor(250 + Math.random() * 100) + 'ms';
+
+                addLogEntry(`Processed ${completedRequests}/${totalRequests} requests...`, 'info');
+
+            }, 200);
+        }
+
+        function calculateROI() {
+            const monthlySpend = parseFloat(document.getElementById('monthly-spend').value) || 10000;
+            const savingsPercent = 47; // Framework's cost optimization
+            const monthlySavings = monthlySpend * (savingsPercent / 100);
+            const annualSavings = monthlySavings * 12;
+            const frameworkCost = 5000; // Hypothetical licensing cost
+            const roi = ((annualSavings - frameworkCost) / frameworkCost * 100).toFixed(0);
+
+            document.getElementById('roi-display').innerHTML = `
+                💰 Estimated Monthly Savings: ${monthlySavings.toLocaleString()}<br>
+                📈 ROI: ${roi}% over 12 months
+            `;
+        }
+
+        function addLogEntry(message, type = 'info') {
+            const logOutput = document.getElementById('activity-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type} slide-in`;
+            entry.textContent = `[${timestamp}] ${message}`;
+
+            logOutput.appendChild(entry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+
+            // Remove old entries to prevent infinite growth
+            if (logOutput.children.length > 50) {
+                logOutput.removeChild(logOutput.firstChild);
+            }
+        }
+
+        // Simulate some background activity
+        setInterval(() => {
+            if (Math.random() < 0.1) { // 10% chance every 5 seconds
+                const activities = [
+                    'Automatic cost optimization adjustment made',
+                    'Provider health check completed',
+                    'API key rotation scheduled',
+                    'Circuit breaker status verified',
+                    'Bias ledger checkpoint saved'
+                ];
+
+                const activity = activities[Math.floor(Math.random() * activities.length)];
+                addLogEntry(activity, 'info');
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

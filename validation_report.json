@@ -1,0 +1,184 @@
+{
+  "validation_summary": {
+    "total_duration_seconds": 24.02,
+    "total_tests": 15,
+    "passed_tests": 5,
+    "failed_tests": 7,
+    "skipped_tests": 1,
+    "warning_tests": 2,
+    "health_score": 33.3,
+    "overall_status": "NEEDS_ATTENTION"
+  },
+  "component_results": {
+    "Framework Core": [
+      {
+        "test_name": "import_test",
+        "status": "FAIL",
+        "duration_ms": 1654.5343399047852,
+        "details": {},
+        "error_message": "No module named 'antifragile_framework.core.adaptive_routing'"
+      }
+    ],
+    "Database Layer": [
+      {
+        "test_name": "connection_test",
+        "status": "FAIL",
+        "duration_ms": 4041.9626235961914,
+        "details": {},
+        "error_message": "connection to server at \"localhost\" (::1), port 5432 failed: Connection refused (0x0000274D/10061)\n\tIs the server running on that host and accepting TCP/IP connections?\nconnection to server at \"localhost\" (127.0.0.1), port 5432 failed: Connection refused (0x0000274D/10061)\n\tIs the server running on that host and accepting TCP/IP connections?\n"
+      }
+    ],
+    "Demo Interface": [
+      {
+        "test_name": "import_test",
+        "status": "PASS",
+        "duration_ms": 313.8260841369629,
+        "details": {
+          "demo_backend_imported": true
+        },
+        "error_message": null
+      },
+      {
+        "test_name": "enhanced_components_test",
+        "status": "WARNING",
+        "duration_ms": 12.68148422241211,
+        "details": {},
+        "error_message": "Enhanced components not found: cannot import name 'EnhancedAPIKeyManager' from 'api_key_manager' (D:\\Users\\OMEN\\Final_MULTI AI ANTIFRAGILE\\PRoject Working\\Adaptive_Mind\\03_Demo_Interface\\api_key_manager.py)"
+      }
+    ],
+    "Telemetry System": [
+      {
+        "test_name": "functionality_test",
+        "status": "FAIL",
+        "duration_ms": 0.4184246063232422,
+        "details": {},
+        "error_message": "No module named 'telemetry.event_emitter'"
+      }
+    ],
+    "Docker Environment": [
+      {
+        "test_name": "availability_test",
+        "status": "PASS",
+        "duration_ms": 656.1679840087891,
+        "details": {
+          "docker_version": "Docker Compose version v2.39.1-desktop.1",
+          "dockerfile_exists": true,
+          "compose_file_exists": true
+        },
+        "error_message": null
+      }
+    ],
+    "Security Monitoring": [
+      {
+        "test_name": "functionality_test",
+        "status": "FAIL",
+        "duration_ms": 186.58018112182617,
+        "details": {},
+        "error_message": "No module named 'azure.keyvault'"
+      }
+    ],
+    "Monitoring Stack": [
+      {
+        "test_name": "configuration_test",
+        "status": "FAIL",
+        "duration_ms": 12.392997741699219,
+        "details": {},
+        "error_message": "Illegal trailing comma before end of object: line 77 column 4 (char 1539)"
+      }
+    ],
+    "API Endpoints": [
+      {
+        "test_name": "connectivity_test",
+        "status": "SKIP",
+        "duration_ms": 17066.916942596436,
+        "details": {
+          "reason": "Server not running"
+        },
+        "error_message": null
+      }
+    ],
+    "WebSocket Streaming": [
+      {
+        "test_name": "connectivity_test",
+        "status": "FAIL",
+        "duration_ms": 34.89375114440918,
+        "details": {},
+        "error_message": "BaseEventLoop.create_connection() got an unexpected keyword argument 'timeout'"
+      }
+    ],
+    "Dual-Mode Operation": [
+      {
+        "test_name": "configuration_test",
+        "status": "PASS",
+        "duration_ms": 27.749061584472656,
+        "details": {
+          "modes_configured": 2,
+          "modes_present": [
+            "hosted_demo",
+            "buyer_evaluation"
+          ]
+        },
+        "error_message": null
+      }
+    ],
+    "ROI Calculator": [
+      {
+        "test_name": "files_test",
+        "status": "FAIL",
+        "duration_ms": 0.16236305236816406,
+        "details": {},
+        "error_message": "ROI Calculator directory not found"
+      }
+    ],
+    "Performance Metrics": [
+      {
+        "test_name": "testing_suite_test",
+        "status": "PASS",
+        "duration_ms": 4.357099533081055,
+        "details": {
+          "test_files_found": 17,
+          "testing_suite_exists": true
+        },
+        "error_message": null
+      }
+    ],
+    "Azure Integration": [
+      {
+        "test_name": "scripts_test",
+        "status": "PASS",
+        "duration_ms": 0.31065940856933594,
+        "details": {
+          "scripts_found": 10,
+          "all_required_present": true
+        },
+        "error_message": null
+      }
+    ],
+    "End-to-End Workflow": [
+      {
+        "test_name": "structure_test",
+        "status": "WARNING",
+        "duration_ms": 0.4723072052001953,
+        "details": {
+          "directories_found": 6,
+          "missing_directories": [
+            "08_ROI_Calculator"
+          ]
+        },
+        "error_message": null
+      }
+    ]
+  },
+  "recommendations": [
+    "Run 'pip install -r requirements.txt' to install missing dependencies",
+    "Start PostgreSQL database using 'docker-compose up postgres'",
+    "Start the demo backend server using 'python 03_Demo_Interface/demo_backend.py'"
+  ],
+  "next_steps": [
+    "\ud83d\udd27 Fix failed components based on recommendations above",
+    "\ud83d\udce6 Ensure all dependencies are installed",
+    "\ud83d\uddc4\ufe0f Start required services (database, cache)",
+    "\ud83d\udd04 Re-run validation after fixes",
+    "\ud83d\udcda Review session documentation for component setup"
+  ]
+}

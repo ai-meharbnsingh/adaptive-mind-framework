@@ -1,0 +1,203 @@
+PROJECT STRUCTURE
+==================================================
+Project: Adaptive_Mind
+Location: D:\Users\OMEN\Final_MULTI AI ANTIFRAGILE\PRoject Working\Adaptive_Mind
+Generated: 2025-08-19 17:53:00
+Max Depth: 5
+
+📁 Adaptive_Mind/
+├── 📁 .pytest_cache
+│   ├── 📁 v
+│   │   └── 📁 cache
+│   │       └── 📄 nodeids
+│   ├── 📄 CACHEDIR.TAG
+│   └── 📄 README.md
+├── 📁 01_Framework_Core
+│   ├── 📁 antifragile_framework
+│   │   ├── 📁 api
+│   │   │   ├── 📄 __init__.py
+│   │   │   └── 📄 framework_api.py
+│   │   ├── 📁 config
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 config_loader.py
+│   │   │   ├── 📄 provider_profiles.json
+│   │   │   ├── 📄 resilience_config.yaml
+│   │   │   ├── 📄 resilience_config_fast.yaml
+│   │   │   └── 📄 schemas.py
+│   │   ├── 📁 core
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 circuit_breaker.py
+│   │   │   ├── 📄 exceptions.py
+│   │   │   ├── 📄 failover_engine.py
+│   │   │   ├── 📄 learning_engine.py
+│   │   │   ├── 📄 online_learning_subscriber.py
+│   │   │   ├── 📄 provider_ranking_engine.py
+│   │   │   ├── 📄 resource_guard.py
+│   │   │   └── 📄 schemas.py
+│   │   ├── 📁 providers
+│   │   │   ├── 📁 provider_adapters
+│   │   │   │   ├── 📄 __init__.py
+│   │   │   │   ├── 📄 claude_adapter.py
+│   │   │   │   ├── 📄 gemini_adapter.py
+│   │   │   │   └── 📄 openai_adapter.py
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 api_abstraction_layer.py
+│   │   │   ├── 📄 checkkkk.md
+│   │   │   └── 📄 provider_registry.py
+│   │   ├── 📁 resilience
+│   │   │   ├── 📄 __init__.py
+│   │   │   ├── 📄 bias_ledger.py
+│   │   │   ├── 📄 llm_based_rewriter.py
+│   │   │   └── 📄 prompt_rewriter.py
+│   │   ├── 📁 utils
+│   │   │   ├── 📄 __init__.py
+│   │   │   └── 📄 error_parser.py
+│   │   └── 📄 __init__.py
+│   ├── 📁 core
+│   │   ├── 📄 __init__.py
+│   │   └── 📄 provider_ranking_engine.py
+│   ├── 📁 providers
+│   │   ├── 📄 __init__.py
+│   │   └── 📄 api_abstraction_layer.py
+│   ├── 📁 telemetry
+│   │   ├── 📄 __init__.py
+│   │   ├── 📄 core_logger.py
+│   │   ├── 📄 event_bus.py
+│   │   ├── 📄 event_topics.py
+│   │   ├── 📄 telemetry_subscriber.py
+│   │   └── 📄 time_series_db_interface.py
+│   └── 📄 __init__.py
+├── 📁 02_Testing_Suite
+│   ├── 📁 session_2_validation
+│   │   ├── 📁 validation_results
+│   │   ├── 📄 integration_test_runner.py
+│   │   ├── 📄 performance_benchmark.py
+│   │   └── 📄 validation_results_1755314738.json
+│   ├── 📁 session_5_telemetry_integration
+│   │   ├── 📁 .pytest_cache
+│   │   │   ├── 📁 v
+│   │   │   │   └── 📁 cache
+│   │   │   ├── 📄 CACHEDIR.TAG
+│   │   │   └── 📄 README.md
+│   │   ├── 📄 demo_telemetry_integration_test.py
+│   │   └── 📄 telemetry_integration_test.py
+│   └── 📁 tests
+│       ├── 📁 api
+│       │   └── 📄 test_e2e_resilience.py
+│       ├── 📁 config
+│       │   └── 📄 test_config_loader.py
+│       ├── 📁 core
+│       │   ├── 📄 test_circuit_breaker.py
+│       │   ├── 📄 test_failover_engine.py
+│       │   ├── 📄 test_learning_engine.py
+│       │   └── 📄 test_resource_guard.py
+│       ├── 📁 resilience
+│       │   ├── 📄 test_bias_ledger.py
+│       │   └── 📄 test_llm_based_rewriter.py
+│       ├── 📁 telemetry
+│       │   └── 📄 test_telemetry_subscriber.py
+│       ├── 📁 unit tests
+│       │   └── 📁 integration tests
+│       │       └── 📁 functional tests
+│       ├── 📁 utils
+│       │   └── 📄 test_error_parser.py
+│       ├── 📄 test_claude_adapter.py
+│       ├── 📄 test_gemini_adapter.py
+│       └── 📄 test_openai_adapter.py
+├── 📁 03_Demo_Interface
+│   ├── 📁 .pytest_cache
+│   │   ├── 📁 v
+│   │   │   └── 📁 cache
+│   │   │       ├── 📄 lastfailed
+│   │   │       └── 📄 nodeids
+│   │   ├── 📄 CACHEDIR.TAG
+│   │   └── 📄 README.md
+│   ├── 📄 __init__.py
+│   ├── 📄 api_key_manager.py
+│   ├── 📄 bias_ledger_visualization.py
+│   ├── 📄 business_metrics.js
+│   ├── 📄 carrier_grade_value_prop.js
+│   ├── 📄 connection_manager.py
+│   ├── 📄 context_validator.py
+│   ├── 📄 cost_optimizer.py
+│   ├── 📄 demo_backend.py
+│   ├── 📄 demo_data_manager.py
+│   ├── 📄 demo_mode_comparison.js
+│   ├── 📄 dual_mode_interface.js
+│   ├── 📄 enhanced_api_key_manager_methods.py
+│   ├── 📄 enhanced_demo_endpoints.py
+│   ├── 📄 enhanced_failover_demo.py
+│   ├── 📄 enhanced_interactive_demo.html
+│   ├── 📄 historical_charts.py
+│   ├── 📄 interactive_demo.html
+│   ├── 📄 performance_dashboard.py
+│   ├── 📄 postgres_timeseries_impl.py
+│   ├── 📄 provider_ranking_system.py
+│   ├── 📄 real_time_metrics.py
+│   ├── 📄 roi_calculator.js
+│   └── 📄 websocket_handler.py
+├── 📁 04_Azure_Infrastructure
+│   ├── 📄 app_service_config.py
+│   ├── 📄 azure_ad_integration.py
+│   ├── 📄 azure_setup.py
+│   ├── 📄 cdn_configuration.py
+│   ├── 📄 container_registry_setup.py
+│   ├── 📄 database_deployment.py
+│   ├── 📄 deployment_pipeline.yml
+│   ├── 📄 key_vault_manager.py
+│   ├── 📄 load_balancer_setup.py
+│   ├── 📄 monitoring_setup.py
+│   └── 📄 ssl_certificate_manager.py
+├── 📁 05_Database_Layer
+│   ├── 📁 migrations
+│   │   ├── 📄 001_initial_schema.sql
+│   │   └── 📄 __init__.py
+│   ├── 📄 __init__.py
+│   ├── 📄 benchmarking_methodology.md
+│   ├── 📄 connection_manager.py
+│   ├── 📄 database_schema.sql
+│   ├── 📄 performance_optimization.sql
+│   └── 📄 postgres_timeseries_impl.py
+├── 📁 06_Professional_Setup
+├── 📁 07_Sales_Materials
+│   ├── 📁 07_Sales_Materials
+│   │   ├── 📄 cost_analysis_report_customer_service_20250818.json
+│   │   ├── 📄 langchain_comparison.xlsx
+│   │   └── 📄 roi_models.xlsx
+│   ├── 📄 api_cost_optimizer.py
+│   ├── 📄 cfo_business_case.py
+│   ├── 📄 cost_analysis.py
+│   ├── 📄 generate_industry_roi_models.py
+│   ├── 📄 generate_langchain_comparison.py
+│   └── 📄 generate_roi_models.py
+├── 📁 09_Deployment_Package
+│   ├── 📄 azure-pipelines.yml
+│   ├── 📄 docker-compose.yml
+│   ├── 📄 Dockerfile
+│   ├── 📄 dual_mode_config.yml
+│   ├── 📄 grafana_dashboards.json
+│   ├── 📄 health_check.py
+│   ├── 📄 nginx.conf
+│   ├── 📄 prometheus_config.yml
+│   ├── 📄 quick_fix.py
+│   ├── 📄 quick_test.bat
+│   ├── 📄 quick_test.sh
+│   ├── 📄 requirements-prod.txt
+│   ├── 📄 security_monitoring.py
+│   ├── 📄 system_validation.py
+│   ├── 📄 test_runner.ps1
+│   ├── 📄 test_runner.sh
+│   └── 📄 verify_system.py
+├── 📄 chk.md
+├── 📄 DEVELOPMENT_LOG.md
+├── 📄 MASTER_DEVELOPMENT_PLAN.md
+├── 📄 performance_benchmark_1755315811.json
+├── 📄 performance_benchmark_1755316267.json
+├── 📄 project_structure.txt
+├── 📄 requirements.txt
+├── 📄 show_structure.py
+└── 📄 validation_report.json
+
+==================================================
+Total items displayed: 191
+Generated by Project Structure Generator

@@ -1,0 +1,681 @@
+# 09_Deployment_Package/azure-pipelines.yml
+# Production-grade CI/CD pipeline for Adaptive Mind Framework
+# Replaces the draft with enterprise-level automation and security
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+      - release/*
+  paths:
+    exclude:
+      - README.md
+      - docs/*
+      - .gitignore
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    exclude:
+      - README.md
+      - docs/*
+
+variables:
+  # Build Configuration
+  pythonVersion: '3.11'
+  nodeVersion: '18.x'
+  dockerImageTag: '$(Build.BuildId)'
+
+  # Azure Configuration
+  azureServiceConnection: 'azure-adaptivemind-service-connection'
+  containerRegistry: 'adaptivemindacr.azurecr.io'
+  imageRepository: 'adaptive-mind-framework'
+  dockerfilePath: '09_Deployment_Package/Dockerfile'
+
+  # Resource Configuration
+  resourceGroupName: 'rg-adaptive-mind-prod'
+  keyVaultName: 'kv-adaptive-mind-prod'
+  appServiceName: 'app-adaptive-mind-prod'
+
+  # Security and Compliance
+  enableSecurityScan: true
+  enableVulnerabilityScan: true
+  enableCodeAnalysis: true
+
+  # Environment-specific variables
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+    deploymentEnvironment: 'production'
+    azureSubscription: 'production-subscription'
+  ${{ elseif eq(variables['Build.SourceBranch'], 'refs/heads/develop') }}:
+    deploymentEnvironment: 'staging'
+    azureSubscription: 'staging-subscription'
+  ${{ else }}:
+    deploymentEnvironment: 'development'
+    azureSubscription: 'dev-subscription'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  # ============================================================================
+  # STAGE 1: BUILD AND TEST
+  # ============================================================================
+  - stage: BuildAndTest
+    displayName: 'Build, Test & Security Scan'
+    variables:
+      PYTHONPATH: $(System.DefaultWorkingDirectory)
+    jobs:
+      # Code Quality and Security Analysis
+      - job: CodeAnalysis
+        displayName: 'Code Quality & Security Analysis'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(pythonVersion)'
+            displayName: 'Use Python $(pythonVersion)'
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install bandit safety pylint black isort mypy pytest-cov
+            displayName: 'Install analysis tools'
+
+          # Security scanning with Bandit
+          - script: |
+              bandit -r . -f json -o bandit-report.json || true
+              bandit -r . -f txt -o bandit-report.txt || true
+            displayName: 'Security scan with Bandit'
+            condition: eq(variables['enableSecurityScan'], 'true')
+
+          # Dependency vulnerability scanning
+          - script: |
+              safety check --json --output safety-report.json || true
+              safety check --output safety-report.txt || true
+            displayName: 'Dependency vulnerability scan'
+            condition: eq(variables['enableVulnerabilityScan'], 'true')
+
+          # Code quality with Pylint
+          - script: |
+              pylint **/*.py --output-format=json > pylint-report.json || true
+              pylint **/*.py > pylint-report.txt || true
+            displayName: 'Code quality analysis'
+            condition: eq(variables['enableCodeAnalysis'], 'true')
+
+          # Type checking with MyPy
+          - script: |
+              mypy --ignore-missing-imports --json-report mypy-report . || true
+            displayName: 'Type checking'
+
+          # Publish security and quality reports
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test-*.xml'
+              mergeTestResults: true
+            displayName: 'Publish security scan results'
+            condition: succeededOrFailed()
+
+      # Unit and Integration Tests
+      - job: Testing
+        displayName: 'Unit & Integration Tests'
+        dependsOn: CodeAnalysis
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(pythonVersion)'
+            displayName: 'Use Python $(pythonVersion)'
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+              pip install -r 09_Deployment_Package/requirements-prod.txt
+              pip install pytest pytest-asyncio pytest-cov pytest-xdist pytest-timeout
+            displayName: 'Install dependencies'
+
+          # Run comprehensive test suite
+          - script: |
+              python -m pytest \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html \
+                --cov-report=term \
+                --junit-xml=test-results.xml \
+                --timeout=300 \
+                -v \
+                02_Testing_Suite/
+            displayName: 'Run test suite'
+            env:
+              PYTHONPATH: $(System.DefaultWorkingDirectory)
+
+          # Performance benchmarks
+          - script: |
+              python -m pytest \
+                --benchmark-only \
+                --benchmark-json=benchmark-results.json \
+                02_Testing_Suite/performance_tests/ || true
+            displayName: 'Performance benchmarks'
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test-*.xml'
+              mergeTestResults: true
+            displayName: 'Publish test results'
+            condition: succeededOrFailed()
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: 'coverage.xml'
+              reportDirectory: 'htmlcov'
+            displayName: 'Publish coverage results'
+            condition: succeededOrFailed()
+
+  # ============================================================================
+  # STAGE 2: CONTAINER BUILD AND PUSH
+  # ============================================================================
+  - stage: ContainerBuild
+    displayName: 'Container Build & Registry Push'
+    dependsOn: BuildAndTest
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/develop')))
+    jobs:
+      - job: DockerBuild
+        displayName: 'Build and Push Container'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Get Container Registry Name'
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                ACR_NAME=$(az acr list --resource-group $(resourceGroupName) --query "[0].name" -o tsv)
+                if [ -z "$ACR_NAME" ]; then
+                  echo "##vso[task.logissue type=error]Container Registry not found in resource group $(resourceGroupName)"
+                  exit 1
+                fi
+                echo "##vso[task.setvariable variable=containerRegistryName;isOutput=true]$ACR_NAME"
+            name: 'getAcrName'
+
+          # Build multi-stage Docker image
+          - task: Docker@2
+            displayName: 'Build Docker Image'
+            inputs:
+              command: build
+              repository: '$(imageRepository)'
+              dockerfile: '$(dockerfilePath)'
+              tags: |
+                $(dockerImageTag)
+                latest
+                $(Build.SourceBranchName)
+              arguments: |
+                --target production
+                --build-arg BUILD_DATE=$(Build.BuildNumber)
+                --build-arg VCS_REF=$(Build.SourceVersion)
+                --build-arg VERSION=$(Build.BuildNumber)
+
+          # Security scan of container image
+          - task: AzureCLI@2
+            displayName: 'Container Security Scan'
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Install Trivy scanner
+                sudo apt-get update
+                sudo apt-get install wget apt-transport-https gnupg lsb-release
+                wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+                echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+                sudo apt-get update
+                sudo apt-get install trivy
+                
+                # Scan the built image
+                trivy image --format json --output container-scan-results.json $(imageRepository):$(dockerImageTag) || true
+                trivy image --format table $(imageRepository):$(dockerImageTag) || true
+            condition: eq(variables['enableSecurityScan'], 'true')
+
+          # Push to Azure Container Registry
+          - task: Docker@2
+            displayName: 'Push to Container Registry'
+            inputs:
+              command: push
+              repository: '$(imageRepository)'
+              containerRegistry: '$(azureServiceConnection)'
+              tags: |
+                $(dockerImageTag)
+                latest
+                $(Build.SourceBranchName)
+
+          # Generate container manifest
+          - script: |
+              cat > container-manifest.json << EOF
+              {
+                "image": "$(containerRegistry)/$(imageRepository):$(dockerImageTag)",
+                "tag": "$(dockerImageTag)",
+                "buildDate": "$(Build.BuildNumber)",
+                "sourceCommit": "$(Build.SourceVersion)",
+                "branch": "$(Build.SourceBranchName)",
+                "environment": "$(deploymentEnvironment)"
+              }
+              EOF
+            displayName: 'Generate container manifest'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: 'container-manifest.json'
+              artifactName: 'ContainerManifest'
+            displayName: 'Publish container manifest'
+
+  # ============================================================================
+  # STAGE 3: INFRASTRUCTURE DEPLOYMENT
+  # ============================================================================
+  - stage: InfrastructureDeployment
+    displayName: 'Azure Infrastructure Deployment'
+    dependsOn: ContainerBuild
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployInfrastructure
+        displayName: 'Deploy Azure Resources'
+        environment: '$(deploymentEnvironment)-infrastructure'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: UsePythonVersion@0
+                  inputs:
+                    versionSpec: '$(pythonVersion)'
+                  displayName: 'Use Python $(pythonVersion)'
+
+                - script: |
+                    pip install -r 04_Azure_Infrastructure/requirements.txt
+                  displayName: 'Install infrastructure dependencies'
+
+                # Validate infrastructure scripts
+                - script: |
+                    python -m py_compile 04_Azure_Infrastructure/*.py
+                    echo "All infrastructure scripts validated successfully"
+                  displayName: 'Validate infrastructure scripts'
+
+                # Deploy Azure resources
+                - task: AzureCLI@2
+                  displayName: 'Deploy Azure Infrastructure'
+                  inputs:
+                    azureSubscription: '$(azureServiceConnection)'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      set -e
+                      echo "Starting infrastructure deployment..."
+                      
+                      # Set environment variables
+                      export AZURE_RESOURCE_GROUP="$(resourceGroupName)"
+                      export AZURE_LOCATION="East US"
+                      export ENVIRONMENT="$(deploymentEnvironment)"
+                      
+                      # Execute infrastructure deployment scripts in order
+                      echo "Creating resource group..."
+                      python 04_Azure_Infrastructure/azure_setup.py
+                      
+                      echo "Setting up Key Vault..."
+                      python 04_Azure_Infrastructure/key_vault_manager.py
+                      
+                      echo "Deploying database..."
+                      python 04_Azure_Infrastructure/database_deployment.py
+                      
+                      echo "Setting up container registry..."
+                      python 04_Azure_Infrastructure/container_registry_setup.py
+                      
+                      echo "Configuring app service..."
+                      python 04_Azure_Infrastructure/app_service_config.py
+                      
+                      echo "Setting up monitoring..."
+                      python 04_Azure_Infrastructure/monitoring_setup.py
+                      
+                      echo "Configuring load balancer..."
+                      python 04_Azure_Infrastructure/load_balancer_setup.py
+                      
+                      echo "Setting up CDN..."
+                      python 04_Azure_Infrastructure/cdn_configuration.py
+                      
+                      echo "Configuring SSL certificates..."
+                      python 04_Azure_Infrastructure/ssl_certificate_manager.py
+                      
+                      echo "Setting up Azure AD integration..."
+                      python 04_Azure_Infrastructure/azure_ad_integration.py
+                      
+                      echo "Infrastructure deployment completed successfully"
+
+                # Run database migrations
+                - task: AzureCLI@2
+                  displayName: 'Apply Database Migrations'
+                  inputs:
+                    azureSubscription: '$(azureServiceConnection)'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      echo "Retrieving database connection string..."
+                      DB_URL=$(az keyvault secret show --vault-name $(keyVaultName) --name DATABASE-URL --query value -o tsv)
+                      
+                      if [ ! -z "$DB_URL" ]; then
+                        echo "Applying database schema..."
+                        if [ -f "05_Database_Layer/migrations/001_initial_schema.sql" ]; then
+                          psql "$DB_URL" -f 05_Database_Layer/migrations/001_initial_schema.sql
+                          echo "Database schema applied successfully"
+                        else
+                          echo "No migration files found, skipping..."
+                        fi
+                      else
+                        echo "Database URL not found in Key Vault"
+                        exit 1
+                      fi
+
+  # ============================================================================
+  # STAGE 4: APPLICATION DEPLOYMENT
+  # ============================================================================
+  - stage: ApplicationDeployment
+    displayName: 'Application Deployment'
+    dependsOn: InfrastructureDeployment
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployApplication
+        displayName: 'Deploy Application'
+        environment: '$(deploymentEnvironment)-application'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # Download container manifest
+                - task: DownloadBuildArtifacts@0
+                  inputs:
+                    artifactName: 'ContainerManifest'
+                  displayName: 'Download container manifest'
+
+                # Configure App Service with new container
+                - task: AzureCLI@2
+                  displayName: 'Deploy Container to App Service'
+                  inputs:
+                    azureSubscription: '$(azureServiceConnection)'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      # Get the container image from manifest
+                      IMAGE_URL=$(cat $(Agent.BuildDirectory)/ContainerManifest/container-manifest.json | jq -r '.image')
+                      
+                      echo "Deploying container: $IMAGE_URL"
+                      
+                      # Configure the web app to use the new container
+                      az webapp config container set \
+                        --name $(appServiceName) \
+                        --resource-group $(resourceGroupName) \
+                        --docker-custom-image-name "$IMAGE_URL" \
+                        --docker-registry-server-url "https://$(containerRegistry)"
+                      
+                      # Configure app settings
+                      az webapp config appsettings set \
+                        --name $(appServiceName) \
+                        --resource-group $(resourceGroupName) \
+                        --settings \
+                          ENVIRONMENT="$(deploymentEnvironment)" \
+                          BUILD_NUMBER="$(Build.BuildNumber)" \
+                          SOURCE_COMMIT="$(Build.SourceVersion)" \
+                          DEPLOYMENT_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                      
+                      # Restart the app service
+                      az webapp restart \
+                        --name $(appServiceName) \
+                        --resource-group $(resourceGroupName)
+                      
+                      echo "Application deployed successfully"
+
+                # Health check after deployment
+                - task: AzureCLI@2
+                  displayName: 'Post-Deployment Health Check'
+                  inputs:
+                    azureSubscription: '$(azureServiceConnection)'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      APP_URL=$(az webapp show --name $(appServiceName) --resource-group $(resourceGroupName) --query defaultHostName -o tsv)
+                      
+                      echo "Waiting for application to start..."
+                      sleep 60
+                      
+                      # Health check with retries
+                      for i in {1..10}; do
+                        if curl -f "https://$APP_URL/health" > /dev/null 2>&1; then
+                          echo "Health check passed on attempt $i"
+                          break
+                        else
+                          echo "Health check failed on attempt $i, retrying..."
+                          sleep 30
+                        fi
+                        
+                        if [ $i -eq 10 ]; then
+                          echo "Health check failed after 10 attempts"
+                          exit 1
+                        fi
+                      done
+                      
+                      echo "Application is healthy and responding"
+
+  # ============================================================================
+  # STAGE 5: POST-DEPLOYMENT VALIDATION
+  # ============================================================================
+  - stage: PostDeploymentValidation
+    displayName: 'Post-Deployment Validation'
+    dependsOn: ApplicationDeployment
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: ValidationTests
+        displayName: 'Run Validation Tests'
+        steps:
+          # Smoke tests
+          - script: |
+              pip install requests pytest
+              
+              # Run smoke tests against deployed application
+              python -c "
+              import requests
+              import sys
+              import time
+              
+              app_url = 'https://$(appServiceName).azurewebsites.net'
+              
+              # Test endpoints
+              endpoints = [
+                  ('/', 'GET'),
+                  ('/health', 'GET'),
+                  ('/metrics', 'GET'),
+                  ('/api/validate-buyer-keys', 'POST')
+              ]
+              
+              for endpoint, method in endpoints:
+                  try:
+                      if method == 'GET':
+                          response = requests.get(f'{app_url}{endpoint}', timeout=30)
+                      else:
+                          response = requests.post(f'{app_url}{endpoint}', json={}, timeout=30)
+                      
+                      print(f'✅ {method} {endpoint}: {response.status_code}')
+                  except Exception as e:
+                      print(f'❌ {method} {endpoint}: {str(e)}')
+                      sys.exit(1)
+              
+              print('All smoke tests passed!')
+              "
+            displayName: 'Smoke tests'
+
+          # Performance validation
+          - script: |
+              # Install load testing tool
+              pip install locust
+              
+              # Create basic load test
+              cat > loadtest.py << 'EOF'
+              from locust import HttpUser, task, between
+              
+              class WebsiteUser(HttpUser):
+                  wait_time = between(1, 3)
+                  
+                  @task
+                  def index_page(self):
+                      self.client.get("/")
+                  
+                  @task
+                  def health_check(self):
+                      self.client.get("/health")
+              EOF
+              
+              # Run light load test
+              locust -f loadtest.py --host=https://$(appServiceName).azurewebsites.net --users 10 --spawn-rate 2 --run-time 60s --headless
+            displayName: 'Performance validation'
+
+      # Security validation
+      - job: SecurityValidation
+        displayName: 'Security Validation'
+        steps:
+          - script: |
+              # Install security testing tools
+              pip install requests urllib3
+              
+              # Run basic security checks
+              python -c "
+              import requests
+              import ssl
+              import socket
+              from urllib.parse import urlparse
+              
+              app_url = 'https://$(appServiceName).azurewebsites.net'
+              
+              # SSL/TLS validation
+              parsed_url = urlparse(app_url)
+              context = ssl.create_default_context()
+              
+              with socket.create_connection((parsed_url.hostname, 443)) as sock:
+                  with context.wrap_socket(sock, server_hostname=parsed_url.hostname) as ssock:
+                      print(f'✅ SSL Certificate: {ssock.version()}')
+                      cert = ssock.getpeercert()
+                      print(f'✅ Certificate Subject: {cert[\"subject\"]}')
+              
+              # Security headers check
+              response = requests.get(app_url)
+              security_headers = [
+                  'X-Content-Type-Options',
+                  'X-Frame-Options',
+                  'X-XSS-Protection',
+                  'Strict-Transport-Security'
+              ]
+              
+              for header in security_headers:
+                  if header in response.headers:
+                      print(f'✅ Security header {header}: {response.headers[header]}')
+                  else:
+                      print(f'⚠️  Missing security header: {header}')
+              
+              print('Security validation completed')
+              "
+            displayName: 'Security validation'
+
+  # ============================================================================
+  # STAGE 6: MONITORING SETUP
+  # ============================================================================
+  - stage: MonitoringSetup
+    displayName: 'Configure Monitoring & Alerts'
+    dependsOn: PostDeploymentValidation
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: SetupMonitoring
+        displayName: 'Configure Monitoring'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Configure Application Insights Alerts'
+            inputs:
+              azureSubscription: '$(azureServiceConnection)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Get Application Insights details
+                AI_NAME=$(az monitor app-insights component show --resource-group $(resourceGroupName) --query "[0].name" -o tsv)
+                
+                if [ ! -z "$AI_NAME" ]; then
+                  echo "Configuring alerts for Application Insights: $AI_NAME"
+                  
+                  # Create availability alert
+                  az monitor metrics alert create \
+                    --name "app-availability-alert" \
+                    --resource-group $(resourceGroupName) \
+                    --target-resource-id "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/$(resourceGroupName)/providers/Microsoft.Insights/components/$AI_NAME" \
+                    --condition "avg availabilityResults/availabilityPercentage < 95" \
+                    --window-size 5m \
+                    --evaluation-frequency 1m \
+                    --severity 2
+                  
+                  # Create response time alert
+                  az monitor metrics alert create \
+                    --name "app-response-time-alert" \
+                    --resource-group $(resourceGroupName) \
+                    --target-resource-id "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/$(resourceGroupName)/providers/Microsoft.Insights/components/$AI_NAME" \
+                    --condition "avg performanceCounters/requestExecutionTime > 5000" \
+                    --window-size 5m \
+                    --evaluation-frequency 1m \
+                    --severity 3
+                  
+                  echo "Application Insights alerts configured"
+                else
+                  echo "Application Insights not found"
+                fi
+
+# ============================================================================
+# PIPELINE COMPLETION NOTIFICATION
+# ============================================================================
+- stage: NotifyCompletion
+  displayName: 'Pipeline Completion Notification'
+  dependsOn:
+    - PostDeploymentValidation
+    - MonitoringSetup
+  condition: always()
+  jobs:
+    - job: SendNotification
+      displayName: 'Send Completion Notification'
+      steps:
+        - script: |
+            # Generate deployment report
+            cat > deployment-report.md << EOF
+            # Deployment Report
+            
+            **Build**: $(Build.BuildNumber)
+            **Environment**: $(deploymentEnvironment)
+            **Commit**: $(Build.SourceVersion)
+            **Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            **Status**: ${{ if eq(variables['Agent.JobStatus'], 'Succeeded') }}✅ Success{{ else }}❌ Failed{{ endif }}
+            
+            ## Deployed Resources
+            - Resource Group: $(resourceGroupName)
+            - App Service: $(appServiceName)
+            - Container: $(containerRegistry)/$(imageRepository):$(dockerImageTag)
+            
+            ## Access URLs
+            - Application: https://$(appServiceName).azurewebsites.net
+            - Health Check: https://$(appServiceName).azurewebsites.net/health
+            - Metrics: https://$(appServiceName).azurewebsites.net/metrics
+            
+            ## Next Steps
+            1. Verify application functionality
+            2. Monitor performance metrics
+            3. Review security scan results
+            4. Update documentation if needed
+            EOF
+            
+            echo "Deployment report generated"
+            cat deployment-report.md
+          displayName: 'Generate deployment report'
+
+        - task: PublishBuildArtifacts@1
+          inputs:
+            pathToPublish: 'deployment-report.md'
+            artifactName: 'DeploymentReport'
+          displayName: 'Publish deployment report'

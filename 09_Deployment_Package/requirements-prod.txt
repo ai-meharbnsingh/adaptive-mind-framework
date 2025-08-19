@@ -1,0 +1,131 @@
+# 09_Deployment_Package/requirements-prod.txt
+# Production requirements for Adaptive Mind Framework
+# Optimized for enterprise deployment with security and performance
+
+# Core Framework Dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+gunicorn==21.2.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# AI Provider SDKs
+openai==1.6.1
+anthropic==0.8.1
+google-generativeai==0.3.2
+
+# Database and Caching
+psycopg2-binary==2.9.9
+asyncpg==0.29.0
+redis==5.0.1
+alembic==1.13.1
+sqlalchemy==2.0.23
+
+# Web and Networking
+httpx==0.25.2
+aiohttp==3.9.1
+websockets==12.0
+requests==2.31.0
+
+# Security and Authentication
+cryptography==41.0.8
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+azure-identity==1.15.0
+azure-keyvault-secrets==4.7.0
+
+# Azure SDK Components
+azure-core==1.29.5
+azure-storage-blob==12.19.0
+azure-monitor-opentelemetry==1.1.1
+azure-servicebus==7.11.4
+
+# Monitoring and Observability
+prometheus-client==0.19.0
+opentelemetry-api==1.21.0
+opentelemetry-sdk==1.21.0
+opentelemetry-auto-instrumentation==0.42b0
+opentelemetry-exporter-prometheus==1.12.0rc1
+opentelemetry-instrumentation-fastapi==0.42b0
+opentelemetry-instrumentation-httpx==0.42b0
+opentelemetry-instrumentation-psycopg2==0.42b0
+
+# Data Processing and Analysis
+pandas==2.1.4
+numpy==1.25.2
+scipy==1.11.4
+scikit-learn==1.3.2
+
+# Utilities and Development
+pyyaml==6.0.1
+python-dotenv==1.0.0
+click==8.1.7
+rich==13.7.0
+typer==0.9.0
+
+# Testing and Quality (production testing)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-timeout==2.2.0
+
+# Performance and Profiling
+memory-profiler==0.61.0
+py-spy==0.3.14
+line-profiler==4.1.1
+
+# Logging and Configuration
+structlog==23.2.0
+loguru==0.7.2
+python-json-logger==2.0.7
+
+# HTTP Client Optimizations
+httpcore==1.0.2
+h11==0.14.0
+h2==4.1.0
+
+# Async Utilities
+asyncio-mqtt==0.13.0
+aiofiles==23.2.1
+aiocache==0.12.2
+
+# Production Server Enhancements
+setproctitle==1.3.3
+watchdog==3.0.0
+
+# Security Headers and CORS
+secure==0.3.0
+python-multipart==0.0.6
+
+# Data Validation and Serialization
+marshmallow==3.20.1
+cerberus==1.3.5
+
+# Enterprise Logging
+fluent-logger==0.10.0
+python-logstash==0.4.8
+
+# Production Deployment Tools
+supervisor==4.2.5
+nginx-python-module==1.24.0
+
+# Version pinning for stability
+certifi==2023.11.17
+charset-normalizer==3.3.2
+idna==3.6
+urllib3==2.1.0
+six==1.16.0
+
+# Additional Azure Components for Enterprise
+azure-mgmt-resource==23.1.1
+azure-mgmt-monitor==6.0.2
+azure-mgmt-containerregistry==10.3.0
+
+# JSON and Data Processing
+orjson==3.9.10
+ujson==5.8.0
+
+# Enterprise Security Additions
+azure-mgmt-keyvault==10.3.0
+msal==1.25.0
+azure-common==1.1.28

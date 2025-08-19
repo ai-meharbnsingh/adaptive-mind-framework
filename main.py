@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
@@ -13,23 +13,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def home():
-    return {
-        "message": "Adaptive Mind Framework - Live IP Demo",
-        "status": "operational", 
-        "ip_package_value": "$9.4M-$14.55M",
-        "creator": "Meharban Singh",
-        "contact": "meharbansingh@adaptive-mind.com",
-        "demo_url": "/demo",
-        "roi_url": "/roi"
-    }
+    """Serve the landing page"""
+    try:
+        with open("index.html", "r") as f:
+            return f.read()
+    except:
+        return """
+        <html><body style="font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px;">
+        <h1>🧠 Adaptive Mind Framework</h1>
+        <h2>$9.4M-$14.55M IP Acquisition Opportunity</h2>
+        <p><strong>Creator:</strong> Meharban Singh</p>
+        <p><strong>Email:</strong> meharbansingh@adaptive-mind.com</p>
+        <p><a href="/demo">Try Demo</a> | <a href="/roi">ROI Calculator</a></p>
+        </body></html>
+        """
 
 @app.get("/demo")
 async def demo():
     return {
         "framework": "Adaptive Mind Framework",
-        "version": "Complete - Sessions 1-12",
+        "version": "Complete - Sessions 1-12", 
         "ip_value": "$9.4M-$14.55M",
         "roi": "347% average",
         "savings": "$485K annually",

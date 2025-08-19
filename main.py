@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
@@ -13,112 +13,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-HTML_CONTENT = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adaptive Mind Framework - $9.4M IP Package</title>
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            max-width: 1000px; 
-            margin: 0 auto; 
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
-        }
-        .container { 
-            background: rgba(255,255,255,0.1); 
-            padding: 40px; 
-            border-radius: 15px; 
-            backdrop-filter: blur(10px);
-            margin: 20px 0;
-        }
-        h1 { font-size: 3em; text-align: center; margin-bottom: 20px; }
-        .stats { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 20px; 
-            margin: 30px 0; 
-        }
-        .stat { 
-            background: rgba(255,255,255,0.2); 
-            padding: 20px; 
-            border-radius: 10px; 
-            text-align: center; 
-        }
-        .stat h3 { font-size: 2em; margin: 0; }
-        .demo-button { 
-            background: #ff6b6b; 
-            color: white; 
-            padding: 15px 30px; 
-            border: none; 
-            border-radius: 25px; 
-            font-size: 18px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            margin: 10px;
-        }
-        .contact { 
-            background: rgba(0,0,0,0.2); 
-            padding: 30px; 
-            border-radius: 10px; 
-            margin-top: 40px;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🧠 Adaptive Mind Framework</h1>
-        <h2 style="text-align: center;">$9.4M-$14.55M IP Acquisition Opportunity</h2>
-        
-        <div class="stats">
-            <div class="stat">
-                <h3>347%</h3>
-                <p>Average ROI</p>
-            </div>
-            <div class="stat">
-                <h3>99.97%</h3>
-                <p>Uptime SLA</p>
-            </div>
-            <div class="stat">
-                <h3>$485K</h3>
-                <p>Annual Savings</p>
-            </div>
-            <div class="stat">
-                <h3>0.002ms</h3>
-                <p>Overhead</p>
-            </div>
-        </div>
-        
-        <div style="text-align: center;">
-            <a href="/demo" class="demo-button">🎯 Try Live Demo</a>
-            <a href="/roi" class="demo-button">📊 ROI Calculator</a>
-        </div>
-        
-        <div class="contact">
-            <h3>🤝 Ready for Acquisition?</h3>
-            <p><strong>Creator:</strong> Meharban Singh</p>
-            <p><strong>Email:</strong> meharbansingh@adaptive-mind.com</p>
-            <p><strong>General:</strong> info@adaptive-mind.com</p>
-            <p style="margin-top: 20px;">
-                <strong>Complete IP Package Available for Immediate Acquisition</strong><br>
-                Enterprise references available upon NDA
-            </p>
-        </div>
-    </div>
-</body>
-</html>
-"""
-
 @app.get("/", response_class=HTMLResponse)
 async def home():
-    return HTML_CONTENT
+    """Serve the landing page"""
+    try:
+        with open("index.html", "r") as f:
+            return f.read()
+    except:
+        return """
+        <html><body style="font-family: Arial; max-width: 800px; margin: 50px auto; padding: 20px;">
+        <h1>🧠 Adaptive Mind Framework</h1>
+        <h2>$9.4M-$14.55M IP Acquisition Opportunity</h2>
+        <p><strong>Creator:</strong> Meharban Singh</p>
+        <p><strong>Email:</strong> meharbansingh@adaptive-mind.com</p>
+        <p><a href="/demo">Try Demo</a> | <a href="/roi">ROI Calculator</a></p>
+        </body></html>
+        """
 
 @app.get("/demo")
 async def demo():

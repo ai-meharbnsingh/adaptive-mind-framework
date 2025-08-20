@@ -181,6 +181,34 @@
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
+        /* Video Container - Add this to your existing CSS */
+        .hero-video-container {
+            margin-top: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .video-placeholder {
+            position: relative;
+            background: #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .video-placeholder:hover {
+            transform: translateY(-2px);
+        }
+
+        .video-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 16px;
+        }
 
         /* Features Section */
         .features {
@@ -499,12 +527,21 @@
                 </p>
                 <div class="hero-buttons">
                     <a href="#demo" class="button-primary" onclick="scrollToDemo()">
-                        Start Interactive Demo
+                        ▶️ Watch Demo (6 min)
                     </a>
                     <a href="#roi-calculator" class="button-secondary" onclick="showROICalculator()">
-                        Calculate ROI
+                        Try Interactive Demo
                     </a>
                 </div>
+                <div class="hero-video-container">
+                    <div class="video-placeholder">
+                        <iframe class="video-iframe"
+                                src="https://www.youtube.com/embed/LTWb92IRzbg?rel=0&modestbranding=1"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>

@@ -582,6 +582,7 @@ json
 ```
 ADAPTIVE MIND IP DEMO - SESSION 13
 REFERENCE DOCUMENT: ENHANCED Master Development Plan v2.5, Development Log (Both in my Current Claude Project folder)
+📦 GITHUB Repo link: https://github.com/ai-meharbnsingh/adaptive-mind-framework
 CURRENT PHASE: Phase 3 - Sales Materials & Content (First Session)
 LAST COMPLETED SESSION: 12 - Professional Business Setup ✅ COMPLETE
 CURRENT STATUS:
@@ -623,6 +624,11 @@ FILES TO CREATE/ENHANCE IN SESSION 13:
 
 
 **RULES REMINDER:**
+- Start of Session Protocol
+    - Before initiating any local coding work or at the start of any new session, you must explicitly prompt me to run `git pull origin main` (or the relevant active branch) to ensure my local copy of the repository is fully up-to-date. Acknowledge when this action is confirmed.
+    - You will Guide Me Step by Step process to how to git pul from base
+    - Below is my project Folder locations “D:\Users\OMEN\Final_MULTI AI ANTIFRAGILE\PRoject Working\Adaptive_Mind”
+
 - Complete code, no brevity
 - Reference ENHANCED project folder structure
 - Build toward complete IP sales package ($9.5M−14.75M enhanced target)
@@ -634,6 +640,11 @@ FILES TO CREATE/ENHANCE IN SESSION 13:
 - External validation available on request
 - NO deviation from master plan without discussion and documentation
 - All rules mandatory for next session context
+- End of session Protocal 
+    *   Confirm that all documents should be aligned and visible on GitHub after pushing.
+    *   Instruct me to `git push` all local changes to GitHub before ending the session.
+    *   Final push and commit changes to git.  
+
 - Focus on integrating the powerful, already-built components into a seamless user experience.
 - The goal is to transform the static landing page into a fully interactive demonstration platform.
 ```

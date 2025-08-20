@@ -5,9 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cdd343bc-940f-44ec-89fb-3fda6e15fa89" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DEVELOPMENT_LOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/DEVELOPMENT_LOG.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MASTER_DEVELOPMENT_PLAN.md" beforeDir="false" afterPath="$PROJECT_DIR$/MASTER_DEVELOPMENT_PLAN.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,30 +32,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Python tests in demo_backend.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in demo_data_manager.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in final_verification_session8.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in quick_verify_session8.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in telemetry_integration_test.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in websocket_handler.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.bias_ledger_visualization.executor&quot;: &quot;Run&quot;,
-    &quot;Python.cost_analysis.executor&quot;: &quot;Run&quot;,
-    &quot;Python.demo_backend.executor&quot;: &quot;Run&quot;,
-    &quot;Python.demo_backend_working.executor&quot;: &quot;Run&quot;,
-    &quot;Python.generate_langchain_comparison.executor&quot;: &quot;Run&quot;,
-    &quot;Python.generate_roi_models.executor&quot;: &quot;Run&quot;,
-    &quot;Python.integration_test_runner.executor&quot;: &quot;Run&quot;,
-    &quot;Python.performance_benchmark.executor&quot;: &quot;Run&quot;,
-    &quot;Python.performance_dashboard.executor&quot;: &quot;Run&quot;,
-    &quot;Python.provider_ranking_system.executor&quot;: &quot;Run&quot;,
-    &quot;Python.show_structure.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Users/OMEN/Final_MULTI AI ANTIFRAGILE/PRoject Working/Adaptive_Mind&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Python tests in demo_backend.py.executor": "Run",
+    "Python tests.Python tests in demo_data_manager.py.executor": "Run",
+    "Python tests.Python tests in final_verification_session8.py.executor": "Run",
+    "Python tests.Python tests in quick_verify_session8.py.executor": "Run",
+    "Python tests.Python tests in telemetry_integration_test.py.executor": "Run",
+    "Python tests.Python tests in websocket_handler.py.executor": "Run",
+    "Python.bias_ledger_visualization.executor": "Run",
+    "Python.cost_analysis.executor": "Run",
+    "Python.demo_backend.executor": "Run",
+    "Python.demo_backend_working.executor": "Run",
+    "Python.generate_langchain_comparison.executor": "Run",
+    "Python.generate_roi_models.executor": "Run",
+    "Python.integration_test_runner.executor": "Run",
+    "Python.performance_benchmark.executor": "Run",
+    "Python.performance_dashboard.executor": "Run",
+    "Python.provider_ranking_system.executor": "Run",
+    "Python.show_structure.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "D:/Users/OMEN/Final_MULTI AI ANTIFRAGILE/PRoject Working/MULTI_AI_Project"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Users\OMEN\Final_MULTI AI ANTIFRAGILE\PRoject Working\Adaptive_Mind" />

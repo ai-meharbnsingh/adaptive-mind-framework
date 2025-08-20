@@ -5,59 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cdd343bc-940f-44ec-89fb-3fda6e15fa89" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/Adaptive_Mind.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/api/framework_api.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/config/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/config/config_loader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/config/provider_profiles.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/config/resilience_config.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/config/resilience_config_fast.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/config/schemas.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/core/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/core/circuit_breaker.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/core/exceptions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/core/failover_engine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/core/learning_engine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/core/online_learning_subscriber.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/core/provider_ranking_engine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/core/resource_guard.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/core/schemas.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/providers/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/providers/api_abstraction_layer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/providers/checkkkk.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/providers/provider_adapters/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/providers/provider_adapters/claude_adapter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/providers/provider_adapters/gemini_adapter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/providers/provider_adapters/openai_adapter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/providers/provider_registry.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/resilience/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/resilience/bias_ledger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/resilience/llm_based_rewriter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/resilience/prompt_rewriter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/utils/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/01_Framework_Core/antifragile_framework/utils/error_parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/api/test_e2e_resilience.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/config/test_config_loader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/core/test_circuit_breaker.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/core/test_failover_engine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/core/test_learning_engine.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/core/test_resource_guard.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/resilience/test_bias_ledger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/resilience/test_llm_based_rewriter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/telemetry/test_telemetry_subscriber.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/test_claude_adapter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/test_gemini_adapter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/test_openai_adapter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/02_Testing_Suite/tests/utils/test_error_parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/DEVELOPMENT_LOG.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MASTER_DEVELOPMENT_PLAN.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DEVELOPMENT_LOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/DEVELOPMENT_LOG.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MASTER_DEVELOPMENT_PLAN.md" beforeDir="false" afterPath="$PROJECT_DIR$/MASTER_DEVELOPMENT_PLAN.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -114,20 +114,6 @@ async def serve_landing_page():
         )
 
 
-@app.get("/video.html", response_class=HTMLResponse)
-async def serve_video_demo():
-    """Serve the animated terminal demo page"""
-    try:
-        with open("video.html", "r", encoding="utf-8") as f:
-            content = f.read()
-        return HTMLResponse(content=content)
-    except FileNotFoundError:
-        return HTMLResponse(
-            content="<h1>Video demo not found</h1><p>Please ensure video.html exists in the project root.</p>",
-            status_code=404
-        )
-
-
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for real-time metrics updates"""
@@ -271,8 +257,7 @@ async def demo_status():
             "roi_calculator": "active",
             "business_metrics": "active",
             "carrier_grade_value_prop": "active",
-            "websocket_connection": "active" if manager.active_connections else "inactive",
-            "terminal_demo": "active"  # Added terminal demo status
+            "websocket_connection": "active" if manager.active_connections else "inactive"
         },
         "metrics": manager.metrics_cache,
         "timestamp": datetime.now().isoformat()
@@ -316,7 +301,6 @@ async def startup_event():
     logger.info(f"📁 Static files directory: {os.path.abspath('static')}")
     logger.info("🔌 WebSocket endpoint available at /ws")
     logger.info("📊 Real-time metrics broadcasting enabled")
-    logger.info("🎮 Terminal demo available at /video.html")  # Added terminal demo info
 
     # Start background metrics updater
     asyncio.create_task(metrics_updater())
@@ -337,7 +321,6 @@ if __name__ == "__main__":
     logger.info(f"🌐 Starting server on {host}:{port}")
     logger.info("📖 API documentation available at /api/docs")
     logger.info("🔄 WebSocket endpoint available at /ws")
-    logger.info("🎮 Terminal demo available at /video.html")
 
     uvicorn.run(
         "main:app",

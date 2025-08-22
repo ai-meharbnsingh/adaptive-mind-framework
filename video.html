@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Mind - Live Terminal Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0c1117;
+            color: #00ff41;
+            font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .terminal-container {
+            height: 100vh;
+            background: linear-gradient(135deg, #0c1117 0%, #1a202c 100%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            background: #1e293b;
+            padding: 12px 20px;
+            border-bottom: 2px solid #00ff41;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .terminal-title {
+            color: #00ff41;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .control-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .close { background: #ff5f57; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #28ca42; }
+
+        .terminal-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .terminal-line {
+            margin: 2px 0;
+            opacity: 0;
+            transform: translateX(-10px);
+            animation: fadeInLine 0.3s ease-out forwards;
+        }
+
+        .prompt {
+            color: #00ff41;
+            font-weight: 600;
+        }
+
+        .command {
+            color: #ffd700;
+        }
+
+        .output {
+            color: #e2e8f0;
+            margin-left: 20px;
+        }
+
+        .success {
+            color: #00ff41;
+        }
+
+        .warning {
+            color: #ffa500;
+        }
+
+        .error {
+            color: #ff4444;
+        }
+
+        .info {
+            color: #00bfff;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+            margin-left: 20px;
+        }
+
+        .status-item {
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .status-online {
+            border-color: #00ff41;
+            background: rgba(0, 255, 65, 0.1);
+        }
+
+        .status-warning {
+            border-color: #ffa500;
+            background: rgba(255, 165, 0, 0.1);
+            color: #ffa500;
+        }
+
+        .status-error {
+            border-color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+            color: #ff4444;
+        }
+
+        .loading-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 255, 65, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff41, #00bfff);
+            width: 0%;
+            animation: progressFill 2s ease-out forwards;
+        }
+
+        .api-key-display {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 11px;
+        }
+
+        .key-masked {
+            color: #666;
+        }
+
+        .key-active {
+            color: #00ff41;
+        }
+
+        .key-inactive {
+            color: #ff4444;
+        }
+
+        .metrics-table {
+            margin: 10px 0;
+            margin-left: 20px;
+        }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: 150px 100px 100px 100px 120px;
+            gap: 15px;
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .metrics-header {
+            color: #00bfff;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .cursor {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes fadeInLine {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes progressFill {
+            to {
+                width: 100%;
+            }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .demo-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .control-button {
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            background: rgba(0, 255, 65, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-title">🚀 Adaptive Mind Enterprise Console - Live Failover Demo</div>
+            <div class="window-controls">
+                <div class="control-btn close"></div>
+                <div class="control-btn minimize"></div>
+                <div class="control-btn maximize"></div>
+            </div>
+        </div>
+        <div class="terminal-body" id="terminal-output">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <div class="demo-controls">
+        <button class="control-button" onclick="startDemo()">🔄 Restart Demo</button>
+        <button class="control-button" onclick="pauseDemo()">⏸️ Pause</button>
+        <button class="control-button" onclick="speedUpDemo()">⏩ Speed Up</button>
+    </div>
+
+    <script>
+        let currentLine = 0;
+        let isPaused = false;
+        let demoSpeed = 1;
+        let demoInterval;
+
+        const demoScript = [
+            {
+                type: 'command',
+                text: 'PS C:\\AdaptiveMind> Initialize-Enterprise-AI-Platform',
+                delay: 1000
+            },
+            {
+                type: 'output',
+                text: '🚀 Starting Adaptive Mind Enterprise AI Platform...',
+                delay: 500
+            },
+            {
+                type: 'output',
+                text: '📡 Connecting to Azure Cloud Infrastructure...',
+                delay: 800
+            },
+            {
+                type: 'loading',
+                text: 'Initializing Enterprise Security Layer',
+                delay: 2000
+            },
+            {
+                type: 'success',
+                text: '✅ Security Layer: ACTIVE (AES-256, SOC2 Compliant)',
+                delay: 500
+            },
+            {
+                type: 'command',
+                text: 'PS C:\\AdaptiveMind> Get-AIProviderStatus',
+                delay: 1000
+            },
+            {
+                type: 'output',
+                text: '🔍 Scanning AI Provider Landscape...',
+                delay: 600
+            },
+            {
+                type: 'status_grid',
+                providers: [
+                    { name: 'OpenAI GPT-4', status: 'online', latency: '127ms', health: '98.2%' },
+                    { name: 'Claude 3.5 Sonnet', status: 'online', latency: '93ms', health: '99.1%' },
+                    { name: 'Azure OpenAI', status: 'online', latency: '156ms', health: '97.8%' },
+                    { name: 'Google Gemini Pro', status: 'warning', latency: '234ms', health: '94.5%' }
+                ],
+                delay: 1500
+            },
+            {
+                type: 'command',
+                text: 'PS C:\\AdaptiveMind> Show-APIKeyVault',
+                delay: 1200
+            },
+            {
+                type: 'output',
+                text: '🔐 Enterprise API Key Management System',
+                delay: 400
+            },
+            {
+                type: 'api_keys',
+                keys: [
+                    { provider: 'OpenAI', key: 'sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', status: 'active', usage: '847/1000 req/min' },
+                    { provider: 'Anthropic', key: 'sk-ant-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', status: 'active', usage: '234/1000 req/min' },
+                    { provider: 'Azure', key: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', status: 'active', usage: '156/1000 req/min' },
+                    { provider: 'Google', key: 'AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', status: 'rotating', usage: '89/1000 req/min' }
+                ],
+                delay: 2000
+            },
+            {
+                type: 'command',
+                text: 'PS C:\\AdaptiveMind> Start-RealTimeMonitoring',
+                delay: 1000
+            },
+            {
+                type: 'output',
+                text: '📊 Initializing Real-Time Performance Dashboard...',
+                delay: 600
+            },
+            {
+                type: 'metrics_table',
+                delay: 2000
+            },
+            {
+                type: 'warning',
+                text: '⚠️  ALERT: OpenAI experiencing elevated latency (>2000ms)',
+                delay: 3000
+            },
+            {
+                type: 'output',
+                text: '🔄 Circuit Breaker TRIGGERED for OpenAI provider',
+                delay: 800
+            },
+            {
+                type: 'command',
+                text: 'PS C:\\AdaptiveMind> Invoke-IntelligentFailover -Provider "Claude"',
+                delay: 1000
+            },
+            {
+                type: 'loading',
+                text: 'Executing Intelligent Failover Protocol',
+                delay: 1500
+            },
+            {
+                type: 'output',
+                text: '🔄 Switching primary provider: OpenAI → Claude 3.5 Sonnet',
+                delay: 600
+            },
+            {
+                type: 'output',
+                text: '📊 Preserving conversation context and session state...',
+                delay: 500
+            },
+            {
+                type: 'output',
+                text: '🔒 Validating API key rotation and security compliance...',
+                delay: 700
+            },
+            {
+                type: 'success',
+                text: '✅ Failover completed in 847ms - ZERO data loss',
+                delay: 800
+            },
+            {
+                type: 'command',
+                text: 'PS C:\\AdaptiveMind> Test-SystemResilience',
+                delay: 1200
+            },
+            {
+                type: 'output',
+                text: '🧪 Running Enterprise Resilience Test Suite...',
+                delay: 600
+            },
+            {
+                type: 'test_results',
+                tests: [
+                    { test: 'Failover Speed', result: '847ms', status: 'PASS', threshold: '<1000ms' },
+                    { test: 'Context Preservation', result: '100%', status: 'PASS', threshold: '>99%' },
+                    { test: 'Security Compliance', result: 'SOC2 VERIFIED', status: 'PASS', threshold: 'Required' },
+                    { test: 'Cost Optimization', result: '34% savings', status: 'PASS', threshold: '>30%' },
+                    { test: 'Uptime SLA', result: '99.97%', status: 'PASS', threshold: '>99.9%' }
+                ],
+                delay: 3000
+            },
+            {
+                type: 'command',
+                text: 'PS C:\\AdaptiveMind> Get-BusinessImpact',
+                delay: 1000
+            },
+            {
+                type: 'output',
+                text: '💰 Calculating Enterprise Business Impact...',
+                delay: 600
+            },
+            {
+                type: 'business_metrics',
+                metrics: {
+                    'Cost Savings': '$127,000/month',
+                    'Downtime Prevention': '99.97% uptime',
+                    'Developer Productivity': '+240% efficiency',
+                    'Risk Mitigation': '$2.4M liability reduction',
+                    'ROI': '487% in Year 1'
+                },
+                delay: 2000
+            },
+            {
+                type: 'success',
+                text: '🎯 MISSION ACCOMPLISHED: Enterprise AI Platform Operating at Peak Performance',
+                delay: 1000
+            },
+            {
+                type: 'output',
+                text: '📞 Enterprise Sales: info@adaptive-mind.com',
+                delay: 500
+            },
+            {
+                type: 'prompt_final',
+                text: 'PS C:\\AdaptiveMind> _',
+                delay: 1000
+            }
+        ];
+
+        function addLine(content, className = '', delay = 0) {
+            setTimeout(() => {
+                if (isPaused) return;
+
+                const terminal = document.getElementById('terminal-output');
+                const line = document.createElement('div');
+                line.className = `terminal-line ${className}`;
+                line.style.animationDelay = '0s';
+                
+                if (className === 'command') {
+                    line.innerHTML = `<span class="prompt">PS C:\\AdaptiveMind></span> <span class="command">${content}</span>`;
+                } else {
+                    line.innerHTML = content;
+                }
+                
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+            }, delay / demoSpeed);
+        }
+
+        function addStatusGrid(providers, delay = 0) {
+            setTimeout(() => {
+                if (isPaused) return;
+
+                const terminal = document.getElementById('terminal-output');
+                const container = document.createElement('div');
+                container.className = 'terminal-line output';
+                
+                const grid = document.createElement('div');
+                grid.className = 'status-grid';
+                
+                providers.forEach(provider => {
+                    const item = document.createElement('div');
+                    item.className = `status-item status-${provider.status}`;
+                    item.innerHTML = `
+                        <strong>${provider.name}</strong><br>
+                        Latency: ${provider.latency}<br>
+                        Health: ${provider.health}
+                    `;
+                    grid.appendChild(item);
+                });
+                
+                container.appendChild(grid);
+                terminal.appendChild(container);
+                terminal.scrollTop = terminal.scrollHeight;
+            }, delay / demoSpeed);
+        }
+
+        function addAPIKeys(keys, delay = 0) {
+            setTimeout(() => {
+                if (isPaused) return;
+
+                const terminal = document.getElementById('terminal-output');
+                
+                keys.forEach((keyData, index) => {
+                    setTimeout(() => {
+                        const line = document.createElement('div');
+                        line.className = 'terminal-line output';
+                        
+                        const keyDisplay = document.createElement('div');
+                        keyDisplay.className = 'api-key-display';
+                        keyDisplay.innerHTML = `
+                            <span class="key-${keyData.status}">[${keyData.provider}]</span>
+                            <span class="key-masked">${keyData.key}</span>
+                            <span class="info"> | ${keyData.usage}</span>
+                        `;
+                        
+                        line.appendChild(keyDisplay);
+                        terminal.appendChild(line);
+                        terminal.scrollTop = terminal.scrollHeight;
+                    }, index * 200);
+                });
+            }, delay / demoSpeed);
+        }
+
+        function addMetricsTable(delay = 0) {
+            setTimeout(() => {
+                if (isPaused) return;
+
+                const terminal = document.getElementById('terminal-output');
+                const container = document.createElement('div');
+                container.className = 'terminal-line output';
+                
+                const table = document.createElement('div');
+                table.className = 'metrics-table';
+                
+                // Header
+                const header = document.createElement('div');
+                header.className = 'metrics-row';
+                header.innerHTML = `
+                    <span class="metrics-header">Provider</span>
+                    <span class="metrics-header">Latency</span>
+                    <span class="metrics-header">Success</span>
+                    <span class="metrics-header">Cost/1K</span>
+                    <span class="metrics-header">Status</span>
+                `;
+                table.appendChild(header);
+                
+                // Data rows
+                const rows = [
+                    ['OpenAI GPT-4', '2847ms', '94.2%', '$0.03', '🔴 DEGRADED'],
+                    ['Claude 3.5', '93ms', '99.8%', '$0.015', '🟢 OPTIMAL'],
+                    ['Azure OpenAI', '156ms', '98.1%', '$0.02', '🟢 HEALTHY'],
+                    ['Gemini Pro', '234ms', '96.5%', '$0.01', '🟡 MONITORING']
+                ];
+                
+                rows.forEach((rowData, index) => {
+                    setTimeout(() => {
+                        const row = document.createElement('div');
+                        row.className = 'metrics-row';
+                        row.innerHTML = rowData.map(cell => `<span>${cell}</span>`).join('');
+                        table.appendChild(row);
+                    }, index * 300);
+                });
+                
+                container.appendChild(table);
+                terminal.appendChild(container);
+                terminal.scrollTop = terminal.scrollHeight;
+            }, delay / demoSpeed);
+        }
+
+        function addTestResults(tests, delay = 0) {
+            setTimeout(() => {
+                if (isPaused) return;
+
+                const terminal = document.getElementById('terminal-output');
+                
+                tests.forEach((test, index) => {
+                    setTimeout(() => {
+                        const line = document.createElement('div');
+                        line.className = 'terminal-line output';
+                        
+                        const statusIcon = test.status === 'PASS' ? '✅' : '❌';
+                        const statusClass = test.status === 'PASS' ? 'success' : 'error';
+                        
+                        line.innerHTML = `
+                            <span class="${statusClass}">${statusIcon} ${test.test}: ${test.result}</span>
+                            <span class="info"> (Threshold: ${test.threshold})</span>
+                        `;
+                        
+                        terminal.appendChild(line);
+                        terminal.scrollTop = terminal.scrollHeight;
+                    }, index * 400);
+                });
+            }, delay / demoSpeed);
+        }
+
+        function addBusinessMetrics(metrics, delay = 0) {
+            setTimeout(() => {
+                if (isPaused) return;
+
+                const terminal = document.getElementById('terminal-output');
+                const container = document.createElement('div');
+                container.className = 'terminal-line output';
+                
+                const grid = document.createElement('div');
+                grid.className = 'status-grid';
+                
+                Object.entries(metrics).forEach(([key, value]) => {
+                    const item = document.createElement('div');
+                    item.className = 'status-item status-online';
+                    item.innerHTML = `<strong>${key}</strong><br>${value}`;
+                    grid.appendChild(item);
+                });
+                
+                container.appendChild(grid);
+                terminal.appendChild(container);
+                terminal.scrollTop = terminal.scrollHeight;
+            }, delay / demoSpeed);
+        }
+
+        function addLoadingBar(text, delay = 0) {
+            setTimeout(() => {
+                if (isPaused) return;
+
+                const terminal = document.getElementById('terminal-output');
+                const line = document.createElement('div');
+                line.className = 'terminal-line output';
+                line.innerHTML = `
+                    <div>${text}...</div>
+                    <div class="loading-bar"><div class="loading-progress"></div></div>
+                `;
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+            }, delay / demoSpeed);
+        }
+
+        function executeScript() {
+            let totalDelay = 0;
+            
+            demoScript.forEach((item, index) => {
+                totalDelay += item.delay;
+                
+                setTimeout(() => {
+                    if (isPaused) return;
+
+                    switch (item.type) {
+                        case 'command':
+                            addLine(item.text, 'command');
+                            break;
+                        case 'output':
+                            addLine(item.text, 'output');
+                            break;
+                        case 'success':
+                            addLine(`✅ ${item.text}`, 'success');
+                            break;
+                        case 'warning':
+                            addLine(`⚠️ ${item.text}`, 'warning');
+                            break;
+                        case 'error':
+                            addLine(`❌ ${item.text}`, 'error');
+                            break;
+                        case 'info':
+                            addLine(`ℹ️ ${item.text}`, 'info');
+                            break;
+                        case 'loading':
+                            addLoadingBar(item.text);
+                            break;
+                        case 'status_grid':
+                            addStatusGrid(item.providers);
+                            break;
+                        case 'api_keys':
+                            addAPIKeys(item.keys);
+                            break;
+                        case 'metrics_table':
+                            addMetricsTable();
+                            break;
+                        case 'test_results':
+                            addTestResults(item.tests);
+                            break;
+                        case 'business_metrics':
+                            addBusinessMetrics(item.metrics);
+                            break;
+                        case 'prompt_final':
+                            addLine(item.text, 'prompt');
+                            break;
+                    }
+                }, totalDelay / demoSpeed);
+            });
+        }
+
+        function startDemo() {
+            document.getElementById('terminal-output').innerHTML = '';
+            isPaused = false;
+            executeScript();
+        }
+
+        function pauseDemo() {
+            isPaused = !isPaused;
+            const button = event.target;
+            button.textContent = isPaused ? '▶️ Resume' : '⏸️ Pause';
+        }
+
+        function speedUpDemo() {
+            demoSpeed = demoSpeed === 1 ? 2 : demoSpeed === 2 ? 4 : 1;
+            const button = event.target;
+            button.textContent = demoSpeed === 1 ? '⏩ Speed Up' : demoSpeed === 2 ? '⏩⏩ 2x Speed' : '⏩⏩⏩ 4x Speed';
+        }
+
+        // Auto-start demo
+        window.addEventListener('load', () => {
+            setTimeout(startDemo, 1000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ') {
+                e.preventDefault();
+                pauseDemo();
+            } else if (e.key === 'r') {
+                startDemo();
+            } else if (e.key === 's') {
+                speedUpDemo();
+            }
+        });
+    </script>
+</body>
+</html>

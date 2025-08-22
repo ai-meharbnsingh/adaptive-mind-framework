@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
     <style>
         :root {
             --primary: #4f46e5;
@@ -38,7 +37,6 @@
             margin: 0 auto;
             padding: 0 1.5rem;
         }
-
         /* Header */
         .header {
             border-bottom: 1px solid var(--border-light);
@@ -102,19 +100,15 @@
             background: var(--primary-dark);
         }
 
-        /* Hero Section with Video */
+        /* Hero Section */
         .hero {
             padding: 4rem 0 6rem;
             background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
         }
         .hero-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-        .hero-text {
-            text-align: left;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
         }
         .hero-badge {
             display: inline-block;
@@ -141,10 +135,14 @@
             font-size: 1.25rem;
             color: var(--text-secondary);
             margin: 0 0 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .hero-buttons {
             display: flex;
             gap: 1rem;
+            justify-content: center;
             flex-wrap: wrap;
         }
         .button-primary {
@@ -183,76 +181,38 @@
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
-
-        /* Video Container */
-        .video-container {
-            position: relative;
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-            aspect-ratio: 16/9;
+        /* Video Container - Add this to your existing CSS */
+        .hero-video-container {
+            margin-top: 3rem;
+            max-width: 900px; /* Increased max-width for the wider terminal */
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .video-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            position: relative;
+            background: #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
             cursor: pointer;
-            transition: all 0.3s;
+            box-shadow: var(--shadow-lg);
         }
 
         .video-placeholder:hover {
-            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+            transform: translateY(-2px);
         }
 
-        .play-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            margin-bottom: 1rem;
-            transition: all 0.3s;
+        .video-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 16px;
         }
 
-        .video-placeholder:hover .play-button {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-
-        .play-icon {
-            width: 24px;
-            height: 24px;
-            fill: white;
-            margin-left: 4px;
-        }
-
-        .video-info {
-            text-align: center;
-            color: white;
-        }
-
-        .video-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin: 0 0 0.5rem;
-        }
-
-        .video-duration {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.875rem;
-        }
-
-        /* Demo Section */
-        .demo-section {
+        /* Features Section */
+        .features {
             padding: 6rem 0;
-            background: var(--bg-secondary);
         }
         .section-header {
             text-align: center;
@@ -268,6 +228,51 @@
             font-size: 1.125rem;
             color: var(--text-secondary);
             margin: 0;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .feature-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 0.75rem;
+        }
+        .feature-description {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Interactive Demo Section */
+        .demo-section {
+            padding: 6rem 0;
+            background: var(--bg-secondary);
         }
         .demo-container {
             background: white;
@@ -312,7 +317,7 @@
             display: block;
         }
 
-        /* Metrics */
+        /* Metrics Dashboard */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -336,6 +341,43 @@
             font-size: 0.875rem;
             font-weight: 500;
             margin: 0.5rem 0 0;
+        }
+
+        /* ROI Calculator */
+        .calculator-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .form-input {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .form-select {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
         }
 
         /* Footer */
@@ -371,18 +413,83 @@
             color: #9ca3af;
         }
 
-        /* Responsive */
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .hero-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
             .hero-title {
                 font-size: 2.5rem;
             }
             .nav-menu {
                 display: none;
             }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .calculator-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Interactive Elements */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(79, 70, 229, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        .status-online { background: #10b981; }
+        .status-warning { background: #f59e0b; }
+        .status-error { background: #ef4444; }
+
+        /* Chart Containers */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            min-height: 300px;
+        }
+
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+        .toast.error {
+            border-left: 4px solid #ef4444;
         }
     </style>
 </head>
@@ -395,7 +502,9 @@
                 The Adaptive Mind
             </div>
             <div class="nav-menu">
+                <a href="#features" class="nav-link">Features</a>
                 <a href="#demo" class="nav-link">Demo</a>
+                <a href="#pricing" class="nav-link">ROI Calculator</a>
                 <a href="#contact" class="nav-link">Contact</a>
                 <a href="#demo" class="cta-button">Try Demo</a>
             </div>
@@ -406,46 +515,95 @@
     <section class="hero">
         <div class="container">
             <div class="hero-content">
-                <div class="hero-text">
-                    <div class="hero-badge">
-                        🚀 Enterprise AI Resilience Platform
-                    </div>
-                    <h1 class="hero-title">
-                        The Adaptive Mind Framework
-                    </h1>
-                    <p class="hero-subtitle">
-                        Enterprise-grade AI resilience with intelligent failover, bias detection, and cost optimization.
-                        Achieve 99.97% uptime with adaptive provider management and real-time performance optimization.
-                    </p>
-                    <div class="hero-buttons">
-                        <button class="button-primary" onclick="playVideo()">
-                            ▶️ Watch Demo (6 min)
-                        </button>
-                        <a href="#demo" class="button-secondary">
-                            Try Interactive Demo
-                        </a>
+                <div class="hero-badge">
+                    🚀 Enterprise AI Resilience Platform
+                </div>
+                <h1 class="hero-title">
+                    The Adaptive Mind Framework
+                </h1>
+                <p class="hero-subtitle">
+                    Enterprise-grade AI resilience with intelligent failover, bias detection, and cost optimization.
+                    Achieve 99.9% uptime with adaptive provider management and real-time performance optimization.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#demo" class="button-primary" onclick="scrollToDemo()">
+                        ▶️ Watch Demo (6 min)
+                    </a>
+                    <a href="#roi-calculator" class="button-secondary" onclick="showROICalculator()">
+                        Try Interactive Demo
+                    </a>
+                </div>
+                <div class="hero-video-container">
+                    <div class="video-placeholder">
+                        <!-- ======================================================= -->
+                        <!-- START OF CHANGE: Replaced YouTube video with live demo  -->
+                        <!-- ======================================================= -->
+                        <iframe class="video-iframe"
+                                src="video.html"
+                                title="Adaptive Mind Live Terminal Demo"
+                                allowfullscreen>
+                        </iframe>
+                        <!-- ======================================================= -->
+                        <!-- END OF CHANGE                                           -->
+                        <!-- ======================================================= -->
                     </div>
                 </div>
-                <div class="video-container">
-                    <div id="video-placeholder" class="video-placeholder" onclick="playVideo()">
-                        <div class="play-button">
-                            <svg class="play-icon" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z"/>
-                            </svg>
-                        </div>
-                        <div class="video-info">
-                            <div class="video-title">Enterprise Demo</div>
-                            <div class="video-duration">6 minutes • Complete Overview</div>
-                        </div>
-                    </div>
-                    <!-- This iframe will be populated after you upload video -->
-                    <iframe id="main-video"
-                            src=""
-                            frameborder="0"
-                            allow="autoplay; fullscreen; picture-in-picture"
-                            allowfullscreen
-                            style="width: 100%; height: 100%; display: none;">
-                    </iframe>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Enterprise-Grade AI Resilience</h2>
+                <p class="section-subtitle">
+                    Built for mission-critical applications with advanced failover, bias monitoring, and cost optimization
+                </p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3 class="feature-title">Intelligent Failover</h3>
+                    <p class="feature-description">
+                        Automatic provider switching with sub-second detection and seamless continuity for mission-critical applications.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Real-Time Optimization</h3>
+                    <p class="feature-description">
+                        Dynamic cost and performance optimization with live metrics and adaptive resource allocation.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Bias Detection</h3>
+                    <p class="feature-description">
+                        Advanced bias monitoring with AI-powered prompt rewriting and comprehensive audit trails.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Enterprise Analytics</h3>
+                    <p class="feature-description">
+                        Comprehensive dashboards with real-time metrics, cost analysis, and performance insights.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">Security & Compliance</h3>
+                    <p class="feature-description">
+                        Enterprise security with API key management, audit logging, and compliance-ready documentation.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3 class="feature-title">Carrier-Grade Performance</h3>
+                    <p class="feature-description">
+                        99.9% uptime with redundant architecture, health monitoring, and automatic scaling.
+                    </p>
                 </div>
             </div>
         </div>
@@ -494,22 +652,59 @@
                                 <div class="metric-label">Requests Today</div>
                             </div>
                         </div>
+                        <div class="chart-container" id="performance-chart">
+                            <p style="text-align: center; color: var(--text-secondary); margin-top: 100px;">
+                                📊 Real-time performance charts loading...
+                            </p>
+                        </div>
                     </div>
 
-                    <!-- Other panels -->
+                    <!-- Failover Demo Panel -->
                     <div id="failover-demo" class="demo-panel">
                         <h4>Intelligent Failover Demonstration</h4>
-                        <p>Failover demo content will load here...</p>
+                        <div id="failover-demo-container">
+                            <p>Loading failover demonstration interface...</p>
+                        </div>
                     </div>
 
+                    <!-- ROI Calculator Panel -->
                     <div id="roi-calculator" class="demo-panel">
                         <h4>Enterprise ROI Calculator</h4>
-                        <p>ROI calculator will load here...</p>
+                        <div class="calculator-form">
+                            <div class="form-group">
+                                <label class="form-label">Monthly AI API Spend ($)</label>
+                                <input type="number" class="form-input" id="monthly-spend" value="10000" onchange="calculateROI()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Industry Sector</label>
+                                <select class="form-select" id="industry-sector" onchange="calculateROI()">
+                                    <option value="finance">Financial Services</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="ecommerce">E-commerce</option>
+                                    <option value="saas">SaaS/Technology</option>
+                                    <option value="enterprise">Enterprise Software</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Team Size</label>
+                                <input type="number" class="form-input" id="team-size" value="25" onchange="calculateROI()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Current Downtime Hours/Month</label>
+                                <input type="number" class="form-input" id="downtime-hours" value="8" onchange="calculateROI()">
+                            </div>
+                        </div>
+                        <div id="roi-results" class="metrics-grid">
+                            <!-- ROI results will be populated by JavaScript -->
+                        </div>
                     </div>
 
+                    <!-- Business Metrics Panel -->
                     <div id="business-metrics" class="demo-panel">
                         <h4>Business Impact Analysis</h4>
-                        <p>Business metrics will load here...</p>
+                        <div id="business-metrics-container">
+                            <p>Loading business impact visualization...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -517,7 +712,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="footer" id="contact">
+    <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
@@ -527,18 +722,36 @@
                     </p>
                 </div>
                 <div class="footer-section">
+                    <h3>Product</h3>
+                    <a href="#features" class="footer-link">Features</a>
+                    <a href="#demo" class="footer-link">Demo</a>
+                    <a href="#pricing" class="footer-link">Pricing</a>
+                    <a href="#documentation" class="footer-link">Documentation</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <a href="#about" class="footer-link">About</a>
+                    <a href="#contact" class="footer-link">Contact</a>
+                    <a href="#security" class="footer-link">Security</a>
+                    <a href="#compliance" class="footer-link">Compliance</a>
+                </div>
+                <div class="footer-section">
                     <h3>Contact</h3>
                     <a href="mailto:info@adaptive-mind.com" class="footer-link">info@adaptive-mind.com</a>
-                    <a href="https://adaptive-mind.com" class="footer-link">adaptive-mind.com</a>
+                    <a href="#enterprise" class="footer-link">Enterprise Sales</a>
+                    <a href="#support" class="footer-link">Support</a>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 The Adaptive Mind. All rights reserved.</p>
+                <p>&copy; 2025 The Adaptive Mind. All rights reserved. Built for enterprise AI resilience.</p>
             </div>
         </div>
     </footer>
 
-    <!-- JavaScript -->
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- JavaScript Integration -->
     <script src="/static/js/dual_mode_interface.js"></script>
     <script src="/static/js/roi_calculator.js"></script>
     <script src="/static/js/business_metrics.js"></script>
@@ -546,79 +759,358 @@
     <script src="/static/js/demo_mode_comparison.js"></script>
 
     <script>
-        // Video player functionality
-        function playVideo() {
-            const placeholder = document.getElementById('video-placeholder');
-            const iframe = document.getElementById('main-video');
-
-            // TODO: Replace 'YOUR_VIDEO_ID' with actual YouTube video ID after upload
-            const videoId = 'YOUR_VIDEO_ID'; // You'll replace this after uploading
-
-            if (videoId !== 'YOUR_VIDEO_ID') {
-                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-                placeholder.style.display = 'none';
-                iframe.style.display = 'block';
-            } else {
-                alert('Video will be available after upload to YouTube');
+        // Global application state
+        window.adaptiveMindApp = {
+            currentDemo: 'live-metrics',
+            isInitialized: false,
+            metrics: {
+                uptime: 99.97,
+                responseTime: 127,
+                costSavings: 34,
+                requestsProcessed: 2400000
             }
-        }
+        };
 
-        // Demo functionality
-        function showDemoPanel(panelId) {
-            // Hide all panels
-            document.querySelectorAll('.demo-panel').forEach(panel => {
-                panel.classList.remove('active');
-            });
-
-            // Remove active class from all tabs
-            document.querySelectorAll('.demo-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // Show selected panel
-            document.getElementById(panelId).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        // Initialize app when page loads
+        // Initialize application when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Adaptive Mind Demo Page Loaded');
+            initializeApp();
+            startMetricsUpdates();
+            calculateROI(); // Initial ROI calculation
+        });
 
-            // Initialize any existing components
+        // Main application initialization
+        function initializeApp() {
+            console.log('🚀 Initializing Adaptive Mind Enterprise Demo');
+
+            // Initialize all components
             if (typeof initializeDualModeInterface === 'function') {
                 initializeDualModeInterface();
             }
 
-            // Start metrics simulation
-            setInterval(updateMetrics, 5000);
+            if (typeof initializeROICalculator === 'function') {
+                initializeROICalculator();
+            }
+
+            if (typeof initializeBusinessMetrics === 'function') {
+                initializeBusinessMetrics();
+            }
+
+            if (typeof initializeCarrierGradeValueProp === 'function') {
+                initializeCarrierGradeValueProp();
+            }
+
+            window.adaptiveMindApp.isInitialized = true;
+            showToast('Enterprise demo platform initialized successfully', 'success');
+        }
+
+        // Demo panel switching
+        function showDemoPanel(panelId) {
+            // Update active tab
+            document.querySelectorAll('.demo-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update active panel
+            document.querySelectorAll('.demo-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.getElementById(panelId).classList.add('active');
+
+            // Load panel-specific content
+            switch(panelId) {
+                case 'failover-demo':
+                    loadFailoverDemo();
+                    break;
+                case 'business-metrics':
+                    loadBusinessMetrics();
+                    break;
+                case 'roi-calculator':
+                    calculateROI();
+                    break;
+                case 'live-metrics':
+                    updateLiveMetrics();
+                    break;
+            }
+
+            window.adaptiveMindApp.currentDemo = panelId;
+        }
+
+        // Live metrics updates
+        function startMetricsUpdates() {
+            setInterval(updateLiveMetrics, 5000); // Update every 5 seconds
+        }
+
+        function updateLiveMetrics() {
+            const metrics = window.adaptiveMindApp.metrics;
+
+            // Simulate real-time fluctuations
+            metrics.uptime = (99.95 + Math.random() * 0.04).toFixed(2);
+            metrics.responseTime = Math.floor(120 + Math.random() * 20);
+            metrics.costSavings = Math.floor(30 + Math.random() * 10);
+            metrics.requestsProcessed += Math.floor(Math.random() * 1000);
+
+            // Update display
+            document.getElementById('uptime-metric').textContent = metrics.uptime + '%';
+            document.getElementById('response-time').textContent = metrics.responseTime + 'ms';
+            document.getElementById('cost-savings').textContent = metrics.costSavings + '%';
+            document.getElementById('requests-processed').textContent =
+                (metrics.requestsProcessed / 1000000).toFixed(1) + 'M';
+        }
+
+        // ROI Calculator
+        function calculateROI() {
+            const monthlySpend = parseFloat(document.getElementById('monthly-spend').value) || 10000;
+            const industrySector = document.getElementById('industry-sector').value;
+            const teamSize = parseInt(document.getElementById('team-size').value) || 25;
+            const downtimeHours = parseFloat(document.getElementById('downtime-hours').value) || 8;
+
+            // Industry-specific multipliers
+            const industryMultipliers = {
+                finance: { efficiency: 1.4, downtime_cost: 50000 },
+                healthcare: { efficiency: 1.2, downtime_cost: 30000 },
+                ecommerce: { efficiency: 1.6, downtime_cost: 25000 },
+                saas: { efficiency: 1.5, downtime_cost: 35000 },
+                enterprise: { efficiency: 1.3, downtime_cost: 40000 }
+            };
+
+            const multiplier = industryMultipliers[industrySector] || industryMultipliers.enterprise;
+
+            // Calculate savings
+            const monthlyCostSavings = monthlySpend * 0.34; // 34% average cost reduction
+            const downtimeReduction = downtimeHours * 0.85; // 85% downtime reduction
+            const downtimeSavings = downtimeReduction * multiplier.downtime_cost;
+            const efficiencyGains = teamSize * 2000 * multiplier.efficiency; // $2k per person efficiency gains
+
+            const totalMonthlySavings = monthlyCostSavings + downtimeSavings + efficiencyGains;
+            const annualSavings = totalMonthlySavings * 12;
+            const implementationCost = 150000; // Estimated implementation cost
+            const roi = ((annualSavings - implementationCost) / implementationCost * 100).toFixed(0);
+            const paybackMonths = (implementationCost / totalMonthlySavings).toFixed(1);
+
+            // Update ROI display
+            document.getElementById('roi-results').innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-value">${Math.round(totalMonthlySavings).toLocaleString()}</div>
+                    <div class="metric-label">Monthly Savings</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${Math.round(annualSavings).toLocaleString()}</div>
+                    <div class="metric-label">Annual Savings</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${roi}%</div>
+                    <div class="metric-label">ROI Year 1</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${paybackMonths}</div>
+                    <div class="metric-label">Payback (Months)</div>
+                </div>
+            `;
+        }
+
+        // Load failover demonstration
+        function loadFailoverDemo() {
+            const container = document.getElementById('failover-demo-container');
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0;">
+                    <div class="metric-card">
+                        <h4>Provider Status</h4>
+                        <div style="margin: 1rem 0;">
+                            <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                                <span class="status-indicator status-online"></span>
+                                <span>OpenAI GPT-4 - Primary</span>
+                            </div>
+                            <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                                <span class="status-indicator status-online"></span>
+                                <span>Claude 3.5 Sonnet - Backup</span>
+                            </div>
+                            <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                                <span class="status-indicator status-warning"></span>
+                                <span>Gemini Pro - Monitoring</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Failover Metrics</h4>
+                        <div class="metric-value" style="font-size: 1.5rem; margin: 1rem 0;">847ms</div>
+                        <div class="metric-label">Average Failover Time</div>
+                        <div class="metric-value" style="font-size: 1.5rem; margin: 1rem 0;">99.97%</div>
+                        <div class="metric-label">Success Rate</div>
+                    </div>
+                </div>
+                <button class="button-primary" onclick="simulateFailover()" style="margin-top: 1rem;">
+                    🔄 Simulate Provider Failover
+                </button>
+                <div id="failover-log" style="background: #f8fafc; border-radius: 8px; padding: 1rem; margin-top: 1rem; font-family: monospace; font-size: 0.875rem; max-height: 200px; overflow-y: auto;">
+                    <div>2025-08-20 15:32:15 - System initialized, primary provider: OpenAI</div>
+                    <div>2025-08-20 15:32:16 - Health check passed for all providers</div>
+                    <div>2025-08-20 15:32:17 - Ready for failover demonstration</div>
+                </div>
+            `;
+        }
+
+        // Simulate failover process
+        function simulateFailover() {
+            const log = document.getElementById('failover-log');
+            const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+            const steps = [
+                'Detecting OpenAI latency spike (>2000ms)',
+                'Circuit breaker triggered for OpenAI',
+                'Initiating failover to Claude 3.5 Sonnet',
+                'Provider switch completed successfully',
+                'Response time normalized: 156ms',
+                'System operating normally on backup provider'
+            ];
+
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    const newEntry = document.createElement('div');
+                    newEntry.textContent = `${timestamp} - ${step}`;
+                    newEntry.style.color = index === steps.length - 1 ? '#10b981' : '#374151';
+                    log.appendChild(newEntry);
+                    log.scrollTop = log.scrollHeight;
+                }, index * 800);
+            });
+
+            showToast('Failover simulation completed successfully', 'success');
+        }
+
+        // Load business metrics
+        function loadBusinessMetrics() {
+            const container = document.getElementById('business-metrics-container');
+            container.innerHTML = `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">34%</div>
+                        <div class="metric-label">Cost Reduction</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">85%</div>
+                        <div class="metric-label">Downtime Reduction</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">2.4x</div>
+                        <div class="metric-label">Performance Improvement</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">99.97%</div>
+                        <div class="metric-label">Reliability Score</div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h4>Monthly Performance Trends</h4>
+                    <div style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 0.5rem; margin: 2rem 0;">
+                        ${Array.from({length: 12}, (_, i) => {
+                            const height = 50 + Math.random() * 100;
+                            const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i];
+                            return `
+                                <div style="text-align: center;">
+                                    <div style="height: ${height}px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">${month}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Utility functions
+        function scrollToDemo() {
+            document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showROICalculator() {
+            document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => showDemoPanel('roi-calculator'), 500);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <span style="margin-right: 0.75rem;">${type === 'success' ? '✅' : '❌'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.getElementById('toast-container').appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Real-time WebSocket connection for live data
+        function connectWebSocket() {
+            if (typeof WebSocket !== 'undefined') {
+                try {
+                    const ws = new WebSocket(`ws://${location.host}/ws`);
+
+                    ws.onopen = function() {
+                        console.log('🔌 WebSocket connected for real-time updates');
+                        showToast('Real-time connection established', 'success');
+                    };
+
+                    ws.onmessage = function(event) {
+                        const data = JSON.parse(event.data);
+                        if (data.type === 'metrics_update') {
+                            updateMetricsFromWebSocket(data.metrics);
+                        }
+                    };
+
+                    ws.onerror = function() {
+                        console.log('📡 WebSocket not available, using simulated data');
+                    };
+                } catch (e) {
+                    console.log('📡 WebSocket not available, using simulated data');
+                }
+            }
+        }
+
+        function updateMetricsFromWebSocket(metrics) {
+            if (metrics) {
+                Object.assign(window.adaptiveMindApp.metrics, metrics);
+                updateLiveMetrics();
+            }
+        }
+
+        // Initialize WebSocket connection after page load
+        setTimeout(connectWebSocket, 2000);
+
+        // Keyboard shortcuts for demo navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey) {
+                switch(e.key) {
+                    case '1':
+                        showDemoPanel('live-metrics');
+                        break;
+                    case '2':
+                        showDemoPanel('failover-demo');
+                        break;
+                    case '3':
+                        showDemoPanel('roi-calculator');
+                        break;
+                    case '4':
+                        showDemoPanel('business-metrics');
+                        break;
+                }
+            }
         });
 
-        // Simple metrics simulation
-        function updateMetrics() {
-            const uptimeEl = document.getElementById('uptime-metric');
-            const responseEl = document.getElementById('response-time');
-            const savingsEl = document.getElementById('cost-savings');
-            const requestsEl = document.getElementById('requests-processed');
-
-            if (uptimeEl) {
-                const uptime = (99.95 + Math.random() * 0.04).toFixed(2);
-                uptimeEl.textContent = uptime + '%';
-            }
-
-            if (responseEl) {
-                const responseTime = Math.floor(120 + Math.random() * 20);
-                responseEl.textContent = responseTime + 'ms';
-            }
-
-            if (savingsEl) {
-                const savings = Math.floor(30 + Math.random() * 10);
-                savingsEl.textContent = savings + '%';
-            }
-
-            if (requestsEl) {
-                const requests = (2.4 + Math.random() * 0.2).toFixed(1);
-                requestsEl.textContent = requests + 'M';
-            }
+        // Performance monitoring
+        if ('performance' in window) {
+            window.addEventListener('load', function() {
+                setTimeout(function() {
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    console.log(`📊 Page load time: ${Math.round(perfData.loadEventEnd - perfData.fetchStart)}ms`);
+                }, 0);
+            });
         }
     </script>
 </body>

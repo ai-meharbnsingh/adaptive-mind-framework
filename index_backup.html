@@ -22,7 +22,9 @@
             --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
+
         *, *::before, *::after { box-sizing: border-box; }
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
@@ -32,11 +34,13 @@
             -webkit-font-smoothing: antialiased;
             font-feature-settings: 'cv11', 'ss01';
         }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 1.5rem;
         }
+
         /* Header */
         .header {
             border-bottom: 1px solid var(--border-light);
@@ -46,12 +50,14 @@
             top: 0;
             z-index: 100;
         }
+
         .nav {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 1rem 0;
         }
+
         .logo {
             display: flex;
             align-items: center;
@@ -59,6 +65,7 @@
             font-size: 1.25rem;
             color: var(--primary);
         }
+
         .logo-icon {
             width: 32px;
             height: 32px;
@@ -71,20 +78,24 @@
             color: white;
             font-weight: 700;
         }
+
         .nav-menu {
             display: flex;
             gap: 2rem;
             align-items: center;
         }
+
         .nav-link {
             text-decoration: none;
             color: var(--text-secondary);
             font-weight: 500;
             transition: color 0.2s;
         }
+
         .nav-link:hover {
             color: var(--primary);
         }
+
         .cta-button {
             background: var(--primary);
             color: white;
@@ -96,6 +107,7 @@
             text-decoration: none;
             transition: background-color 0.2s;
         }
+
         .cta-button:hover {
             background: var(--primary-dark);
         }
@@ -105,11 +117,13 @@
             padding: 4rem 0 6rem;
             background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
         }
+
         .hero-content {
             text-align: center;
             max-width: 800px;
             margin: 0 auto;
         }
+
         .hero-badge {
             display: inline-block;
             background: var(--bg-accent);
@@ -121,6 +135,7 @@
             margin-bottom: 1.5rem;
             border: 1px solid var(--border);
         }
+
         .hero-title {
             font-size: 3.5rem;
             font-weight: 800;
@@ -131,6 +146,7 @@
             background-clip: text;
             line-height: 1.1;
         }
+
         .hero-subtitle {
             font-size: 1.25rem;
             color: var(--text-secondary);
@@ -139,12 +155,14 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         .hero-buttons {
             display: flex;
             gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
         }
+
         .button-primary {
             background: var(--primary);
             color: white;
@@ -158,11 +176,13 @@
             text-decoration: none;
             display: inline-block;
         }
+
         .button-primary:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
+
         .button-secondary {
             background: white;
             color: var(--text-primary);
@@ -176,15 +196,17 @@
             text-decoration: none;
             display: inline-block;
         }
+
         .button-secondary:hover {
             background: var(--bg-secondary);
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
-        /* Video Container - Add this to your existing CSS */
+
+        /* Video Container */
         .hero-video-container {
             margin-top: 3rem;
-            max-width: 900px; /* Increased max-width for the wider terminal */
+            max-width: 900px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -214,39 +236,150 @@
         .features {
             padding: 6rem 0;
         }
+
         .section-header {
             text-align: center;
             max-width: 600px;
             margin: 0 auto 4rem;
         }
+
         .section-title {
             font-size: 2.5rem;
             font-weight: 700;
             margin: 0 0 1rem;
         }
+
         .section-subtitle {
             font-size: 1.125rem;
             color: var(--text-secondary);
             margin: 0;
         }
+
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 2rem;
             margin: 3rem 0;
+            position: relative;
         }
+
         .feature-card {
             background: white;
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 2rem;
             transition: all 0.3s;
+            position: relative;
+            z-index: 1;
         }
+
         .feature-card:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-lg);
             border-color: var(--primary);
+            z-index: 10000;
         }
+
+        /* Feature Tooltip */
+        .feature-tooltip {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            color: var(--text-primary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            width: 350px;
+            z-index: 10001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            pointer-events: none;
+        }
+
+        .feature-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
+            z-index: 10002;
+        }
+
+        .feature-tooltip::after {
+            content: '';
+            position: absolute;
+            top: -9px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 9px solid transparent;
+            border-right: 9px solid transparent;
+            border-bottom: 9px solid var(--border);
+            z-index: 10001;
+        }
+
+        .feature-card:hover .feature-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
+        .features-grid {
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card {
+            position: relative;
+            overflow: visible;
+            z-index: 2;
+        }
+
+        .tooltip-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tooltip-description {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .tooltip-benefits {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .tooltip-benefits strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .tooltip-benefits ul {
+            margin: 0.5rem 0 0 0;
+            padding-left: 1rem;
+        }
+
+        .tooltip-benefits li {
+            margin: 0.25rem 0;
+            color: var(--text-secondary);
+        }
+
         .feature-icon {
             width: 48px;
             height: 48px;
@@ -259,11 +392,13 @@
             font-size: 1.5rem;
             margin-bottom: 1.5rem;
         }
+
         .feature-title {
             font-size: 1.25rem;
             font-weight: 600;
             margin: 0 0 0.75rem;
         }
+
         .feature-description {
             color: var(--text-secondary);
             margin: 0;
@@ -274,6 +409,7 @@
             padding: 6rem 0;
             background: var(--bg-secondary);
         }
+
         .demo-container {
             background: white;
             border-radius: 20px;
@@ -281,20 +417,24 @@
             overflow: hidden;
             box-shadow: var(--shadow-lg);
         }
+
         .demo-header {
             padding: 2rem;
             border-bottom: 1px solid var(--border);
             background: var(--bg-accent);
         }
+
         .demo-content {
             padding: 2rem;
         }
+
         .demo-tabs {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--border);
         }
+
         .demo-tab {
             padding: 1rem 1.5rem;
             border: none;
@@ -305,14 +445,17 @@
             border-bottom: 2px solid transparent;
             transition: all 0.2s;
         }
+
         .demo-tab.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
         }
+
         .demo-panel {
             display: none;
             min-height: 400px;
         }
+
         .demo-panel.active {
             display: block;
         }
@@ -324,18 +467,21 @@
             gap: 1.5rem;
             margin: 2rem 0;
         }
+
         .metric-card {
             background: var(--bg-secondary);
             border-radius: 12px;
             padding: 1.5rem;
             text-align: center;
         }
+
         .metric-value {
             font-size: 2rem;
             font-weight: 700;
             color: var(--primary);
             margin: 0;
         }
+
         .metric-label {
             color: var(--text-secondary);
             font-size: 0.875rem;
@@ -350,15 +496,18 @@
             gap: 1.5rem;
             margin: 2rem 0;
         }
+
         .form-group {
             display: flex;
             flex-direction: column;
         }
+
         .form-label {
             font-weight: 600;
             margin-bottom: 0.5rem;
             color: var(--text-primary);
         }
+
         .form-input {
             padding: 0.75rem;
             border: 1px solid var(--border);
@@ -366,11 +515,13 @@
             font-size: 1rem;
             transition: border-color 0.2s;
         }
+
         .form-input:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
+
         .form-select {
             padding: 0.75rem;
             border: 1px solid var(--border);
@@ -380,22 +531,35 @@
             cursor: pointer;
         }
 
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            min-height: 300px;
+        }
+
         /* Footer */
         .footer {
             background: var(--text-primary);
             color: white;
             padding: 3rem 0 1rem;
         }
+
         .footer-content {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             margin-bottom: 2rem;
         }
+
         .footer-section h3 {
             margin: 0 0 1rem;
             font-weight: 600;
         }
+
         .footer-link {
             color: #d1d5db;
             text-decoration: none;
@@ -403,9 +567,11 @@
             margin: 0.5rem 0;
             transition: color 0.2s;
         }
+
         .footer-link:hover {
             color: white;
         }
+
         .footer-bottom {
             border-top: 1px solid #374151;
             padding-top: 1rem;
@@ -443,6 +609,7 @@
             border-top-color: var(--primary);
             animation: spin 1s ease-in-out infinite;
         }
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -454,21 +621,12 @@
             border-radius: 50%;
             margin-right: 0.5rem;
         }
+
         .status-online { background: #10b981; }
         .status-warning { background: #f59e0b; }
         .status-error { background: #ef4444; }
 
-        /* Chart Containers */
-        .chart-container {
-            background: white;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 1.5rem;
-            margin: 1rem 0;
-            min-height: 300px;
-        }
-
-        /* Notification Toast */
+        /* Toast Notification */
         .toast {
             position: fixed;
             top: 20px;
@@ -482,14 +640,13 @@
             transform: translateX(400px);
             transition: transform 0.3s ease;
         }
+
         .toast.show {
             transform: translateX(0);
         }
+
         .toast.success {
             border-left: 4px solid #10b981;
-        }
-        .toast.error {
-            border-left: 4px solid #ef4444;
         }
     </style>
 </head>
@@ -504,7 +661,6 @@
             <div class="nav-menu">
                 <a href="#features" class="nav-link">Features</a>
                 <a href="#demo" class="nav-link">Demo</a>
-                <a href="#pricing" class="nav-link">ROI Calculator</a>
                 <a href="#contact" class="nav-link">Contact</a>
                 <a href="#demo" class="cta-button">Try Demo</a>
             </div>
@@ -512,7 +668,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero" id="hero">
         <div class="container">
             <div class="hero-content">
                 <div class="hero-badge">
@@ -525,30 +681,15 @@
                     Enterprise-grade AI resilience with intelligent failover, bias detection, and cost optimization.
                     Achieve 99.9% uptime with adaptive provider management and real-time performance optimization.
                 </p>
-                <div class="hero-buttons">
-                    <a href="#demo" class="button-primary" onclick="scrollToDemo()">
-                        ▶️ Watch Demo (6 min)
-                    </a>
-                    <a href="#roi-calculator" class="button-secondary" onclick="showROICalculator()">
-                        Try Interactive Demo
-                    </a>
-                </div>
                 <div class="hero-video-container">
                     <div class="video-placeholder">
-                        <!-- ======================================================= -->
-                        <!-- START OF CHANGE: Replaced YouTube video with live demo  -->
-                        <!-- ======================================================= -->
                         <iframe class="video-iframe"
                                 src="video.html"
                                 title="Adaptive Mind Live Terminal Demo"
                                 allowfullscreen>
                         </iframe>
-                        <!-- ======================================================= -->
-                        <!-- END OF CHANGE                                           -->
-                        <!-- ======================================================= -->
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
@@ -569,6 +710,31 @@
                     <p class="feature-description">
                         Automatic provider switching with sub-second detection and seamless continuity for mission-critical applications.
                     </p>
+                    <div class="tooltip-backdrop"></div>
+                    <div class="feature-tooltip">
+                        <div class="tooltip-title">🛡️ Intelligent Failover - Never Go Down</div>
+                        <div class="tooltip-close" onclick="closeTooltip(event)">×</div>
+                        <div class="tooltip-left">
+                            <div class="tooltip-description">
+                                Think of this as having multiple backup power generators for your building. If your main AI provider (like OpenAI) goes down or gets slow, our system instantly switches to a backup provider (like Claude or Gemini) in less than 1 second. Your customers never experience interruptions, and your business operations continue seamlessly.
+                                <br><br>
+                                The system continuously monitors response times, error rates, and availability across all providers. When issues are detected, it triggers an automatic failover that preserves context and maintains session state, ensuring zero data loss and seamless user experience.
+                            </div>
+                        </div>
+                        <div class="tooltip-right">
+                            <div class="tooltip-benefits">
+                                <strong>🎯 Business Impact</strong>
+                                <ul>
+                                    <li>Zero downtime = No lost revenue or customer frustration</li>
+                                    <li>Customers never notice interruptions or service degradation</li>
+                                    <li>Maintains business operations 24/7 without manual intervention</li>
+                                    <li>Reduces IT emergency calls and stress on technical teams</li>
+                                    <li>Protects your reputation and maintains customer trust</li>
+                                    <li>Enables you to offer enterprise-grade SLA guarantees</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
@@ -576,6 +742,31 @@
                     <p class="feature-description">
                         Dynamic cost and performance optimization with live metrics and adaptive resource allocation.
                     </p>
+                    <div class="tooltip-backdrop"></div>
+                    <div class="feature-tooltip">
+                        <div class="tooltip-title">⚡ Real-Time Optimization - Smart Cost Control</div>
+                        <div class="tooltip-close" onclick="closeTooltip(event)">×</div>
+                        <div class="tooltip-left">
+                            <div class="tooltip-description">
+                                Like having a smart financial advisor that constantly monitors your AI spending and automatically chooses the cheapest, fastest option for each task. It's like switching between different suppliers based on real-time prices and quality. The system learns from usage patterns and optimizes automatically.
+                                <br><br>
+                                Our intelligent routing algorithm analyzes cost per token, response time, and quality metrics to make optimal decisions in real-time. This ensures you always get the best value while maintaining performance standards.
+                            </div>
+                        </div>
+                        <div class="tooltip-right">
+                            <div class="tooltip-benefits">
+                                <strong>💰 Business Impact</strong>
+                                <ul>
+                                    <li>Reduces AI costs by 34% automatically without manual oversight</li>
+                                    <li>Faster response times = better user experience and satisfaction</li>
+                                    <li>No manual monitoring required - runs itself 24/7</li>
+                                    <li>Scales automatically with demand during peak business hours</li>
+                                    <li>Detailed cost analytics help with budget planning and forecasting</li>
+                                    <li>Maximizes performance while minimizing operational expenses</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🎯</div>
@@ -583,6 +774,31 @@
                     <p class="feature-description">
                         Advanced bias monitoring with AI-powered prompt rewriting and comprehensive audit trails.
                     </p>
+                    <div class="tooltip-backdrop"></div>
+                    <div class="feature-tooltip">
+                        <div class="tooltip-title">🎯 Performance Bias Detection - System Optimization</div>
+                        <div class="tooltip-close" onclick="closeTooltip(event)">×</div>
+                        <div class="tooltip-left">
+                            <div class="tooltip-description">
+                                Our system continuously monitors AI provider performance for bias patterns - detecting when certain providers consistently perform worse, cost more, or respond slower than others. This ensures optimal provider selection and prevents performance degradation from affecting your operations.
+                                <br><br>
+                                The BiasLedger tracks performance anomalies, cost inefficiencies, and latency patterns across providers. When issues are detected, the system automatically routes requests to better-performing alternatives.
+                            </div>
+                        </div>
+                        <div class="tooltip-right">
+                            <div class="tooltip-benefits">
+                                <strong>⚖️ Business Impact</strong>
+                                <ul>
+                                    <li>Prevents performance degradation from biased provider selection</li>
+                                    <li>Optimizes costs by detecting provider pricing inefficiencies</li>
+                                    <li>Maintains consistent response times across all providers</li>
+                                    <li>Automatic failover when provider bias patterns are detected</li>
+                                    <li>Real-time monitoring dashboard for system performance</li>
+                                    <li>Comprehensive audit trails for performance optimization</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📊</div>
@@ -590,6 +806,31 @@
                     <p class="feature-description">
                         Comprehensive dashboards with real-time metrics, cost analysis, and performance insights.
                     </p>
+                    <div class="tooltip-backdrop"></div>
+                    <div class="feature-tooltip">
+                        <div class="tooltip-title">📊 Enterprise Analytics - Data-Driven Decisions</div>
+                        <div class="tooltip-close" onclick="closeTooltip(event)">×</div>
+                        <div class="tooltip-left">
+                            <div class="tooltip-description">
+                                Like having a business intelligence dashboard specifically for your AI operations. See exactly how much you're spending, which features are most popular, and where you can optimize - all in real-time with executive-level reporting that CFOs and CEOs can understand and act upon.
+                                <br><br>
+                                Our analytics platform provides deep insights into usage patterns, cost trends, performance metrics, and ROI calculations. Custom reports can be generated for different stakeholders, from technical teams to executive leadership.
+                            </div>
+                        </div>
+                        <div class="tooltip-right">
+                            <div class="tooltip-benefits">
+                                <strong>📈 Business Impact</strong>
+                                <ul>
+                                    <li>Clear ROI visibility for executives and board presentations</li>
+                                    <li>Identify cost-saving opportunities and optimization potential</li>
+                                    <li>Track business performance metrics and user engagement</li>
+                                    <li>Data-driven insights for strategic planning and budgeting</li>
+                                    <li>Executive dashboards that communicate value to leadership</li>
+                                    <li>Predictive analytics for capacity planning and growth forecasting</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔒</div>
@@ -597,14 +838,64 @@
                     <p class="feature-description">
                         Enterprise security with API key management, audit logging, and compliance-ready documentation.
                     </p>
+                    <div class="tooltip-backdrop"></div>
+                    <div class="feature-tooltip">
+                        <div class="tooltip-title">🔒 Security & Compliance - Enterprise-Grade Protection</div>
+                        <div class="tooltip-close" onclick="closeTooltip(event)">×</div>
+                        <div class="tooltip-left">
+                            <div class="tooltip-description">
+                                Like having a digital vault with bank-level security for all your AI operations. Every interaction is logged, encrypted, and auditable. Built to meet SOC2, GDPR, and other regulatory requirements that enterprise customers demand. Designed for the most security-conscious organizations.
+                                <br><br>
+                                Our security framework includes end-to-end encryption, role-based access controls, comprehensive audit logging, and compliance-ready architecture. The infrastructure is designed for security assessments and ongoing protection.
+                            </div>
+                        </div>
+                        <div class="tooltip-right">
+                            <div class="tooltip-benefits">
+                                <strong>🛡️ Business Impact</strong>
+                                <ul>
+                                    <li>Built to pass enterprise security audits and compliance requirements</li>
+                                    <li>Reduces cyber security risks and potential data breaches</li>
+                                    <li>Enables Fortune 500 sales and enterprise customer acquisition</li>
+                                    <li>Protects sensitive customer and business data</li>
+                                    <li>Comprehensive audit trails for regulatory compliance</li>
+                                    <li>Enterprise-grade encryption and access controls</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🚀</div>
                     <h3 class="feature-title">Carrier-Grade Performance</h3>
                     <p class="feature-description">
-                        99.9% uptime with redundant architecture, health monitoring, and automatic scaling.
+                        99.97% uptime with redundant architecture, health monitoring, and automatic scaling.
                     </p>
-                </div>
+                    <div class="tooltip-backdrop"></div>
+                    <div class="feature-tooltip">
+                        <div class="tooltip-title">🚀 Carrier-Grade Performance - Telecom-Level Reliability</div>
+                        <div class="tooltip-close" onclick="closeTooltip(event)">×</div>
+                        <div class="tooltip-left">
+                            <div class="tooltip-description">
+                                Built like telephone networks - designed to never fail. Uses the same reliability standards as phone companies and internet providers. Multiple data centers, automatic healing, and enterprise-grade infrastructure that Fortune 500 companies depend on for mission-critical operations.
+                                <br><br>
+                                Our infrastructure spans multiple availability zones with automated failover, load balancing, and self-healing capabilities. Continuous monitoring and proactive maintenance ensure maximum uptime and performance.
+                            </div>
+                        </div>
+                        <div class="tooltip-right">
+                            <div class="tooltip-benefits">
+                                <strong>🏢 Business Impact</strong>
+                                <ul>
+                                    <li>99.97% uptime SLA guarantee with financial penalties for downtime</li>
+                                    <li>Handles enterprise-scale traffic without performance degradation</li>
+                                    <li>No performance slowdowns under high load or peak usage</li>
+                                    <li>Reduces infrastructure costs through efficient resource utilization</li>
+                                    <li>Automatic scaling handles business growth seamlessly</li>
+                                    <li>Enterprise-grade monitoring and proactive issue resolution</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>>
             </div>
         </div>
     </section>
@@ -653,8 +944,9 @@
                             </div>
                         </div>
                         <div class="chart-container" id="performance-chart">
+                            <h4>System Performance Overview</h4>
                             <p style="text-align: center; color: var(--text-secondary); margin-top: 100px;">
-                                📊 Real-time performance charts loading...
+                                📊 Real-time performance monitoring active
                             </p>
                         </div>
                     </div>
@@ -663,7 +955,35 @@
                     <div id="failover-demo" class="demo-panel">
                         <h4>Intelligent Failover Demonstration</h4>
                         <div id="failover-demo-container">
-                            <p>Loading failover demonstration interface...</p>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0;">
+                                <div class="metric-card">
+                                    <h4>Provider Status</h4>
+                                    <div style="margin: 1rem 0;">
+                                        <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                                            <span class="status-indicator status-online"></span>
+                                            <span>OpenAI GPT-4 - Primary</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                                            <span class="status-indicator status-online"></span>
+                                            <span>Claude 3.5 Sonnet - Backup</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; margin: 0.5rem 0;">
+                                            <span class="status-indicator status-warning"></span>
+                                            <span>Gemini Pro - Monitoring</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="metric-card">
+                                    <h4>Failover Metrics</h4>
+                                    <div class="metric-value" style="font-size: 1.5rem; margin: 1rem 0;">847ms</div>
+                                    <div class="metric-label">Average Failover Time</div>
+                                    <div class="metric-value" style="font-size: 1.5rem; margin: 1rem 0;">99.97%</div>
+                                    <div class="metric-label">Success Rate</div>
+                                </div>
+                            </div>
+                            <button class="button-primary" onclick="simulateFailover()" style="margin-top: 1rem;">
+                                🔄 Simulate Provider Failover
+                            </button>
                         </div>
                     </div>
 
@@ -702,8 +1022,76 @@
                     <!-- Business Metrics Panel -->
                     <div id="business-metrics" class="demo-panel">
                         <h4>Business Impact Analysis</h4>
-                        <div id="business-metrics-container">
-                            <p>Loading business impact visualization...</p>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-value">34%</div>
+                                <div class="metric-label">Cost Reduction</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">85%</div>
+                                <div class="metric-label">Downtime Reduction</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">2.4x</div>
+                                <div class="metric-label">Performance Improvement</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">99.97%</div>
+                                <div class="metric-label">Reliability Score</div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Monthly Performance Trends</h4>
+                            <div style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 0.5rem; margin: 2rem 0;">
+                                <div style="text-align: center;">
+                                    <div style="height: 80px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Jan</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 95px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Feb</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 110px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Mar</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 130px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Apr</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 145px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">May</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 120px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Jun</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 135px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Jul</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 150px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Aug</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 125px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Sep</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 140px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Oct</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 155px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Nov</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="height: 160px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">Dec</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -724,22 +1112,14 @@
                 <div class="footer-section">
                     <h3>Product</h3>
                     <a href="#features" class="footer-link">Features</a>
-                    <a href="#demo" class="footer-link">Demo</a>
-                    <a href="#pricing" class="footer-link">Pricing</a>
-                    <a href="#documentation" class="footer-link">Documentation</a>
                 </div>
                 <div class="footer-section">
                     <h3>Company</h3>
-                    <a href="#about" class="footer-link">About</a>
-                    <a href="#contact" class="footer-link">Contact</a>
-                    <a href="#security" class="footer-link">Security</a>
-                    <a href="#compliance" class="footer-link">Compliance</a>
+                    <a href="#hero" class="footer-link">About</a>
                 </div>
                 <div class="footer-section">
                     <h3>Contact</h3>
-                    <a href="mailto:info@adaptive-mind.com" class="footer-link">info@adaptive-mind.com</a>
-                    <a href="#enterprise" class="footer-link">Enterprise Sales</a>
-                    <a href="#support" class="footer-link">Support</a>
+                    <a href="www.adaptive-mind.com" class="footer-link">info@adaptive-mind.com</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -750,13 +1130,6 @@
 
     <!-- Toast Notification Container -->
     <div id="toast-container"></div>
-
-    <!-- JavaScript Integration -->
-    <script src="/static/js/dual_mode_interface.js"></script>
-    <script src="/static/js/roi_calculator.js"></script>
-    <script src="/static/js/business_metrics.js"></script>
-    <script src="/static/js/carrier_grade_value_prop.js"></script>
-    <script src="/static/js/demo_mode_comparison.js"></script>
 
     <script>
         // Global application state
@@ -781,24 +1154,6 @@
         // Main application initialization
         function initializeApp() {
             console.log('🚀 Initializing Adaptive Mind Enterprise Demo');
-
-            // Initialize all components
-            if (typeof initializeDualModeInterface === 'function') {
-                initializeDualModeInterface();
-            }
-
-            if (typeof initializeROICalculator === 'function') {
-                initializeROICalculator();
-            }
-
-            if (typeof initializeBusinessMetrics === 'function') {
-                initializeBusinessMetrics();
-            }
-
-            if (typeof initializeCarrierGradeValueProp === 'function') {
-                initializeCarrierGradeValueProp();
-            }
-
             window.adaptiveMindApp.isInitialized = true;
             showToast('Enterprise demo platform initialized successfully', 'success');
         }
@@ -816,22 +1171,6 @@
                 panel.classList.remove('active');
             });
             document.getElementById(panelId).classList.add('active');
-
-            // Load panel-specific content
-            switch(panelId) {
-                case 'failover-demo':
-                    loadFailoverDemo();
-                    break;
-                case 'business-metrics':
-                    loadBusinessMetrics();
-                    break;
-                case 'roi-calculator':
-                    calculateROI();
-                    break;
-                case 'live-metrics':
-                    updateLiveMetrics();
-                    break;
-            }
 
             window.adaptiveMindApp.currentDemo = panelId;
         }
@@ -851,19 +1190,23 @@
             metrics.requestsProcessed += Math.floor(Math.random() * 1000);
 
             // Update display
-            document.getElementById('uptime-metric').textContent = metrics.uptime + '%';
-            document.getElementById('response-time').textContent = metrics.responseTime + 'ms';
-            document.getElementById('cost-savings').textContent = metrics.costSavings + '%';
-            document.getElementById('requests-processed').textContent =
-                (metrics.requestsProcessed / 1000000).toFixed(1) + 'M';
+            const uptimeEl = document.getElementById('uptime-metric');
+            const responseEl = document.getElementById('response-time');
+            const savingsEl = document.getElementById('cost-savings');
+            const requestsEl = document.getElementById('requests-processed');
+
+            if (uptimeEl) uptimeEl.textContent = metrics.uptime + '%';
+            if (responseEl) responseEl.textContent = metrics.responseTime + 'ms';
+            if (savingsEl) savingsEl.textContent = metrics.costSavings + '%';
+            if (requestsEl) requestsEl.textContent = (metrics.requestsProcessed / 1000000).toFixed(1) + 'M';
         }
 
         // ROI Calculator
         function calculateROI() {
-            const monthlySpend = parseFloat(document.getElementById('monthly-spend').value) || 10000;
-            const industrySector = document.getElementById('industry-sector').value;
-            const teamSize = parseInt(document.getElementById('team-size').value) || 25;
-            const downtimeHours = parseFloat(document.getElementById('downtime-hours').value) || 8;
+            const monthlySpend = parseFloat(document.getElementById('monthly-spend')?.value) || 10000;
+            const industrySector = document.getElementById('industry-sector')?.value || 'enterprise';
+            const teamSize = parseInt(document.getElementById('team-size')?.value) || 25;
+            const downtimeHours = parseFloat(document.getElementById('downtime-hours')?.value) || 8;
 
             // Industry-specific multipliers
             const industryMultipliers = {
@@ -889,72 +1232,37 @@
             const paybackMonths = (implementationCost / totalMonthlySavings).toFixed(1);
 
             // Update ROI display
-            document.getElementById('roi-results').innerHTML = `
-                <div class="metric-card">
-                    <div class="metric-value">${Math.round(totalMonthlySavings).toLocaleString()}</div>
-                    <div class="metric-label">Monthly Savings</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value">${Math.round(annualSavings).toLocaleString()}</div>
-                    <div class="metric-label">Annual Savings</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value">${roi}%</div>
-                    <div class="metric-label">ROI Year 1</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value">${paybackMonths}</div>
-                    <div class="metric-label">Payback (Months)</div>
-                </div>
-            `;
-        }
-
-        // Load failover demonstration
-        function loadFailoverDemo() {
-            const container = document.getElementById('failover-demo-container');
-            container.innerHTML = `
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0;">
+            const resultsEl = document.getElementById('roi-results');
+            if (resultsEl) {
+                resultsEl.innerHTML = `
                     <div class="metric-card">
-                        <h4>Provider Status</h4>
-                        <div style="margin: 1rem 0;">
-                            <div style="display: flex; align-items: center; margin: 0.5rem 0;">
-                                <span class="status-indicator status-online"></span>
-                                <span>OpenAI GPT-4 - Primary</span>
-                            </div>
-                            <div style="display: flex; align-items: center; margin: 0.5rem 0;">
-                                <span class="status-indicator status-online"></span>
-                                <span>Claude 3.5 Sonnet - Backup</span>
-                            </div>
-                            <div style="display: flex; align-items: center; margin: 0.5rem 0;">
-                                <span class="status-indicator status-warning"></span>
-                                <span>Gemini Pro - Monitoring</span>
-                            </div>
-                        </div>
+                        <div class="metric-value">${Math.round(totalMonthlySavings).toLocaleString()}</div>
+                        <div class="metric-label">Monthly Savings</div>
                     </div>
                     <div class="metric-card">
-                        <h4>Failover Metrics</h4>
-                        <div class="metric-value" style="font-size: 1.5rem; margin: 1rem 0;">847ms</div>
-                        <div class="metric-label">Average Failover Time</div>
-                        <div class="metric-value" style="font-size: 1.5rem; margin: 1rem 0;">99.97%</div>
-                        <div class="metric-label">Success Rate</div>
+                        <div class="metric-value">${Math.round(annualSavings).toLocaleString()}</div>
+                        <div class="metric-label">Annual Savings</div>
                     </div>
-                </div>
-                <button class="button-primary" onclick="simulateFailover()" style="margin-top: 1rem;">
-                    🔄 Simulate Provider Failover
-                </button>
-                <div id="failover-log" style="background: #f8fafc; border-radius: 8px; padding: 1rem; margin-top: 1rem; font-family: monospace; font-size: 0.875rem; max-height: 200px; overflow-y: auto;">
-                    <div>2025-08-20 15:32:15 - System initialized, primary provider: OpenAI</div>
-                    <div>2025-08-20 15:32:16 - Health check passed for all providers</div>
-                    <div>2025-08-20 15:32:17 - Ready for failover demonstration</div>
-                </div>
-            `;
+                    <div class="metric-card">
+                        <div class="metric-value">${roi}%</div>
+                        <div class="metric-label">ROI Year 1</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${paybackMonths}</div>
+                        <div class="metric-label">Payback (Months)</div>
+                    </div>
+                `;
+            }
         }
 
         // Simulate failover process
         function simulateFailover() {
-            const log = document.getElementById('failover-log');
-            const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            const container = document.getElementById('failover-demo-container');
+            const logDiv = document.createElement('div');
+            logDiv.id = 'failover-log';
+            logDiv.style.cssText = 'background: #f8fafc; border-radius: 8px; padding: 1rem; margin-top: 1rem; font-family: monospace; font-size: 0.875rem; max-height: 200px; overflow-y: auto;';
 
+            const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
             const steps = [
                 'Detecting OpenAI latency spike (>2000ms)',
                 'Circuit breaker triggered for OpenAI',
@@ -964,57 +1272,19 @@
                 'System operating normally on backup provider'
             ];
 
+            container.appendChild(logDiv);
+
             steps.forEach((step, index) => {
                 setTimeout(() => {
                     const newEntry = document.createElement('div');
                     newEntry.textContent = `${timestamp} - ${step}`;
                     newEntry.style.color = index === steps.length - 1 ? '#10b981' : '#374151';
-                    log.appendChild(newEntry);
-                    log.scrollTop = log.scrollHeight;
+                    logDiv.appendChild(newEntry);
+                    logDiv.scrollTop = logDiv.scrollHeight;
                 }, index * 800);
             });
 
             showToast('Failover simulation completed successfully', 'success');
-        }
-
-        // Load business metrics
-        function loadBusinessMetrics() {
-            const container = document.getElementById('business-metrics-container');
-            container.innerHTML = `
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-value">34%</div>
-                        <div class="metric-label">Cost Reduction</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">85%</div>
-                        <div class="metric-label">Downtime Reduction</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">2.4x</div>
-                        <div class="metric-label">Performance Improvement</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">99.97%</div>
-                        <div class="metric-label">Reliability Score</div>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <h4>Monthly Performance Trends</h4>
-                    <div style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 0.5rem; margin: 2rem 0;">
-                        ${Array.from({length: 12}, (_, i) => {
-                            const height = 50 + Math.random() * 100;
-                            const month = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][i];
-                            return `
-                                <div style="text-align: center;">
-                                    <div style="height: ${height}px; background: linear-gradient(to top, var(--primary), var(--primary-dark)); border-radius: 4px; margin-bottom: 0.5rem;"></div>
-                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">${month}</div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
         }
 
         // Utility functions
@@ -1024,7 +1294,17 @@
 
         function showROICalculator() {
             document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
-            setTimeout(() => showDemoPanel('roi-calculator'), 500);
+            setTimeout(() => {
+                // Find and click the ROI Calculator tab
+                const roiTab = Array.from(document.querySelectorAll('.demo-tab')).find(tab => tab.textContent.includes('ROI Calculator'));
+                if (roiTab) {
+                    // Simulate click event
+                    const clickEvent = new Event('click');
+                    Object.defineProperty(clickEvent, 'target', { value: roiTab });
+                    roiTab.dispatchEvent(clickEvent);
+                    showDemoPanel('roi-calculator');
+                }
+            }, 500);
         }
 
         function showToast(message, type = 'success') {
@@ -1046,61 +1326,98 @@
             }, 3000);
         }
 
-        // Real-time WebSocket connection for live data
-        function connectWebSocket() {
-            if (typeof WebSocket !== 'undefined') {
-                try {
-                    const ws = new WebSocket(`ws://${location.host}/ws`);
+        // Close tooltip function - Fixed to allow re-hovering
+        function closeTooltip(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            const featureCard = event.target.closest('.feature-card');
+            if (featureCard) {
+                const tooltip = featureCard.querySelector('.feature-tooltip');
+                const backdrop = featureCard.querySelector('.tooltip-backdrop');
+                if (tooltip) {
+                    tooltip.style.opacity = '0';
+                    tooltip.style.visibility = 'hidden';
+                    tooltip.style.pointerEvents = 'none';
+                }
+                if (backdrop) {
+                    backdrop.style.opacity = '0';
+                    backdrop.style.visibility = 'hidden';
+                    backdrop.style.pointerEvents = 'none';
+                }
 
-                    ws.onopen = function() {
-                        console.log('🔌 WebSocket connected for real-time updates');
-                        showToast('Real-time connection established', 'success');
-                    };
+                // Re-enable hover after a short delay
+                setTimeout(() => {
+                    if (tooltip) {
+                        tooltip.style.removeProperty('opacity');
+                        tooltip.style.removeProperty('visibility');
+                        tooltip.style.removeProperty('pointer-events');
+                    }
+                    if (backdrop) {
+                        backdrop.style.removeProperty('opacity');
+                        backdrop.style.removeProperty('visibility');
+                        backdrop.style.removeProperty('pointer-events');
+                    }
+                }, 300);
+            }
+        }
 
-                    ws.onmessage = function(event) {
-                        const data = JSON.parse(event.data);
-                        if (data.type === 'metrics_update') {
-                            updateMetricsFromWebSocket(data.metrics);
+        // Close tooltip when clicking on backdrop
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('tooltip-backdrop')) {
+                closeTooltip(event);
+            }
+        });
+
+        // Close tooltip when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.feature-card') && !event.target.closest('.feature-tooltip')) {
+                document.querySelectorAll('.feature-tooltip').forEach(tooltip => {
+                    tooltip.style.opacity = '0';
+                    tooltip.style.visibility = 'hidden';
+                    tooltip.style.pointerEvents = 'none';
+
+                    // Re-enable hover after closing
+                    setTimeout(() => {
+                        tooltip.style.removeProperty('opacity');
+                        tooltip.style.removeProperty('visibility');
+                        tooltip.style.removeProperty('pointer-events');
+                    }, 300);
+                });
+
+                document.querySelectorAll('.tooltip-backdrop').forEach(backdrop => {
+                    backdrop.style.opacity = '0';
+                    backdrop.style.visibility = 'hidden';
+                    backdrop.style.pointerEvents = 'none';
+
+                    // Re-enable hover after closing
+                    setTimeout(() => {
+                        backdrop.style.removeProperty('opacity');
+                        backdrop.style.removeProperty('visibility');
+                        backdrop.style.removeProperty('pointer-events');
+                    }, 300);
+                });
+            }
+        });
+
+        // Ensure tooltips work on mobile touch devices
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('touchstart', function(e) {
+                // Close other tooltips first
+                document.querySelectorAll('.feature-card').forEach(otherCard => {
+                    if (otherCard !== card) {
+                        const otherTooltip = otherCard.querySelector('.feature-tooltip');
+                        const otherBackdrop = otherCard.querySelector('.tooltip-backdrop');
+                        if (otherTooltip) {
+                            otherTooltip.style.opacity = '0';
+                            otherTooltip.style.visibility = 'hidden';
                         }
-                    };
-
-                    ws.onerror = function() {
-                        console.log('📡 WebSocket not available, using simulated data');
-                    };
-                } catch (e) {
-                    console.log('📡 WebSocket not available, using simulated data');
-                }
-            }
-        }
-
-        function updateMetricsFromWebSocket(metrics) {
-            if (metrics) {
-                Object.assign(window.adaptiveMindApp.metrics, metrics);
-                updateLiveMetrics();
-            }
-        }
-
-        // Initialize WebSocket connection after page load
-        setTimeout(connectWebSocket, 2000);
-
-        // Keyboard shortcuts for demo navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.altKey) {
-                switch(e.key) {
-                    case '1':
-                        showDemoPanel('live-metrics');
-                        break;
-                    case '2':
-                        showDemoPanel('failover-demo');
-                        break;
-                    case '3':
-                        showDemoPanel('roi-calculator');
-                        break;
-                    case '4':
-                        showDemoPanel('business-metrics');
-                        break;
-                }
-            }
+                        if (otherBackdrop) {
+                            otherBackdrop.style.opacity = '0';
+                            otherBackdrop.style.visibility = 'hidden';
+                        }
+                    }
+                });
+            });
         });
 
         // Performance monitoring

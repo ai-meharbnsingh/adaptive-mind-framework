@@ -5,7 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cdd343bc-940f-44ec-89fb-3fda6e15fa89" name="Changes" comment="">
+<<<<<<< Updated upstream
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index_backup.html" beforeDir="false" afterPath="$PROJECT_DIR$/index_backup.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project_structure.txt" beforeDir="false" afterPath="$PROJECT_DIR$/project_structure.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/video.html" beforeDir="false" afterPath="$PROJECT_DIR$/video.html" afterDir="false" />
+>>>>>>> Stashed changes
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

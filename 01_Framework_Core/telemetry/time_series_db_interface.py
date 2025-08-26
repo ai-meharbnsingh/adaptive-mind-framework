@@ -11,9 +11,7 @@ from typing import Any, Dict, Iterator, List
 
 CURRENT_DIR = Path(__file__).parent
 PROJECT_ROOT = CURRENT_DIR.parent.parent.parent  # Points to project root
-FRAMEWORK_CORE_PATH = (
-    PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
-)
+FRAMEWORK_CORE_PATH = PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
 DATABASE_LAYER_PATH = PROJECT_ROOT / "05_Database_Layer"
 
 
@@ -138,9 +136,7 @@ async def main():
             print(f"{self.name}: Connections closed.")
 
         async def record_event(self, event_schema: Dict[str, Any]):
-            print(
-                f"{self.name}: Recorded event: {event_schema.get('event_type')}"
-            )
+            print(f"{self.name}: Recorded event: {event_schema.get('event_type')}")
 
         async def query_events(
             self,
@@ -186,9 +182,7 @@ async def main():
             print(
                 f"{self.name}: Aggregating {event_type} by {aggregate_by} (mock data)."
             )
-            return [
-                {"aggregate_key": "mock_key", "count": 10, "avg_value": 5.5}
-            ]
+            return [{"aggregate_key": "mock_key", "count": 10, "avg_value": 5.5}]
 
     mock_db = MockTimeSeriesDB()
 
@@ -201,9 +195,7 @@ async def main():
         "test_event", datetime.now(), datetime.now()
     ):
         print(f"Generator yielded: {event}")
-    await mock_db.aggregate_events(
-        "test_event", datetime.now(), datetime.now(), "hour"
-    )
+    await mock_db.aggregate_events("test_event", datetime.now(), datetime.now(), "hour")
     await mock_db.close()
 
 

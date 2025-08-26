@@ -18,9 +18,7 @@ class ChatMessage(BaseModel):
         if not self.role or not self.role.strip():
             raise ValueError("Message 'role' cannot be empty.")
         if not self.content or not self.content.strip():
-            raise ValueError(
-                "Message 'content' cannot be empty or just whitespace."
-            )
+            raise ValueError("Message 'content' cannot be empty or just whitespace.")
         return self
 
 
@@ -29,9 +27,7 @@ class TokenUsage(BaseModel):
     Represents the token usage for a single completion request.
     """
 
-    input_tokens: int = Field(
-        ..., description="Number of tokens in the input prompt."
-    )
+    input_tokens: int = Field(..., description="Number of tokens in the input prompt.")
     output_tokens: int = Field(
         ..., description="Number of tokens in the generated completion."
     )

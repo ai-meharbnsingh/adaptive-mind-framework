@@ -2,9 +2,7 @@
 # Manages Azure Load Balancer for high availability - Session 10
 # Part of the Adaptive Mind Framework infrastructure setup
 
-import os
 import logging
-from azure.identity import DefaultAzureCredential
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.network.models import (
     PublicIPAddress,
@@ -14,15 +12,15 @@ from azure.mgmt.network.models import (
     HealthProbe,
     LoadBalancingRule,
     TransportProtocol,
-    ProbeProtocol
+    ProbeProtocol,
 )
 from azure.core.exceptions import HttpResponseError
 
 # Configure professional logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-m-d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-m-d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -32,7 +30,9 @@ class HighAvailabilityManager:
     Manages the deployment of Azure Load Balancer for high availability and scalability.
     """
 
-    def __init__(self, credential, subscription_id: str, resource_group_name: str, location: str):
+    def __init__(
+        self, credential, subscription_id: str, resource_group_name: str, location: str
+    ):
         """
         Initializes the HighAvailabilityManager.
 
@@ -51,7 +51,9 @@ class HighAvailabilityManager:
 
         logger.info("Initializing Network management client...")
         try:
-            self.network_client = NetworkManagementClient(self.credential, self.subscription_id)
+            self.network_client = NetworkManagementClient(
+                self.credential, self.subscription_id
+            )
             logger.info("✅ Network management client initialized successfully.")
         except Exception as e:
             logger.error(f"❌ Failed to initialize Network management client: {e}")
@@ -73,12 +75,16 @@ class HighAvailabilityManager:
                     location=self.location,
                     sku={"name": "Standard"},
                     public_ip_allocation_method="Static",
-                    tags={"Project": "Adaptive Mind Framework", "Environment": "Production"}
-                )
+                    tags={
+                        "Project": "Adaptive Mind Framework",
+                        "Environment": "Production",
+                    },
+                ),
             )
             ip_address = poller.result()
             logger.info(
-                f"✅ Successfully created Public IP Address '{ip_address.name}' with IP: {ip_address.ip_address}")
+                f"✅ Successfully created Public IP Address '{ip_address.name}' with IP: {ip_address.ip_address}"
+            )
             return ip_address
         except HttpResponseError as e:
             logger.error(f"❌ Failed to create Public IP Address: {e.message}")
@@ -97,8 +103,7 @@ class HighAvailabilityManager:
         logger.info(f"🚀 Creating Load Balancer '{self.lb_name}'...")
         try:
             frontend_ip_config = FrontendIPConfiguration(
-                name="loadBalancerFrontend",
-                public_ip_address=public_ip_address
+                name="loadBalancerFrontend", public_ip_address=public_ip_address
             )
 
             backend_pool = BackendAddressPool(name="backendAddressPool")
@@ -109,7 +114,7 @@ class HighAvailabilityManager:
                 protocol=ProbeProtocol.TCP,
                 port=443,
                 interval_in_seconds=5,
-                number_of_probes=2
+                number_of_probes=2,
             )
 
             # Load balancing rule to route HTTPS traffic from port 443 to the backend pool
@@ -121,7 +126,7 @@ class HighAvailabilityManager:
                 frontend_ip_configuration=frontend_ip_config,
                 backend_address_pool=backend_pool,
                 probe=health_probe,
-                enable_floating_ip=False
+                enable_floating_ip=False,
             )
 
             lb_params = LoadBalancer(
@@ -131,16 +136,19 @@ class HighAvailabilityManager:
                 backend_address_pools=[backend_pool],
                 probes=[health_probe],
                 load_balancing_rules=[lb_rule],
-                tags={"Project": "Adaptive Mind Framework", "Environment": "Production"}
+                tags={
+                    "Project": "Adaptive Mind Framework",
+                    "Environment": "Production",
+                },
             )
 
             poller = self.network_client.load_balancers.begin_create_or_update(
-                self.resource_group_name,
-                self.lb_name,
-                lb_params
+                self.resource_group_name, self.lb_name, lb_params
             )
             load_balancer = poller.result()
-            logger.info(f"✅ Successfully created Load Balancer '{load_balancer.name}'.")
+            logger.info(
+                f"✅ Successfully created Load Balancer '{load_balancer.name}'."
+            )
             return load_balancer
         except HttpResponseError as e:
             logger.error(f"❌ Failed to create Load Balancer: {e.message}")
@@ -167,7 +175,7 @@ def main():
             credential=infra_manager.credential,
             subscription_id=infra_manager.subscription_id,
             resource_group_name=infra_manager.resource_group_name,
-            location=infra_manager.location
+            location=infra_manager.location,
         )
 
         public_ip = ha_manager.create_public_ip()
@@ -176,12 +184,14 @@ def main():
         logger.info("\n--- Load Balancer Verification ---")
         logger.info(f"  Load Balancer Name: {load_balancer.name}")
         logger.info(f"  Public IP Address: {public_ip.ip_address}")
-        logger.info(f"  SKU: Standard")
-        logger.info(f"  Rule: Forwarding TCP port 443 (HTTPS)")
-        logger.info(f"  Health Probe: TCP on port 443, every 5 seconds")
+        logger.info("  SKU: Standard")
+        logger.info("  Rule: Forwarding TCP port 443 (HTTPS)")
+        logger.info("  Health Probe: TCP on port 443, every 5 seconds")
         logger.info("----------------------------------")
         logger.info("✅ Azure Load Balancer setup is complete.")
-        logger.info("ℹ️ Next step will be to link the App Service backend pool to this load balancer.")
+        logger.info(
+            "ℹ️ Next step will be to link the App Service backend pool to this load balancer."
+        )
 
     except (ValueError, ImportError) as e:
         logger.error(f"Configuration or import error: {e}")

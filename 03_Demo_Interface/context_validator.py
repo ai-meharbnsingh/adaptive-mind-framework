@@ -157,9 +157,7 @@ class ContextValidator:
 
                 if element_data or element_type in self.required_elements:
                     # Create checksum for integrity validation
-                    content_str = json.dumps(
-                        element_data, sort_keys=True, default=str
-                    )
+                    content_str = json.dumps(element_data, sort_keys=True, default=str)
                     checksum = hashlib.sha256(content_str.encode()).hexdigest()
 
                     element = ContextElement(
@@ -247,9 +245,7 @@ class ContextValidator:
             ) in before_snapshot.elements.items():
                 after_element = after_snapshot.elements.get(element_type)
 
-                result = await self._validate_element(
-                    before_element, after_element
-                )
+                result = await self._validate_element(before_element, after_element)
                 validation_results.append(result)
 
                 # Calculate weighted scores
@@ -317,11 +313,8 @@ class ContextValidator:
                         "element_type": result.element_type.value,
                         "status": result.status.value,
                         "preservation_score": result.preservation_score,
-                        "priority": self.element_priorities.get(
-                            result.element_type, 5
-                        ),
-                        "is_required": result.element_type
-                        in self.required_elements,
+                        "priority": self.element_priorities.get(result.element_type, 5),
+                        "is_required": result.element_type in self.required_elements,
                         "details": result.details,
                         "recommendations": result.recommendations,
                     }
@@ -389,9 +382,7 @@ class ContextValidator:
             return validation_report
 
         except Exception as e:
-            self.logger.error(
-                f"❌ Context validation failed: {e}", exc_info=True
-            )
+            self.logger.error(f"❌ Context validation failed: {e}", exc_info=True)
             return await self._generate_fallback_validation_result(
                 str(e), before_snapshot_id
             )
@@ -413,9 +404,7 @@ class ContextValidator:
                         "issue": "Element completely missing after operation",
                         "before_checksum": before_element.checksum,
                         "after_checksum": None,
-                        "content_size_before": len(
-                            str(before_element.content)
-                        ),
+                        "content_size_before": len(str(before_element.content)),
                         "content_size_after": 0,
                     },
                     recommendations=[
@@ -434,9 +423,7 @@ class ContextValidator:
                     details={
                         "preservation_type": "exact_match",
                         "checksum_match": True,
-                        "content_size_before": len(
-                            str(before_element.content)
-                        ),
+                        "content_size_before": len(str(before_element.content)),
                         "content_size_after": len(str(after_element.content)),
                         "size_change": 0,
                     },
@@ -517,9 +504,7 @@ class ContextValidator:
         """Calculate similarity between content objects"""
         try:
             # Convert to strings for comparison
-            before_str = json.dumps(
-                before_content, sort_keys=True, default=str
-            )
+            before_str = json.dumps(before_content, sort_keys=True, default=str)
             after_str = json.dumps(after_content, sort_keys=True, default=str)
 
             if before_str == after_str:
@@ -536,9 +521,7 @@ class ContextValidator:
             intersection = len(before_chars.intersection(after_chars))
             union = len(before_chars.union(after_chars))
 
-            jaccard_similarity = (
-                (intersection / union) * 100 if union > 0 else 100.0
-            )
+            jaccard_similarity = (intersection / union) * 100 if union > 0 else 100.0
 
             # Calculate length similarity
             len_before = len(before_str)
@@ -546,14 +529,10 @@ class ContextValidator:
             max_len = max(len_before, len_after)
             min_len = min(len_before, len_after)
 
-            length_similarity = (
-                (min_len / max_len) * 100 if max_len > 0 else 100.0
-            )
+            length_similarity = (min_len / max_len) * 100 if max_len > 0 else 100.0
 
             # Weighted average of similarities
-            overall_similarity = (jaccard_similarity * 0.7) + (
-                length_similarity * 0.3
-            )
+            overall_similarity = (jaccard_similarity * 0.7) + (length_similarity * 0.3)
 
             return round(overall_similarity, 2)
 
@@ -614,14 +593,11 @@ class ContextValidator:
         ]
 
         # Identify most problematic elements
-        worst_performing = sorted(results, key=lambda x: x.preservation_score)[
-            :3
-        ]
+        worst_performing = sorted(results, key=lambda x: x.preservation_score)[:3]
 
         return {
             "status_distribution": {
-                status: len(results)
-                for status, results in status_groups.items()
+                status: len(results) for status, results in status_groups.items()
             },
             "high_priority_issues_count": len(high_priority_issues),
             "worst_performing_elements": [
@@ -634,9 +610,7 @@ class ContextValidator:
                 if result.preservation_score < 100
             ],
             "preservation_trend": self._calculate_preservation_trend(),
-            "common_failure_patterns": self._identify_failure_patterns(
-                results
-            ),
+            "common_failure_patterns": self._identify_failure_patterns(results),
         }
 
     def _calculate_business_impact(
@@ -673,14 +647,10 @@ class ContextValidator:
         ):
             overall_impact = "minimal"
         elif (
-            user_experience_impact in ["low", "minimal"]
-            and operational_impact == "low"
+            user_experience_impact in ["low", "minimal"] and operational_impact == "low"
         ):
             overall_impact = "low"
-        elif (
-            user_experience_impact == "moderate"
-            or operational_impact == "moderate"
-        ):
+        elif user_experience_impact == "moderate" or operational_impact == "moderate":
             overall_impact = "moderate"
         else:
             overall_impact = "high"
@@ -691,9 +661,7 @@ class ContextValidator:
             "operational_impact": operational_impact,
             "compliance_impact": compliance_impact,
             "critical_elements_preserved": f"{critical_elements_preserved}/{total_critical_elements}",
-            "business_continuity_score": self._calculate_continuity_score(
-                results
-            ),
+            "business_continuity_score": self._calculate_continuity_score(results),
             "recovery_recommendation": self._get_recovery_recommendation(
                 overall_impact
             ),
@@ -707,9 +675,7 @@ class ContextValidator:
 
         # Analyze common issues
         low_score_elements = [r for r in results if r.preservation_score < 75]
-        lost_elements = [
-            r for r in results if r.status == ValidationStatus.LOST
-        ]
+        lost_elements = [r for r in results if r.status == ValidationStatus.LOST]
         corrupted_elements = [
             r for r in results if r.status == ValidationStatus.CORRUPTED
         ]
@@ -828,16 +794,12 @@ class ContextValidator:
         else:
             return "stable"
 
-    def _identify_failure_patterns(
-        self, results: List[ValidationResult]
-    ) -> List[str]:
+    def _identify_failure_patterns(self, results: List[ValidationResult]) -> List[str]:
         """Identify common failure patterns"""
         patterns = []
 
         # Check for systematic issues
-        lost_count = len(
-            [r for r in results if r.status == ValidationStatus.LOST]
-        )
+        lost_count = len([r for r in results if r.status == ValidationStatus.LOST])
         corrupted_count = len(
             [r for r in results if r.status == ValidationStatus.CORRUPTED]
         )
@@ -879,15 +841,12 @@ class ContextValidator:
         else:
             return "minimal"
 
-    def _calculate_operational_impact(
-        self, results: List[ValidationResult]
-    ) -> str:
+    def _calculate_operational_impact(self, results: List[ValidationResult]) -> str:
         """Calculate operational impact"""
         required_preserved = sum(
             1
             for r in results
-            if r.element_type in self.required_elements
-            and r.preservation_score >= 90
+            if r.element_type in self.required_elements and r.preservation_score >= 90
         )
 
         total_required = len(
@@ -901,17 +860,11 @@ class ContextValidator:
         else:
             return "high"
 
-    def _calculate_compliance_impact(
-        self, results: List[ValidationResult]
-    ) -> str:
+    def _calculate_compliance_impact(self, results: List[ValidationResult]) -> str:
         """Calculate compliance impact"""
         # Check safety and security elements
         safety_result = next(
-            (
-                r
-                for r in results
-                if r.element_type == ContextElementType.SAFETY_FILTERS
-            ),
+            (r for r in results if r.element_type == ContextElementType.SAFETY_FILTERS),
             None,
         )
 
@@ -920,9 +873,7 @@ class ContextValidator:
         else:
             return "low"
 
-    def _calculate_continuity_score(
-        self, results: List[ValidationResult]
-    ) -> float:
+    def _calculate_continuity_score(self, results: List[ValidationResult]) -> float:
         """Calculate business continuity score"""
         if not results:
             return 0.0
@@ -935,8 +886,7 @@ class ContextValidator:
         )
 
         total_weight = sum(
-            self.element_priorities.get(result.element_type, 5)
-            for result in results
+            self.element_priorities.get(result.element_type, 5) for result in results
         )
 
         return round(weighted_sum / max(total_weight, 1), 1)
@@ -950,9 +900,7 @@ class ContextValidator:
             "high": "Immediate action required - implement preservation safeguards",
         }
 
-        return recommendations.get(
-            impact, "Assess and implement appropriate measures"
-        )
+        return recommendations.get(impact, "Assess and implement appropriate measures")
 
     async def _generate_fallback_validation_result(
         self, error: str, snapshot_id: str
@@ -977,9 +925,7 @@ class ContextValidator:
             },
         }
 
-    async def get_validation_history(
-        self, limit: int = 10
-    ) -> List[Dict[str, Any]]:
+    async def get_validation_history(self, limit: int = 10) -> List[Dict[str, Any]]:
         """Get recent validation history"""
         return self.validation_history[-limit:]
 
@@ -995,9 +941,7 @@ class ContextValidator:
         avg_score = sum(scores) / len(scores) if scores else 0
 
         # Status distribution
-        statuses = [
-            v.get("overall_status", "unknown") for v in recent_validations
-        ]
+        statuses = [v.get("overall_status", "unknown") for v in recent_validations]
         status_counts = {}
         for status in statuses:
             status_counts[status] = status_counts.get(status, 0) + 1

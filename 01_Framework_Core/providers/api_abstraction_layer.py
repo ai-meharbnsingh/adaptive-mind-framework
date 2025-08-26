@@ -7,11 +7,7 @@ class ChatMessage:
 
 class CompletionResponse:
     def __init__(
-        self,
-        success: bool = True,
-        content: str = "",
-        model_used: str = "",
-        **kwargs
+        self, success: bool = True, content: str = "", model_used: str = "", **kwargs
     ):
         self.success = success
         self.content = content

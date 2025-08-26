@@ -11,7 +11,6 @@ from antifragile_framework.config.config_loader import (
     load_resilience_config,
 )
 from antifragile_framework.config.schemas import ProviderProfiles
-from pydantic import ValidationError
 
 # --- Fixtures for Mocking Config Files ---
 
@@ -70,13 +69,9 @@ def test_load_provider_profiles_success(valid_provider_profiles_data):
     mock_json_content = json.dumps(valid_provider_profiles_data)
     with patch("builtins.open", mock_open(read_data=mock_json_content)):
         with patch("os.path.exists", return_value=True):
-            profiles = load_provider_profiles(
-                "dummy/path/provider_profiles.json"
-            )
+            profiles = load_provider_profiles("dummy/path/provider_profiles.json")
             assert isinstance(profiles, ProviderProfiles)
-            assert profiles.profiles["openai"]["gpt-4o"].input_cpm == Decimal(
-                "5.00"
-            )
+            assert profiles.profiles["openai"]["gpt-4o"].input_cpm == Decimal("5.00")
 
 
 def test_load_provider_profiles_file_not_found():
@@ -128,14 +123,9 @@ def test_load_resilience_config_success(valid_resilience_data):
     mock_yaml_content = yaml.dump(valid_resilience_data)
     with patch("builtins.open", mock_open(read_data=mock_yaml_content)):
         with patch("os.path.exists", return_value=True):
-            config = load_resilience_config(
-                "dummy/path/resilience_config.yaml"
-            )
+            config = load_resilience_config("dummy/path/resilience_config.yaml")
             assert (
-                config["resilience_score_penalties"][
-                    "mitigated_success_penalty"
-                ]
-                == 0.1
+                config["resilience_score_penalties"]["mitigated_success_penalty"] == 0.1
             )
 
 

@@ -78,9 +78,7 @@ async def test_claude_agenerate_no_system_prompt(
     claude_provider: ClaudeProvider,
 ):
     messages = [
-        ChatMessage(
-            role="user", content="Simply respond with the word 'test'."
-        )
+        ChatMessage(role="user", content="Simply respond with the word 'test'.")
     ]
     response = await claude_provider.agenerate_completion(messages)
     assert response.success is True
@@ -92,17 +90,9 @@ async def test_claude_agenerate_no_system_prompt(
 @pytest.mark.parametrize(
     "test_model", ["claude-3-5-sonnet-20240620", "claude-3-haiku-20240307"]
 )
-async def test_claude_model_override(
-    claude_provider: ClaudeProvider, test_model: str
-):
-    messages = [
-        ChatMessage(
-            role="user", content=f"Confirm you are an Anthropic model."
-        )
-    ]
-    response = await claude_provider.agenerate_completion(
-        messages, model=test_model
-    )
+async def test_claude_model_override(claude_provider: ClaudeProvider, test_model: str):
+    messages = [ChatMessage(role="user", content="Confirm you are an Anthropic model.")]
+    response = await claude_provider.agenerate_completion(messages, model=test_model)
     assert response.success is True
     assert test_model in response.model_used
 

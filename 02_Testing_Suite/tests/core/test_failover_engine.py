@@ -11,11 +11,9 @@ import pytest
 from antifragile_framework.config.schemas import CostProfile, ProviderProfiles
 from antifragile_framework.core.circuit_breaker import (
     CircuitBreakerError,
-    CircuitBreakerState,
 )
 from antifragile_framework.core.exceptions import (
     AllProvidersFailedError,
-    ContentPolicyError,
     NoResourcesAvailableError,
     RewriteFailedError,
 )
@@ -44,7 +42,6 @@ from antifragile_framework.utils.error_parser import (
     ErrorCategory,
     ErrorDetails,
 )
-from telemetry import event_topics
 
 # --- Test Fixtures ---
 
@@ -145,9 +142,7 @@ def mock_guards(mocker):
     created_guards = {}
 
     def guard_factory(*args, **kwargs):
-        provider_name = kwargs.get(
-            "provider_name", args[0] if args else "unknown"
-        )
+        provider_name = kwargs.get("provider_name", args[0] if args else "unknown")
         mock_guard = MagicMock(spec=ResourceGuard)
         api_keys = kwargs.get("api_keys", [])
 
@@ -170,9 +165,7 @@ def mock_guards(mocker):
             def side_effect():
                 # Always return the first available key (mimics highest health score selection)
                 if api_keys:
-                    key_id = api_keys[
-                        0
-                    ]  # Always use first key (highest health score)
+                    key_id = api_keys[0]  # Always use first key (highest health score)
                     return _mock_resource_context(key_id)
                 else:
                     raise NoResourcesAvailableError(provider=provider_name)
@@ -301,9 +294,7 @@ async def test_key_rotation_on_single_model(
         if call_count == 1:
             return _mock_resource_context("key-openai-1")  # First key fails
         elif call_count == 2:
-            return _mock_resource_context(
-                "key-openai-2"
-            )  # Second key succeeds
+            return _mock_resource_context("key-openai-2")  # Second key succeeds
         else:
             raise NoResourcesAvailableError(provider="openai")
 
@@ -432,9 +423,7 @@ async def test_provider_failover_on_all_models_failing_due_to_cooldown(
     # Override for this specific test
     mock_guards["openai"].get_resource.side_effect = side_effect_func
 
-    mock_openai_adapter.side_effect = openai.APIError(
-        "Fail", request=Mock(), body=None
-    )
+    mock_openai_adapter.side_effect = openai.APIError("Fail", request=Mock(), body=None)
     mock_anthropic_adapter.return_value = CompletionResponse(
         success=True, content="Success", latency_ms=100.0
     )
@@ -507,9 +496,7 @@ async def test_all_providers_and_models_fail_raises_final_error(
         nonlocal openai_call_count
         openai_call_count += 1
         if openai_call_count <= 2:
-            return _openai_resource_context(
-                "key-openai-" + str(openai_call_count)
-            )
+            return _openai_resource_context("key-openai-" + str(openai_call_count))
         else:
             raise NoResourcesAvailableError(provider="openai")
 
@@ -537,9 +524,7 @@ async def test_all_providers_and_models_fail_raises_final_error(
     mock_guards["anthropic"].get_resource.side_effect = anthropic_side_effect
     mock_guards["google_gemini"].get_resource.side_effect = gemini_side_effect
 
-    mock_openai_adapter.side_effect = openai.APIError(
-        "Fail", request=Mock(), body=None
-    )
+    mock_openai_adapter.side_effect = openai.APIError("Fail", request=Mock(), body=None)
     mock_anthropic_adapter.side_effect = anthropic.APIError(
         "Fail", request=Mock(), body=None
     )
@@ -621,8 +606,8 @@ async def test_mitigation_fails_if_rewriter_fails(
         response=Mock(),
         body={"error": {"code": "content_policy_violation"}},
     )
-    mock_rewriter.rephrase_for_policy_compliance.side_effect = (
-        RewriteFailedError("LLM fail")
+    mock_rewriter.rephrase_for_policy_compliance.side_effect = RewriteFailedError(
+        "LLM fail"
     )
     with pytest.raises(AllProvidersFailedError):
         await engine_with_rewriter.execute_request(
@@ -746,9 +731,7 @@ class TestUserIntentAndCostManagement:
             content=content,
             model_used=model_used,
             latency_ms=latency,
-            usage=TokenUsage(
-                input_tokens=input_tokens, output_tokens=output_tokens
-            ),
+            usage=TokenUsage(input_tokens=input_tokens, output_tokens=output_tokens),
             metadata={"provider_name": provider_name},
         )
 
@@ -802,9 +785,7 @@ class TestUserIntentAndCostManagement:
         mock_openai_adapter.assert_not_called()
         mock_anthropic_adapter.assert_called_once()
         assert (
-            mock_bias_ledger.log_request_lifecycle.call_args.kwargs[
-                "failover_reason"
-            ]
+            mock_bias_ledger.log_request_lifecycle.call_args.kwargs["failover_reason"]
             == "PREFERRED_PROVIDER_CIRCUIT_OPEN:openai"
         )
 
@@ -832,9 +813,7 @@ class TestUserIntentAndCostManagement:
         mock_openai_adapter.assert_not_called()
         mock_anthropic_adapter.assert_called_once()
         assert (
-            mock_bias_ledger.log_request_lifecycle.call_args.kwargs[
-                "failover_reason"
-            ]
+            mock_bias_ledger.log_request_lifecycle.call_args.kwargs["failover_reason"]
             == "ALL_PREFERRED_KEYS_UNHEALTHY:openai"
         )
 
@@ -846,12 +825,12 @@ class TestUserIntentAndCostManagement:
         mock_gemini_adapter,
         mock_bias_ledger,
     ):
-        engine.provider_profiles.profiles["openai"]["gpt-4o"].input_cpm = (
+        engine.provider_profiles.profiles["openai"]["gpt-4o"].input_cpm = Decimal(
+            "10000.00"
+        )
+        engine.provider_profiles.profiles["anthropic"]["claude-3-sonnet"].input_cpm = (
             Decimal("10000.00")
         )
-        engine.provider_profiles.profiles["anthropic"][
-            "claude-3-sonnet"
-        ].input_cpm = Decimal("10000.00")
         mock_gemini_adapter.return_value = self._create_success_response(
             provider_name="google_gemini", model_used="gemini-pro"
         )
@@ -879,18 +858,18 @@ class TestUserIntentAndCostManagement:
     async def test_cost_cap_skips_expensive_model_in_preferred_mode(
         self, engine, mock_openai_adapter, mock_bias_ledger
     ):
-        engine.provider_profiles.profiles["openai"]["gpt-4o"].input_cpm = (
-            Decimal("1000.00")
+        engine.provider_profiles.profiles["openai"]["gpt-4o"].input_cpm = Decimal(
+            "1000.00"
         )
-        engine.provider_profiles.profiles["openai"]["gpt-4o"].output_cpm = (
-            Decimal("1000.00")
+        engine.provider_profiles.profiles["openai"]["gpt-4o"].output_cpm = Decimal(
+            "1000.00"
         )
-        engine.provider_profiles.profiles["openai"][
-            "gpt-4-turbo"
-        ].input_cpm = Decimal("1.0")
-        engine.provider_profiles.profiles["openai"][
-            "gpt-4-turbo"
-        ].output_cpm = Decimal("1.0")
+        engine.provider_profiles.profiles["openai"]["gpt-4-turbo"].input_cpm = Decimal(
+            "1.0"
+        )
+        engine.provider_profiles.profiles["openai"]["gpt-4-turbo"].output_cpm = Decimal(
+            "1.0"
+        )
         mock_openai_adapter.return_value = self._create_success_response(
             provider_name="openai", model_used="gpt-4-turbo"
         )
@@ -918,12 +897,12 @@ class TestUserIntentAndCostManagement:
         mock_anthropic_adapter,
         mock_bias_ledger,
     ):
-        engine.provider_profiles.profiles["openai"]["gpt-4o"].input_cpm = (
+        engine.provider_profiles.profiles["openai"]["gpt-4o"].input_cpm = Decimal(
+            "10000.00"
+        )
+        engine.provider_profiles.profiles["anthropic"]["claude-3-sonnet"].input_cpm = (
             Decimal("10000.00")
         )
-        engine.provider_profiles.profiles["anthropic"][
-            "claude-3-sonnet"
-        ].input_cpm = Decimal("10000.00")
         with pytest.raises(AllProvidersFailedError):
             await engine.execute_request(
                 model_priority_map={
@@ -946,9 +925,9 @@ class TestUserIntentAndCostManagement:
         mock_bias_ledger,
     ):
         mock_guards["openai"].has_healthy_resources.return_value = False
-        engine.provider_profiles.profiles["anthropic"][
-            "claude-3-sonnet"
-        ].input_cpm = Decimal("10000.00")
+        engine.provider_profiles.profiles["anthropic"]["claude-3-sonnet"].input_cpm = (
+            Decimal("10000.00")
+        )
         mock_gemini_adapter.return_value = self._create_success_response(
             provider_name="google_gemini", model_used="gemini-pro"
         )
@@ -967,7 +946,5 @@ class TestUserIntentAndCostManagement:
         mock_anthropic_adapter.assert_not_called()
         mock_gemini_adapter.assert_called_once()
         kwargs = mock_bias_ledger.log_request_lifecycle.call_args.kwargs
-        assert (
-            kwargs["failover_reason"] == "ALL_PREFERRED_KEYS_UNHEALTHY:openai"
-        )
+        assert kwargs["failover_reason"] == "ALL_PREFERRED_KEYS_UNHEALTHY:openai"
         assert kwargs["cost_cap_enforced"] is True

@@ -63,9 +63,7 @@ class OpenAIProvider(LLMProvider):
         # Simulate variable token usage
         input_tokens = random.randint(50, 250)
         output_tokens = random.randint(100, 500)
-        usage = TokenUsage(
-            input_tokens=input_tokens, output_tokens=output_tokens
-        )
+        usage = TokenUsage(input_tokens=input_tokens, output_tokens=output_tokens)
 
         # Create a unique response content
         content = f"Mocked OpenAI response for model {model_to_use}. UUID: {uuid.uuid4().hex[:12]}"
@@ -100,9 +98,7 @@ class OpenAIProvider(LLMProvider):
 
         # Performance test mocking logic (keep existing mock logic)
         if os.getenv("PERFORMANCE_TEST_MODE", "False").lower() == "true":
-            return await self._generate_mock_response(
-                model_to_use, framework_start
-            )
+            return await self._generate_mock_response(model_to_use, framework_start)
 
         # Framework processing: client setup
         usage = None
@@ -115,9 +111,7 @@ class OpenAIProvider(LLMProvider):
             except Exception as e:
                 error_msg = f"Failed to initialize temporary OpenAI client with override key: {e}"
                 log.error(error_msg)
-                framework_latency = (
-                    time.perf_counter() - framework_start
-                ) * 1000
+                framework_latency = (time.perf_counter() - framework_start) * 1000
                 return CompletionResponse(
                     success=False,
                     content=None,
@@ -129,8 +123,8 @@ class OpenAIProvider(LLMProvider):
             client_to_use = self.client
 
         # Framework processing: message preparation
-        system_prompt, user_assistant_messages = (
-            self._prepare_provider_messages(messages)
+        system_prompt, user_assistant_messages = self._prepare_provider_messages(
+            messages
         )
         if system_prompt:
             user_assistant_messages.insert(
@@ -168,8 +162,7 @@ class OpenAIProvider(LLMProvider):
             ):
                 framework_end = time.perf_counter()
                 framework_latency = (
-                    (api_call_start - framework_start)
-                    + (framework_end - api_call_end)
+                    (api_call_start - framework_start) + (framework_end - api_call_end)
                 ) * 1000
                 return CompletionResponse(
                     success=False,
@@ -190,8 +183,7 @@ class OpenAIProvider(LLMProvider):
 
             # Calculate ONLY framework overhead (excluding external API time)
             framework_latency = (
-                (api_call_start - framework_start)
-                + (framework_end - api_call_end)
+                (api_call_start - framework_start) + (framework_end - api_call_end)
             ) * 1000
 
             return CompletionResponse(
@@ -223,9 +215,7 @@ class OpenAIProvider(LLMProvider):
             (api_call_start - framework_start) + (framework_end - api_call_end)
         ) * 1000
 
-        log.error(
-            f"Failed OpenAI call for model {model_to_use}. Reason: {error_msg}"
-        )
+        log.error(f"Failed OpenAI call for model {model_to_use}. Reason: {error_msg}")
         return CompletionResponse(
             success=False,
             content=None,

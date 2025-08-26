@@ -132,9 +132,7 @@ async def lifespan(app: FastAPI):
         )
     )
 
-    is_perf_mode = (
-        os.getenv("PERFORMANCE_TEST_MODE", "False").lower() == "true"
-    )
+    is_perf_mode = os.getenv("PERFORMANCE_TEST_MODE", "False").lower() == "true"
     if is_perf_mode:
         print("[OK] Lifespan: PERFORMANCE_TEST_MODE is 'True'. Init mocks.")
         core_logger.log(
@@ -147,9 +145,7 @@ async def lifespan(app: FastAPI):
             )
         )
     else:
-        print(
-            "[INFO] Lifespan: PERFORMANCE_TEST_MODE not set. Init production."
-        )
+        print("[INFO] Lifespan: PERFORMANCE_TEST_MODE not set. Init production.")
 
     try:
         provider_profiles = load_provider_profiles()
@@ -173,9 +169,7 @@ async def lifespan(app: FastAPI):
     event_bus = EventBus()
     ranking_engine = ProviderRankingEngine()
     learning_subscriber = OnlineLearningSubscriber(ranking_engine)
-    bias_ledger = BiasLedger(
-        event_bus=event_bus, provider_profiles=provider_profiles
-    )
+    bias_ledger = BiasLedger(event_bus=event_bus, provider_profiles=provider_profiles)
 
     event_bus.subscribe(
         event_topics.LEARNING_FEEDBACK_PUBLISHED,
@@ -187,9 +181,7 @@ async def lifespan(app: FastAPI):
             event_source="framework_api.lifespan",
             timestamp_utc=datetime.now(timezone.utc).isoformat(),
             severity="INFO",
-            payload={
-                "message": "Online learning subscriber connected to event bus."
-            },
+            payload={"message": "Online learning subscriber connected to event bus."},
         )
     )
 
@@ -252,17 +244,13 @@ async def all_providers_failed_exception_handler(
             payload={
                 "request_id": request_id,
                 "error": str(exc),
-                "client_host": (
-                    request.client.host if request.client else "N/A"
-                ),
+                "client_host": (request.client.host if request.client else "N/A"),
             },
         )
     )
     return JSONResponse(
         status_code=503,
-        content={
-            "detail": "All underlying AI providers are currently unavailable."
-        },
+        content={"detail": "All underlying AI providers are currently unavailable."},
         headers={"Retry-After": "60"},
     )
 
@@ -280,9 +268,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
                 "request_id": request_id,
                 "error_type": type(exc).__name__,
                 "error_details": str(exc),
-                "client_host": (
-                    request.client.host if request.client else "N/A"
-                ),
+                "client_host": (request.client.host if request.client else "N/A"),
             },
         )
     )
@@ -305,9 +291,7 @@ async def logging_and_request_id_middleware(request: Request, call_next):
             severity="INFO",
             payload={
                 "request_id": request_id,
-                "client_host": (
-                    request.client.host if request.client else "N/A"
-                ),
+                "client_host": (request.client.host if request.client else "N/A"),
                 "method": request.method,
                 "path": request.url.path,
             },

@@ -12,9 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Any
 
 CURRENT_DIR = Path(__file__).parent
-FRAMEWORK_CORE_ROOT = (
-    CURRENT_DIR.parent.parent.parent
-)  # Points to 01_Framework_Core
+FRAMEWORK_CORE_ROOT = CURRENT_DIR.parent.parent.parent  # Points to 01_Framework_Core
 TELEMETRY_PATH = FRAMEWORK_CORE_ROOT / "telemetry"
 
 
@@ -81,9 +79,7 @@ class ProviderRankingEngine:
         if not (0.0 <= default_score <= 1.0):
             raise ValueError("Default score must be between 0.0 and 1.0.")
         if not (min_requests_threshold >= 0):
-            raise ValueError(
-                "Minimum requests threshold must be non-negative."
-            )
+            raise ValueError("Minimum requests threshold must be non-negative.")
 
         self._alpha = smoothing_factor
         self._default_score = default_score
@@ -97,9 +93,7 @@ class ProviderRankingEngine:
             f"ProviderRankingEngine initialized with alpha={self._alpha}, default_score={self._default_score}, min_requests={self._min_requests}."
         )
 
-    def update_provider_score(
-        self, provider_name: str, resilience_score: float
-    ):
+    def update_provider_score(self, provider_name: str, resilience_score: float):
         """
         Updates a provider's performance score using the latest ResilienceScore.
         This method is thread-safe.
@@ -177,9 +171,7 @@ class ProviderRankingEngine:
                 """Helper to determine the score used for ranking based on request count."""
                 current_requests = self._request_counts.get(provider_name, 0)
                 if current_requests >= self._min_requests:
-                    return self._provider_emas.get(
-                        provider_name, self._default_score
-                    )
+                    return self._provider_emas.get(provider_name, self._default_score)
                 # For providers below threshold, return default_score, or their current EMA if it exists and is higher
                 # This helps prevent brand new providers with one good score from being penalized too much
                 return self._default_score

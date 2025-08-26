@@ -42,12 +42,8 @@ class PostgreSQLConnectionManager:
                 try:
                     # Retrieve database credentials from environment variables
                     self.db_user = os.getenv("POSTGRES_USER", "postgres")
-                    self.db_password = os.getenv(
-                        "POSTGRES_PASSWORD", "password"
-                    )
-                    self.db_name = os.getenv(
-                        "POSTGRES_DB", "adaptive_mind_demo"
-                    )
+                    self.db_password = os.getenv("POSTGRES_PASSWORD", "password")
+                    self.db_name = os.getenv("POSTGRES_DB", "adaptive_mind_demo")
                     self.db_host = os.getenv("POSTGRES_HOST", "localhost")
                     self.db_port = os.getenv("POSTGRES_PORT", "5432")
 
@@ -64,12 +60,8 @@ class PostgreSQLConnectionManager:
 
                     # Add connection pool parameters
                     pool_params = {
-                        "min_size": int(
-                            os.getenv("POSTGRES_POOL_MIN_SIZE", 5)
-                        ),
-                        "max_size": int(
-                            os.getenv("POSTGRES_POOL_MAX_SIZE", 20)
-                        ),
+                        "min_size": int(os.getenv("POSTGRES_POOL_MIN_SIZE", 5)),
+                        "max_size": int(os.getenv("POSTGRES_POOL_MAX_SIZE", 20)),
                         "timeout": int(
                             os.getenv("POSTGRES_POOL_TIMEOUT", 60)
                         ),  # seconds
@@ -77,9 +69,7 @@ class PostgreSQLConnectionManager:
                             os.getenv("POSTGRES_POOL_MAX_QUERIES", 10000)
                         ),
                         "max_inactive_connection_lifetime": int(
-                            os.getenv(
-                                "POSTGRES_POOL_MAX_INACTIVE_LIFETIME", 300
-                            )
+                            os.getenv("POSTGRES_POOL_MAX_INACTIVE_LIFETIME", 300)
                         ),
                         # seconds
                         "command_timeout": int(
@@ -91,9 +81,7 @@ class PostgreSQLConnectionManager:
                     logger.info(
                         f"Attempting to initialize PostgreSQL connection pool for '{self.db_name}' on {self.db_host}:{self.db_port}..."
                     )
-                    self._pool = await asyncpg.create_pool(
-                        **conn_params, **pool_params
-                    )
+                    self._pool = await asyncpg.create_pool(**conn_params, **pool_params)
 
                     # Test connection by acquiring and releasing one connection
                     async with self._pool.acquire() as conn:
@@ -124,9 +112,7 @@ class PostgreSQLConnectionManager:
             logger.debug("Acquired connection from pool.")
             return conn
         except Exception as e:
-            logger.error(
-                f"Failed to acquire connection from pool: {e}", exc_info=True
-            )
+            logger.error(f"Failed to acquire connection from pool: {e}", exc_info=True)
             raise
 
     async def release_connection(self, conn: asyncpg.Connection) -> None:
@@ -201,9 +187,7 @@ class PostgreSQLConnectionManager:
             if conn:
                 await self.release_connection(conn)
 
-    async def fetch_one(
-        self, query: str, *args: Any
-    ) -> Optional[Dict[str, Any]]:
+    async def fetch_one(self, query: str, *args: Any) -> Optional[Dict[str, Any]]:
         """
         Executes a query that returns at most one row.
         Returns a dictionary or None.
@@ -235,9 +219,7 @@ class PostgreSQLConnectionManager:
         try:
             conn = await self.get_connection()
             val = await conn.fetchval(query, *args)
-            logger.debug(
-                f"Fetched value for query: {query.splitlines()[0].strip()}..."
-            )
+            logger.debug(f"Fetched value for query: {query.splitlines()[0].strip()}...")
             return val
         except Exception as e:
             logger.error(
@@ -254,9 +236,7 @@ class PostgreSQLConnectionManager:
 async def main():
     # Set dummy environment variables for local testing
     os.environ["POSTGRES_USER"] = os.getenv("POSTGRES_USER", "postgres")
-    os.environ["POSTGRES_PASSWORD"] = os.getenv(
-        "POSTGRES_PASSWORD", "password"
-    )
+    os.environ["POSTGRES_PASSWORD"] = os.getenv("POSTGRES_PASSWORD", "password")
     os.environ["POSTGRES_DB"] = os.getenv("POSTGRES_DB", "adaptive_mind_demo")
     os.environ["POSTGRES_HOST"] = os.getenv("POSTGRES_HOST", "localhost")
     os.environ["POSTGRES_PORT"] = os.getenv("POSTGRES_PORT", "5432")
@@ -312,9 +292,7 @@ async def main():
         print("\n--- Testing pool re-initialization ---")
         await manager.close_all_connections()
         await manager.initialize()
-        re_test = await manager.fetch_val(
-            "SELECT 'Pool re-initialized' FROM DUAL;"
-        )
+        re_test = await manager.fetch_val("SELECT 'Pool re-initialized' FROM DUAL;")
         print(f"Re-initialized pool test: {re_test}")
 
     except ConnectionError as ce:

@@ -61,9 +61,7 @@ class FrameworkIntegrationValidator:
             "google_gemini": ["gemini-1.5-pro", "gemini-1.5-flash"],
         }
 
-        logger.info(
-            "🚀 Adaptive Mind Framework Integration Validator Initialized"
-        )
+        logger.info("🚀 Adaptive Mind Framework Integration Validator Initialized")
         logger.info(f"📁 Project Path: {self.project_path}")
 
     async def run_complete_validation(self) -> Dict[str, Any]:
@@ -169,14 +167,12 @@ class FrameworkIntegrationValidator:
 
         # Log final results
         logger.info(f"\n{'=' * 80}")
-        logger.info(f"🏁 VALIDATION COMPLETE")
+        logger.info("🏁 VALIDATION COMPLETE")
         logger.info(f"{'=' * 80}")
         logger.info(
             f"📊 Results: {validation_results['tests_passed']}/{validation_results['total_tests']} tests passed"
         )
-        logger.info(
-            f"⚡ Success Rate: {validation_results['success_rate']:.1f}%"
-        )
+        logger.info(f"⚡ Success Rate: {validation_results['success_rate']:.1f}%")
         logger.info(
             f"⏱️ Total Duration: {validation_results['total_duration_seconds']:.3f}s"
         )
@@ -214,8 +210,7 @@ class FrameworkIntegrationValidator:
             initialization_tests = {
                 "config_loading": True,
                 "provider_registry_setup": len(engine.providers) > 0,
-                "circuit_breaker_registry": engine.circuit_breakers
-                is not None,
+                "circuit_breaker_registry": engine.circuit_breakers is not None,
                 "resource_guard_initialization": len(engine.guards) > 0,
                 "bias_ledger_setup": engine.bias_ledger is not None,
                 "event_bus_configuration": True,
@@ -261,9 +256,7 @@ class FrameworkIntegrationValidator:
             await asyncio.sleep(0.05)
 
             adapter_results[provider] = {
-                "tests_passed": len(
-                    [k for k, v in adapter_tests.items() if v]
-                ),
+                "tests_passed": len([k for k, v in adapter_tests.items() if v]),
                 "total_tests": len(adapter_tests),
                 "success_rate": 100.0,
                 "average_response_time_ms": 250,
@@ -471,9 +464,7 @@ class FrameworkIntegrationValidator:
         logger.info("✅ Bias ledger tracking validated successfully")
 
         return {
-            "ledger_tests_passed": len(
-                [k for k, v in ledger_tests.items() if v]
-            ),
+            "ledger_tests_passed": len([k for k, v in ledger_tests.items() if v]),
             "audit_trail_completeness": "100%",
             "compliance_grade": "SOC2_READY",
             "analytics_capabilities": "REAL_TIME",
@@ -538,25 +529,19 @@ async def main():
         print(f"\n📄 Validation results saved to: {results_file}")
 
         # Print summary
-        print(f"\n🎯 VALIDATION SUMMARY:")
+        print("\n🎯 VALIDATION SUMMARY:")
         print(f"   Status: {results['overall_status']}")
-        print(
-            f"   Tests Passed: {results['tests_passed']}/{results['total_tests']}"
-        )
+        print(f"   Tests Passed: {results['tests_passed']}/{results['total_tests']}")
         print(f"   Success Rate: {results['success_rate']:.1f}%")
         print(f"   Duration: {results['total_duration_seconds']:.3f}s")
 
         if results["overall_status"] == "PASSED":
-            print(f"\n🎉 FRAMEWORK IS PRODUCTION-READY!")
-            print(f"   Enterprise-grade validation completed successfully.")
-            print(
-                f"   Ready for demo interface creation and buyer presentation."
-            )
+            print("\n🎉 FRAMEWORK IS PRODUCTION-READY!")
+            print("   Enterprise-grade validation completed successfully.")
+            print("   Ready for demo interface creation and buyer presentation.")
         else:
-            print(f"\n⚠️  VALIDATION ISSUES DETECTED")
-            print(
-                f"   Review failed tests and address issues before proceeding."
-            )
+            print("\n⚠️  VALIDATION ISSUES DETECTED")
+            print("   Review failed tests and address issues before proceeding.")
 
         return results["overall_status"] == "PASSED"
 
@@ -571,12 +556,10 @@ if __name__ == "__main__":
     success = asyncio.run(main())
 
     if success:
-        print(
-            f"\n✅ SESSION 2: Integration validation completed successfully!"
-        )
-        print(f"🚀 Ready to proceed with demo interface creation.")
+        print("\n✅ SESSION 2: Integration validation completed successfully!")
+        print("🚀 Ready to proceed with demo interface creation.")
     else:
-        print(f"\n❌ SESSION 2: Integration validation failed!")
-        print(f"🔧 Address issues before proceeding to next phase.")
+        print("\n❌ SESSION 2: Integration validation failed!")
+        print("🔧 Address issues before proceeding to next phase.")
 
     sys.exit(0 if success else 1)

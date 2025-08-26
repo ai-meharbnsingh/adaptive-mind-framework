@@ -15,17 +15,13 @@ from typing import Any, Dict, Iterator, List
 
 CURRENT_DIR = Path(__file__).parent
 PROJECT_ROOT = CURRENT_DIR.parent.parent
-FRAMEWORK_CORE_PATH = (
-    PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
-)
+FRAMEWORK_CORE_PATH = PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
 TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
 
 
 sys.path.insert(0, str(FRAMEWORK_CORE_PATH))
 sys.path.insert(0, str(TELEMETRY_PATH))
-sys.path.insert(
-    0, str(CURRENT_DIR)
-)  # For sibling modules within 05_Database_Layer
+sys.path.insert(0, str(CURRENT_DIR))  # For sibling modules within 05_Database_Layer
 
 # Preferred import pattern for core components
 try:
@@ -110,9 +106,7 @@ except ImportError:
             return []
 
     class UniversalEventSchema:
-        def __init__(
-            self, event_type, event_source, timestamp_utc, severity, payload
-        ):
+        def __init__(self, event_type, event_source, timestamp_utc, severity, payload):
             pass
 
         def model_dump(self):
@@ -194,9 +188,7 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
                 else None
             )
             query_id_val = (
-                uuid.UUID(payload.get("query_id"))
-                if payload.get("query_id")
-                else None
+                uuid.UUID(payload.get("query_id")) if payload.get("query_id") else None
             )
             attempt_id_val = (
                 uuid.UUID(payload.get("attempt_id"))
@@ -282,16 +274,12 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
             )
             # Re-parse event_data (JSONB) into dictionary if it's a string, and map `id` to `event_id`
             for record in records:
-                if "event_data" in record and isinstance(
-                    record["event_data"], str
-                ):
+                if "event_data" in record and isinstance(record["event_data"], str):
                     try:
                         record["event_data"] = json.loads(record["event_data"])
                     except json.JSONDecodeError:
                         pass  # Keep as string if cannot decode
-            logger.debug(
-                f"Fetched {len(records)} events of type {event_type}."
-            )
+            logger.debug(f"Fetched {len(records)} events of type {event_type}.")
             return records
         except Exception as e:
             logger.error(
@@ -350,13 +338,9 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
 
                 for record in records:
                     # Re-parse event_data (JSONB) into dictionary if it's a string, and map `id` to `event_id`
-                    if "event_data" in record and isinstance(
-                        record["event_data"], str
-                    ):
+                    if "event_data" in record and isinstance(record["event_data"], str):
                         try:
-                            record["event_data"] = json.loads(
-                                record["event_data"]
-                            )
+                            record["event_data"] = json.loads(record["event_data"])
                         except json.JSONDecodeError:
                             pass  # Keep as string if cannot decode
                     yield record  # Yield each individual event
@@ -424,7 +408,7 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
                 )
                 return []
         elif aggregate_by == "total":
-            query = f"""
+            query = """
             SELECT
                 COUNT(id) AS total_requests,
                 SUM((event_data->>'cost_estimate')::float) AS total_cost_usd,
@@ -448,9 +432,7 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
                     result["avg_response_time_ms"] = (
                         result["avg_response_time_ms"] or 0.0
                     )
-                    result["latest_bias_score"] = (
-                        result["latest_bias_score"] or 0.0
-                    )
+                    result["latest_bias_score"] = result["latest_bias_score"] or 0.0
                     logger.debug(
                         f"Aggregated total events for type {event_type}. Result: {result}"
                     )
@@ -502,9 +484,7 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
             for row in results:
                 row["total_requests"] = row["total_requests"] or 0
                 row["successful_requests"] = row["successful_requests"] or 0
-                row["avg_response_time_ms"] = (
-                    row["avg_response_time_ms"] or 0.0
-                )
+                row["avg_response_time_ms"] = row["avg_response_time_ms"] or 0.0
                 row["total_cost_usd"] = row["total_cost_usd"] or 0.0
                 row["failover_count"] = row["failover_count"] or 0
             logger.debug(
@@ -523,9 +503,7 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
 async def main():
     print("Starting PostgreSQLTimeSeriesDB demo...")
     os.environ["POSTGRES_USER"] = os.getenv("POSTGRES_USER", "postgres")
-    os.environ["POSTGRES_PASSWORD"] = os.getenv(
-        "POSTGRES_PASSWORD", "password"
-    )
+    os.environ["POSTGRES_PASSWORD"] = os.getenv("POSTGRES_PASSWORD", "password")
     os.environ["POSTGRES_DB"] = os.getenv("POSTGRES_DB", "adaptive_mind_demo")
     os.environ["POSTGRES_HOST"] = os.getenv("POSTGRES_HOST", "localhost")
     os.environ["POSTGRES_PORT"] = os.getenv("POSTGRES_PORT", "5432")
@@ -652,9 +630,7 @@ async def main():
         print(f"  Total: {total_agg[0]}")
 
     except Exception as e:
-        logger.error(
-            f"An error occurred during TimeSeriesDB test: {e}", exc_info=True
-        )
+        logger.error(f"An error occurred during TimeSeriesDB test: {e}", exc_info=True)
     finally:
         await timeseries_db.close()
         print("\nPostgreSQLTimeSeriesDB demo completed.")

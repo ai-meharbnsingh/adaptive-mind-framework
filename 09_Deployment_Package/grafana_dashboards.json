@@ -74,5 +74,5 @@
         "titleFormat": "Deployment {{ $labels.version }}"
       }
     ]
-  },
+  }
 }

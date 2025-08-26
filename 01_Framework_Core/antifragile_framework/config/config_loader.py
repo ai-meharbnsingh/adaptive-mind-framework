@@ -12,9 +12,7 @@ from pydantic import ValidationError
 log = logging.getLogger(__name__)
 
 
-def _get_config_path(
-    default_filename: str, provided_path: Optional[str] = None
-) -> str:
+def _get_config_path(default_filename: str, provided_path: Optional[str] = None) -> str:
     """Helper function to determine the absolute path for a configuration file."""
     if provided_path:
         return provided_path
@@ -62,14 +60,10 @@ def load_resilience_config(
     try:
         with open(abs_config_path, "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
-            log.info(
-                f"Successfully loaded resilience config from {abs_config_path}"
-            )
+            log.info(f"Successfully loaded resilience config from {abs_config_path}")
             return config
     except yaml.YAMLError as e:
-        log.error(
-            f"Error parsing resilience config YAML file {abs_config_path}: {e}"
-        )
+        log.error(f"Error parsing resilience config YAML file {abs_config_path}: {e}")
         raise
     except Exception as e:
         log.error(
@@ -117,9 +111,7 @@ def load_provider_profiles(
         return validated_profiles
 
     except json.JSONDecodeError as e:
-        log.error(
-            f"Error parsing provider profiles JSON file {abs_config_path}: {e}"
-        )
+        log.error(f"Error parsing provider profiles JSON file {abs_config_path}: {e}")
         raise ValueError(
             f"Invalid JSON in provider profiles file: {abs_config_path}"
         ) from e

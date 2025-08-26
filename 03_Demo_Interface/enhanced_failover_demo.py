@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List
+
 # Configure logger
 logger = logging.getLogger(__name__)
 
@@ -177,9 +178,7 @@ class EnhancedFailoverDemo:
             Detailed failover demonstration results
         """
         demo_start_time = datetime.now(timezone.utc)
-        self.logger.info(
-            f"🚨 Starting enhanced failover demo: {failover_scenario_key}"
-        )
+        self.logger.info(f"🚨 Starting enhanced failover demo: {failover_scenario_key}")
 
         try:
             # Get scenario configuration
@@ -209,8 +208,7 @@ class EnhancedFailoverDemo:
             )
 
             total_demo_time_ms += sum(
-                step.response_time_ms
-                for step in failover_sequence_result["steps"]
+                step.response_time_ms for step in failover_sequence_result["steps"]
             )
             failover_steps.extend(failover_sequence_result["steps"])
 
@@ -237,9 +235,7 @@ class EnhancedFailoverDemo:
                 "demo_type": "enhanced_failover",
                 "scenario_executed": scenario["name"],
                 "final_response": final_response,
-                "providers_used_sequence": [
-                    step.provider for step in failover_steps
-                ],
+                "providers_used_sequence": [step.provider for step in failover_steps],
                 "total_demo_time_ms": total_demo_time_ms,
                 "failover_occurred": True,
                 "context_preserved": context_validation.is_preserved,
@@ -250,9 +246,7 @@ class EnhancedFailoverDemo:
                     "failover_scenario": scenario["name"],
                     "simulated_trigger": scenario["trigger"].value,
                     "recovery_action": f"Automatic failover to {failover_sequence_result['successful_provider']}",
-                    "expected_recovery_time_ms": scenario[
-                        "expected_recovery_time_ms"
-                    ],
+                    "expected_recovery_time_ms": scenario["expected_recovery_time_ms"],
                     "actual_recovery_time_ms": total_demo_time_ms,
                     "performance_impact": self._calculate_performance_impact(
                         scenario["expected_recovery_time_ms"],
@@ -293,9 +287,7 @@ class EnhancedFailoverDemo:
             return demo_results
 
         except Exception as e:
-            self.logger.error(
-                f"❌ Enhanced failover demo failed: {e}", exc_info=True
-            )
+            self.logger.error(f"❌ Enhanced failover demo failed: {e}", exc_info=True)
             return await self._generate_fallback_demo_result(
                 session_id, initial_prompt, str(e)
             )
@@ -326,9 +318,7 @@ class EnhancedFailoverDemo:
             response_time_ms=response_time,
             details={
                 "error_type": scenario["trigger"].value,
-                "error_message": self._generate_error_message(
-                    scenario["trigger"]
-                ),
+                "error_message": self._generate_error_message(scenario["trigger"]),
                 "retry_attempted": False,
                 "failover_triggered": True,
                 "prompt_length": len(prompt),
@@ -349,9 +339,7 @@ class EnhancedFailoverDemo:
             "current_prompt": current_prompt,
             "prompt_length": len(current_prompt),
             "conversation_turns": len(conversation),
-            "context_elements": {
-                element: True for element in self.context_elements
-            },
+            "context_elements": {element: True for element in self.context_elements},
             "backup_timestamp": datetime.now(timezone.utc).isoformat(),
             "session_variables": {
                 "user_preferences": {
@@ -366,9 +354,7 @@ class EnhancedFailoverDemo:
             },
         }
 
-        self.logger.info(
-            "💾 Context backup completed for preservation validation"
-        )
+        self.logger.info("💾 Context backup completed for preservation validation")
         return context_backup
 
     async def _execute_failover_sequence(
@@ -519,23 +505,19 @@ class EnhancedFailoverDemo:
         """Calculate comprehensive demo performance metrics"""
         return {
             "total_steps": len(steps),
-            "successful_steps": len(
-                [s for s in steps if s.status == "SUCCESS"]
-            ),
+            "successful_steps": len([s for s in steps if s.status == "SUCCESS"]),
             "failed_steps": len([s for s in steps if s.status == "FAILED"]),
             "total_recovery_time_ms": total_time_ms,
             "expected_recovery_time_ms": scenario["expected_recovery_time_ms"],
             "recovery_efficiency": min(
                 100,
-                (scenario["expected_recovery_time_ms"] / max(total_time_ms, 1))
-                * 100,
+                (scenario["expected_recovery_time_ms"] / max(total_time_ms, 1)) * 100,
             ),
             "average_step_time_ms": total_time_ms / max(len(steps), 1),
             "scenario_complexity": scenario["context_preservation_difficulty"],
             "business_impact_level": scenario["business_impact"],
             "demo_success_rate": (
-                len([s for s in steps if s.status == "SUCCESS"])
-                / max(len(steps), 1)
+                len([s for s in steps if s.status == "SUCCESS"]) / max(len(steps), 1)
             )
             * 100,
         }
@@ -607,9 +589,7 @@ class EnhancedFailoverDemo:
                     "description": scenario["description"],
                     "difficulty": scenario["context_preservation_difficulty"],
                     "business_impact": scenario["business_impact"],
-                    "expected_recovery_ms": scenario[
-                        "expected_recovery_time_ms"
-                    ],
+                    "expected_recovery_ms": scenario["expected_recovery_time_ms"],
                 }
             )
         return scenarios
@@ -618,9 +598,7 @@ class EnhancedFailoverDemo:
         """Get current provider reliability statistics"""
         return self.provider_reliability.copy()
 
-    async def simulate_provider_outage(
-        self, provider: str, duration_minutes: int = 5
-    ):
+    async def simulate_provider_outage(self, provider: str, duration_minutes: int = 5):
         """Simulate a provider outage for testing purposes"""
         original_reliability = self.provider_reliability.get(provider, 0.99)
         self.provider_reliability[provider] = 0.0

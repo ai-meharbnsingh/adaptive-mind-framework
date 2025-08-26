@@ -166,9 +166,7 @@ class EnhancedMockAPIKeyManager:
     async def validate_key_format(self, api_keys: Dict[str, str]) -> bool:
         """Mock key format validation"""
         for provider, key in api_keys.items():
-            if provider == "openai" and not (
-                key.startswith("sk-") and len(key) >= 20
-            ):
+            if provider == "openai" and not (key.startswith("sk-") and len(key) >= 20):
                 return False
             elif provider == "anthropic" and not (
                 key.startswith("sk-ant-") and len(key) >= 20
@@ -193,9 +191,7 @@ class EnhancedMockAPIKeyManager:
         }
         return audit_id
 
-    async def get_stored_keys(
-        self, session_id: str
-    ) -> Optional[Dict[str, str]]:
+    async def get_stored_keys(self, session_id: str) -> Optional[Dict[str, str]]:
         """Mock key retrieval"""
         if session_id in self._mock_sessions:
             session_data = self._mock_sessions[session_id]
@@ -203,9 +199,7 @@ class EnhancedMockAPIKeyManager:
                 return session_data["keys"]
         return None
 
-    async def get_session_info(
-        self, session_id: str
-    ) -> Optional[Dict[str, Any]]:
+    async def get_session_info(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Mock session info retrieval"""
         if session_id in self._mock_sessions:
             session_data = self._mock_sessions[session_id]
@@ -322,9 +316,7 @@ async def lifespan(app: FastAPI):
         app.state.timeseries_db_interface = timeseries_db_interface
         app.state.background_tasks = []
 
-        logger.info(
-            "✅ Session 8 Demo Backend initialization complete (Minimal Mode)"
-        )
+        logger.info("✅ Session 8 Demo Backend initialization complete (Minimal Mode)")
         yield
 
     except Exception as e:
@@ -618,9 +610,7 @@ async def dashboard_metrics():
     }
 
 
-@app.post(
-    "/api/validate-buyer-keys", response_model=BuyerKeyValidationResponse
-)
+@app.post("/api/validate-buyer-keys", response_model=BuyerKeyValidationResponse)
 async def validate_buyer_keys(
     request: BuyerKeyValidationRequest, background_tasks: BackgroundTasks
 ):
@@ -637,9 +627,7 @@ async def validate_buyer_keys(
         api_key_manager = components.api_key_manager
 
         # Basic format validation
-        format_validation = await api_key_manager.validate_key_format(
-            request.api_keys
-        )
+        format_validation = await api_key_manager.validate_key_format(request.api_keys)
         if not format_validation:
             raise HTTPException(
                 status_code=400, detail="Invalid API key format detected"
@@ -655,11 +643,7 @@ async def validate_buyer_keys(
         for provider, key in request.api_keys.items():
             try:
                 # Basic format check (more detailed validation would happen in real usage)
-                if (
-                    provider == "openai"
-                    and key.startswith("sk-")
-                    and len(key) >= 20
-                ):
+                if provider == "openai" and key.startswith("sk-") and len(key) >= 20:
                     valid_keys[provider] = True
                 elif (
                     provider == "anthropic"
@@ -667,11 +651,7 @@ async def validate_buyer_keys(
                     and len(key) >= 20
                 ):
                     valid_keys[provider] = True
-                elif (
-                    provider == "google"
-                    and key.startswith("AIza")
-                    and len(key) >= 20
-                ):
+                elif provider == "google" and key.startswith("AIza") and len(key) >= 20:
                     valid_keys[provider] = True
                 else:
                     valid_keys[provider] = False
@@ -682,9 +662,7 @@ async def validate_buyer_keys(
 
         # Check if at least one key is valid
         if not any(valid_keys.values()):
-            raise HTTPException(
-                status_code=400, detail="No valid API keys provided"
-            )
+            raise HTTPException(status_code=400, detail="No valid API keys provided")
 
         # Log security audit event
         background_tasks.add_task(
@@ -713,9 +691,7 @@ async def validate_buyer_keys(
         raise
     except Exception as e:
         logger.error(f"❌ Buyer key validation failed: {str(e)}")
-        return BuyerKeyValidationResponse(
-            success=False, valid_keys={}, error=str(e)
-        )
+        return BuyerKeyValidationResponse(success=False, valid_keys={}, error=str(e))
 
 
 @app.post("/api/test-buyer-connection", response_model=ConnectionTestResponse)
@@ -726,9 +702,7 @@ async def test_buyer_connection(
     Tests connection to AI providers using buyer's API keys
     """
     try:
-        logger.info(
-            f"🚀 Starting connection test for session: {request.session_id}"
-        )
+        logger.info(f"🚀 Starting connection test for session: {request.session_id}")
 
         # Get components
         components = app.state.demo_components
@@ -763,21 +737,15 @@ async def test_buyer_connection(
                 providers_tested.append(provider)
 
             except Exception as e:
-                logger.warning(
-                    f"Connection test failed for {provider}: {str(e)}"
-                )
+                logger.warning(f"Connection test failed for {provider}: {str(e)}")
                 test_results[provider] = {"status": "failed", "error": str(e)}
 
         # Check if at least one connection succeeded
         successful_connections = [
-            p
-            for p, r in test_results.items()
-            if r.get("status") == "connected"
+            p for p, r in test_results.items() if r.get("status") == "connected"
         ]
         if not successful_connections:
-            raise HTTPException(
-                status_code=400, detail="All connection tests failed"
-            )
+            raise HTTPException(status_code=400, detail="All connection tests failed")
 
         # Log security audit event
         background_tasks.add_task(
@@ -791,9 +759,7 @@ async def test_buyer_connection(
             },
         )
 
-        logger.info(
-            f"✅ Connection test successful for session: {request.session_id}"
-        )
+        logger.info(f"✅ Connection test successful for session: {request.session_id}")
 
         return ConnectionTestResponse(
             success=True,
@@ -851,9 +817,7 @@ async def execute_enhanced_demo(
 
             # Verify keys are still valid and stored
             api_key_manager = components.api_key_manager
-            stored_keys = await api_key_manager.get_stored_keys(
-                request.session_id
-            )
+            stored_keys = await api_key_manager.get_stored_keys(request.session_id)
             if not stored_keys:
                 raise HTTPException(
                     status_code=400,
@@ -892,9 +856,7 @@ async def execute_enhanced_demo(
             response=demo_result.content,
             provider_used=demo_result.model_used,
             response_time_ms=response_time_ms,
-            cost_estimate=demo_result.metadata.get(
-                "estimated_cost_usd", 0.001
-            ),
+            cost_estimate=demo_result.metadata.get("estimated_cost_usd", 0.001),
             metrics={
                 "execution_context": execution_context,
                 "api_source": execution_context["api_source"],
@@ -904,9 +866,7 @@ async def execute_enhanced_demo(
             bias_score=0.05,  # Mock bias score
             learning_applied=True,
             failover_occurred=(
-                not demo_result.success
-                if request.enable_failover_demo
-                else False
+                not demo_result.success if request.enable_failover_demo else False
             ),
             context_preserved=True,
         )
@@ -946,9 +906,7 @@ async def execute_enhanced_demo(
         raise
     except Exception as e:
         logger.error(f"❌ Enhanced demo execution failed: {str(e)}")
-        raise HTTPException(
-            status_code=500, detail=f"Demo execution failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Demo execution failed: {str(e)}")
 
 
 @app.get("/api/session-status/{session_id}")
@@ -973,9 +931,7 @@ async def get_session_status(session_id: str):
             "session_created": (
                 session_info.get("created_at") if session_info else None
             ),
-            "expires_at": (
-                session_info.get("expires_at") if session_info else None
-            ),
+            "expires_at": (session_info.get("expires_at") if session_info else None),
             "security_level": "enterprise" if stored_keys else "standard",
             "status": "active",
         }
@@ -1117,9 +1073,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 "security_level": "enterprise",
             }
 
-            await websocket.send_json(
-                {"type": "metrics_update", "data": metrics}
-            )
+            await websocket.send_json({"type": "metrics_update", "data": metrics})
 
             # Wait 5 seconds before next update
             await asyncio.sleep(5)
@@ -1130,7 +1084,7 @@ async def websocket_endpoint(websocket: WebSocket):
         logger.error(f"WebSocket error: {str(e)}")
         try:
             await websocket.close()
-        except:
+        except Exception:
             pass
 
 
@@ -1259,9 +1213,7 @@ DEMO_RESULT_STYLES = """
 if __name__ == "__main__":
     import uvicorn
 
-    logger.info(
-        "🚀 Starting Adaptive Mind Session 8 Demo Backend (Minimal Mode)..."
-    )
+    logger.info("🚀 Starting Adaptive Mind Session 8 Demo Backend (Minimal Mode)...")
     logger.info("🌐 Access demo at: http://localhost:8000")
 
     uvicorn.run(

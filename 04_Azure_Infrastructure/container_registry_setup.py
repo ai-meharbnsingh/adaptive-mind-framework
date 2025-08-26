@@ -4,7 +4,6 @@
 
 import os
 import logging
-from azure.identity import DefaultAzureCredential
 from azure.mgmt.containerregistry import ContainerRegistryManagementClient
 from azure.mgmt.containerregistry.models import Registry, Sku, SkuName
 from azure.core.exceptions import HttpResponseError
@@ -12,8 +11,8 @@ from azure.core.exceptions import HttpResponseError
 # Configure professional logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,9 @@ class ContainerRegistryManager:
     for the Adaptive Mind project.
     """
 
-    def __init__(self, credential, subscription_id: str, resource_group_name: str, location: str):
+    def __init__(
+        self, credential, subscription_id: str, resource_group_name: str, location: str
+    ):
         """
         Initializes the ContainerRegistryManager.
 
@@ -43,10 +44,16 @@ class ContainerRegistryManager:
 
         logger.info("Initializing Container Registry management client...")
         try:
-            self.acr_client = ContainerRegistryManagementClient(self.credential, self.subscription_id)
-            logger.info("✅ Container Registry management client initialized successfully.")
+            self.acr_client = ContainerRegistryManagementClient(
+                self.credential, self.subscription_id
+            )
+            logger.info(
+                "✅ Container Registry management client initialized successfully."
+            )
         except Exception as e:
-            logger.error(f"❌ Failed to initialize Container Registry management client: {e}")
+            logger.error(
+                f"❌ Failed to initialize Container Registry management client: {e}"
+            )
             raise
 
     def create_container_registry(self) -> str | None:
@@ -60,29 +67,33 @@ class ContainerRegistryManager:
         Returns:
             str | None: The login server URL of the registry if created, otherwise None.
         """
-        logger.info(f"🚀 Preparing to create Container Registry '{self.registry_name}'...")
+        logger.info(
+            f"🚀 Preparing to create Container Registry '{self.registry_name}'..."
+        )
 
         registry_params = Registry(
             location=self.location,
-            sku=Sku(name=SkuName.PREMIUM),  # Premium for geo-replication and security features
+            sku=Sku(
+                name=SkuName.PREMIUM
+            ),  # Premium for geo-replication and security features
             admin_user_enabled=True,
             tags={
                 "Project": "Adaptive Mind Framework",
                 "Environment": "Production",
-                "Purpose": "Application Container Images"
-            }
+                "Purpose": "Application Container Images",
+            },
         )
 
         try:
             poller = self.acr_client.registries.begin_create(
-                self.resource_group_name,
-                self.registry_name,
-                registry_params
+                self.resource_group_name, self.registry_name, registry_params
             )
             logger.info("... Container Registry creation in progress...")
             registry_result = poller.result()
 
-            logger.info(f"✅ Successfully created Container Registry '{registry_result.name}'.")
+            logger.info(
+                f"✅ Successfully created Container Registry '{registry_result.name}'."
+            )
             logger.info(f"   Login Server: {registry_result.login_server}")
             return registry_result.login_server
 
@@ -103,20 +114,23 @@ class ContainerRegistryManager:
         logger.info(f"🔑 Retrieving admin credentials for '{self.registry_name}'...")
         try:
             creds = self.acr_client.registries.list_credentials(
-                self.resource_group_name,
-                self.registry_name
+                self.resource_group_name, self.registry_name
             )
             credentials = {
                 "username": creds.username,
-                "password": creds.passwords[0].value
+                "password": creds.passwords[0].value,
             }
-            logger.info(f"✅ Successfully retrieved admin username for '{self.registry_name}'.")
+            logger.info(
+                f"✅ Successfully retrieved admin username for '{self.registry_name}'."
+            )
             return credentials
         except HttpResponseError as e:
             logger.error(f"❌ Failed to retrieve ACR credentials: {e.message}")
             return {}
         except Exception as e:
-            logger.error(f"❌ An unexpected error occurred while retrieving ACR credentials: {e}")
+            logger.error(
+                f"❌ An unexpected error occurred while retrieving ACR credentials: {e}"
+            )
             return {}
 
 
@@ -133,14 +147,16 @@ def main():
     try:
         infra_manager = AzureInfrastructureManager()
         if not infra_manager.create_resource_group():
-            logger.error("❌ Prerequisite failed: Resource group not available. Aborting ACR setup.")
+            logger.error(
+                "❌ Prerequisite failed: Resource group not available. Aborting ACR setup."
+            )
             return
 
         acr_manager = ContainerRegistryManager(
             credential=infra_manager.credential,
             subscription_id=infra_manager.subscription_id,
             resource_group_name=infra_manager.resource_group_name,
-            location=infra_manager.location
+            location=infra_manager.location,
         )
 
         login_server = acr_manager.create_container_registry()
@@ -151,7 +167,7 @@ def main():
             logger.info("\n--- Container Registry Verification ---")
             logger.info(f"  Registry Name: {acr_manager.registry_name}")
             logger.info(f"  Login Server URL: {login_server}")
-            logger.info(f"  SKU: Premium")
+            logger.info("  SKU: Premium")
             if creds:
                 logger.info(f"  Admin Username: {creds['username']}")
                 logger.info("  Admin Password: [REDACTED FOR SECURITY]")

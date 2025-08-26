@@ -69,18 +69,14 @@ async def test_openai_agenerate_completion_success(
 @skip_if_no_key
 @pytest.mark.asyncio
 @pytest.mark.parametrize("test_model", ["gpt-4o", "gpt-3.5-turbo"])
-async def test_openai_model_override(
-    openai_provider: OpenAIProvider, test_model: str
-):
+async def test_openai_model_override(openai_provider: OpenAIProvider, test_model: str):
     messages = [
         ChatMessage(
             role="user",
             content=f"Confirm you are based on the {test_model} architecture.",
         )
     ]
-    response = await openai_provider.agenerate_completion(
-        messages, model=test_model
-    )
+    response = await openai_provider.agenerate_completion(messages, model=test_model)
     assert response.success is True
     assert isinstance(response.content, str)
     assert test_model in response.model_used.lower()

@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 import pytest
 from antifragile_framework.core.exceptions import NoResourcesAvailableError
 from antifragile_framework.core.resource_guard import (
-    MonitoredResource,
     ResourceGuard,
     ResourceState,
 )
@@ -97,9 +96,7 @@ def test_penalize_resource_method(guard: ResourceGuard):
     assert resource.state == ResourceState.COOLING_DOWN
 
 
-def test_health_score_healing(
-    guard: ResourceGuard, monkeypatch, resource_config
-):
+def test_health_score_healing(guard: ResourceGuard, monkeypatch, resource_config):
     """Tests that an available resource's health score recovers over time."""
     resources = guard.get_all_resources()
     res1 = resources[0]

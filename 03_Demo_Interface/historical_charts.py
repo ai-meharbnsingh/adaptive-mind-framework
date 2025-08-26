@@ -37,9 +37,7 @@ try:
 
     METRICS_AVAILABLE = True
 except ImportError:
-    print(
-        "Warning: Metrics modules not available. Using mock implementations."
-    )
+    print("Warning: Metrics modules not available. Using mock implementations.")
     METRICS_AVAILABLE = False
 
     # Mock implementations
@@ -134,12 +132,8 @@ class HistoricalChartsGenerator:
     Generates historical data for performance charts by querying the RealTimeMetricsCollector.
     """
 
-    def __init__(
-        self, metrics_collector: Optional[RealTimeMetricsCollector] = None
-    ):
-        self.metrics_collector = (
-            metrics_collector or RealTimeMetricsCollector()
-        )
+    def __init__(self, metrics_collector: Optional[RealTimeMetricsCollector] = None):
+        self.metrics_collector = metrics_collector or RealTimeMetricsCollector()
         logger.info("HistoricalChartsGenerator initialized.")
 
     async def get_response_time_history(
@@ -287,9 +281,7 @@ class HistoricalChartsGenerator:
         if not data:  # Fallback to mock data if no real data
             labels = [f"{i:02d}:00" for i in range(24)]
             data = [round(random.uniform(0.005, 0.045), 4) for _ in range(24)]
-            logger.warning(
-                "No real cost data found for charts. Using mock data."
-            )
+            logger.warning("No real cost data found for charts. Using mock data.")
 
         return ChartData(
             chart_id="costChart",
@@ -369,9 +361,7 @@ class HistoricalChartsGenerator:
         if not data:  # Fallback to mock data if no real data
             labels = [f"{i:02d}:00" for i in range(24)]
             data = [random.randint(0, 4) for _ in range(24)]
-            logger.warning(
-                "No real failover data found for charts. Using mock data."
-            )
+            logger.warning("No real failover data found for charts. Using mock data.")
 
         return ChartData(
             chart_id="failoverChart",
@@ -479,7 +469,7 @@ class HistoricalChartsGenerator:
         Retrieves provider usage distribution for a pie/doughnut chart.
         """
         end_time = datetime.now(timezone.utc)
-        start_time = end_time - timedelta(hours=time_window_hours)
+        end_time - timedelta(hours=time_window_hours)
 
         try:
             # This would need a different aggregation method for provider distribution
@@ -565,9 +555,7 @@ class HistoricalChartsGenerator:
                     }
                 else:
                     charts[name] = (
-                        chart.model_dump()
-                        if hasattr(chart, "model_dump")
-                        else chart
+                        chart.model_dump() if hasattr(chart, "model_dump") else chart
                     )
 
             return {
@@ -600,17 +588,13 @@ if __name__ == "__main__":
         print("\n--- Response Time History ---")
         rt_chart = await generator.get_response_time_history()
         chart_data = (
-            rt_chart.model_dump()
-            if hasattr(rt_chart, "model_dump")
-            else rt_chart
+            rt_chart.model_dump() if hasattr(rt_chart, "model_dump") else rt_chart
         )
         print(
             f"Chart ID: {chart_data.get('chart_id')}, Title: {chart_data.get('title')}"
         )
         if chart_data.get("labels"):
-            print(
-                f"Labels: {chart_data['labels'][-5:]}"
-            )  # Print last 5 labels
+            print(f"Labels: {chart_data['labels'][-5:]}")  # Print last 5 labels
         if chart_data.get("datasets") and chart_data["datasets"]:
             print(
                 f"Data: {chart_data['datasets'][0]['data'][-5:]}"
@@ -619,13 +603,9 @@ if __name__ == "__main__":
         print("\n--- Cost History ---")
         cost_chart = await generator.get_cost_history()
         cost_data = (
-            cost_chart.model_dump()
-            if hasattr(cost_chart, "model_dump")
-            else cost_chart
+            cost_chart.model_dump() if hasattr(cost_chart, "model_dump") else cost_chart
         )
-        print(
-            f"Chart ID: {cost_data.get('chart_id')}, Title: {cost_data.get('title')}"
-        )
+        print(f"Chart ID: {cost_data.get('chart_id')}, Title: {cost_data.get('title')}")
         if cost_data.get("labels"):
             print(f"Labels: {cost_data['labels'][-5:]}")
         if cost_data.get("datasets") and cost_data["datasets"]:
@@ -649,9 +629,7 @@ if __name__ == "__main__":
         print("\n--- Comprehensive Dashboard Data ---")
         dashboard_data = await generator.get_comprehensive_dashboard_data()
         print(f"Status: {dashboard_data.get('status')}")
-        print(
-            f"Charts available: {list(dashboard_data.get('charts', {}).keys())}"
-        )
+        print(f"Charts available: {list(dashboard_data.get('charts', {}).keys())}")
 
         print("\nHistoricalChartsGenerator demo completed.")
 

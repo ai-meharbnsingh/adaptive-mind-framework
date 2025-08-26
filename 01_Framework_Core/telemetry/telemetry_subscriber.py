@@ -26,9 +26,7 @@ class TelemetrySubscriber:
         if not isinstance(event_bus, EventBus):
             raise TypeError("event_bus must be an instance of EventBus")
         if not isinstance(db_interface, TimeSeriesDBInterface):
-            raise TypeError(
-                "db_interface must be an instance of TimeSeriesDBInterface"
-            )
+            raise TypeError("db_interface must be an instance of TimeSeriesDBInterface")
 
         self.event_bus = event_bus
         self.db_interface = db_interface

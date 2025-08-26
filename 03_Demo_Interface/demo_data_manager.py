@@ -212,9 +212,7 @@ class DemoDataManager:
         for scenario_key, scenario in default_scenarios.items():
             self.scenarios[scenario_key] = scenario
 
-        self.logger.info(
-            f"✅ Loaded {len(default_scenarios)} default demo scenarios"
-        )
+        self.logger.info(f"✅ Loaded {len(default_scenarios)} default demo scenarios")
         return default_scenarios
 
     async def _initialize_simulation_data(self):
@@ -226,19 +224,13 @@ class DemoDataManager:
             )
 
             # Cost simulation data
-            self.simulation_data["cost_data"] = (
-                self._generate_cost_simulation_data()
-            )
+            self.simulation_data["cost_data"] = self._generate_cost_simulation_data()
 
             # Provider performance metrics
-            self.simulation_data["provider_metrics"] = (
-                self._generate_provider_metrics()
-            )
+            self.simulation_data["provider_metrics"] = self._generate_provider_metrics()
 
             # Bias simulation data
-            self.simulation_data["bias_events"] = (
-                self._generate_bias_simulation_data()
-            )
+            self.simulation_data["bias_events"] = self._generate_bias_simulation_data()
 
             self.logger.info("✅ Simulation data initialized")
 
@@ -315,9 +307,7 @@ class DemoDataManager:
                     "bias_type": random.choice(
                         ["cost_bias", "performance_bias", "reliability_bias"]
                     ),
-                    "provider": random.choice(
-                        ["openai", "anthropic", "google"]
-                    ),
+                    "provider": random.choice(["openai", "anthropic", "google"]),
                     "impact_level": random.choice(["low", "medium", "high"]),
                     "confidence_score": round(random.uniform(0.7, 0.95), 3),
                     "description": f"Simulated bias event #{i + 1} for demonstration",
@@ -349,9 +339,7 @@ class DemoDataManager:
         """Add a custom demo scenario"""
         try:
             self.scenarios[scenario.scenario_id] = scenario
-            self.logger.info(
-                f"✅ Added custom scenario: {scenario.scenario_id}"
-            )
+            self.logger.info(f"✅ Added custom scenario: {scenario.scenario_id}")
             return True
         except Exception as e:
             self.logger.error(f"Error adding custom scenario: {e}")
@@ -367,9 +355,7 @@ class DemoDataManager:
             self.logger.error(f"Error updating simulation data: {e}")
             return False
 
-    async def get_scenario_success_criteria(
-        self, scenario_id: str
-    ) -> Dict[str, Any]:
+    async def get_scenario_success_criteria(self, scenario_id: str) -> Dict[str, Any]:
         """Get success criteria for a scenario"""
         scenario = self.scenarios.get(scenario_id)
         return scenario.success_criteria if scenario else {}
@@ -421,9 +407,7 @@ class DemoDataManager:
         return {
             "valid": is_valid,
             "criteria_met": validation_results,
-            "overall_score": sum(
-                1 for r in validation_results.values() if r["valid"]
-            )
+            "overall_score": sum(1 for r in validation_results.values() if r["valid"])
             / max(len(validation_results), 1),
         }
 
@@ -434,9 +418,7 @@ class DemoDataManager:
             "scenario_types": list(
                 set(s.scenario_type.value for s in self.scenarios.values())
             ),
-            "total_prompts": sum(
-                len(s.prompts) for s in self.scenarios.values()
-            ),
+            "total_prompts": sum(len(s.prompts) for s in self.scenarios.values()),
             "simulation_data_types": list(self.simulation_data.keys()),
             "is_initialized": self.is_initialized,
             "last_updated": datetime.now(timezone.utc).isoformat(),

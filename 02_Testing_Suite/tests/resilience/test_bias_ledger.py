@@ -116,9 +116,7 @@ def test_log_successful_request(mock_event_bus, mock_logger, basic_context):
     )  # NEW: Assert the new field
 
 
-def test_log_mitigated_success_request(
-    mock_event_bus, mock_logger, basic_context
-):
+def test_log_mitigated_success_request(mock_event_bus, mock_logger, basic_context):
     ledger = BiasLedger(event_bus=mock_event_bus)
     basic_context.mitigation_attempted = True
     basic_context.final_messages = [

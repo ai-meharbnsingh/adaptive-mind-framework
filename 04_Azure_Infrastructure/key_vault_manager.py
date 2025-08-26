@@ -4,17 +4,23 @@
 
 import os
 import logging
-from azure.identity import DefaultAzureCredential
 from azure.mgmt.keyvault import KeyVaultManagementClient
-from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters, VaultProperties, Sku, SkuName, AccessPolicyEntry, \
-    Permissions, SecretPermissions
+from azure.mgmt.keyvault.models import (
+    VaultCreateOrUpdateParameters,
+    VaultProperties,
+    Sku,
+    SkuName,
+    AccessPolicyEntry,
+    Permissions,
+    SecretPermissions,
+)
 from azure.core.exceptions import HttpResponseError
 
 # Configure professional logging (consistent with azure_setup.py)
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -25,7 +31,9 @@ class KeyVaultManager:
     Ensures secure storage of application secrets, connection strings, and buyer API keys.
     """
 
-    def __init__(self, credential, subscription_id: str, resource_group_name: str, location: str):
+    def __init__(
+        self, credential, subscription_id: str, resource_group_name: str, location: str
+    ):
         """
         Initializes the KeyVaultManager.
 
@@ -39,11 +47,15 @@ class KeyVaultManager:
         self.subscription_id = subscription_id
         self.resource_group_name = resource_group_name
         self.location = location
-        self.keyvault_name = f"kv-adaptive-mind-prod-{os.urandom(4).hex()}"  # Globally unique name
+        self.keyvault_name = (
+            f"kv-adaptive-mind-prod-{os.urandom(4).hex()}"  # Globally unique name
+        )
 
         logger.info("Initializing Key Vault management client...")
         try:
-            self.keyvault_client = KeyVaultManagementClient(self.credential, self.subscription_id)
+            self.keyvault_client = KeyVaultManagementClient(
+                self.credential, self.subscription_id
+            )
             logger.info("✅ Key Vault management client initialized successfully.")
         except Exception as e:
             logger.error(f"❌ Failed to initialize Key Vault management client: {e}")
@@ -62,7 +74,8 @@ class KeyVaultManager:
             bool: True if the Key Vault was created or updated successfully, False otherwise.
         """
         logger.info(
-            f"🚀 Preparing to create Key Vault '{self.keyvault_name}' in resource group '{self.resource_group_name}'...")
+            f"🚀 Preparing to create Key Vault '{self.keyvault_name}' in resource group '{self.resource_group_name}'..."
+        )
 
         try:
             # Get the object ID of the current service principal or user
@@ -79,20 +92,25 @@ class KeyVaultManager:
 
             if not tenant_id or not client_id:
                 logger.warning(
-                    "⚠️ AZURE_TENANT_ID or AZURE_CLIENT_ID not set. Access policy might not be correctly configured for the service principal.")
+                    "⚠️ AZURE_TENANT_ID or AZURE_CLIENT_ID not set. Access policy might not be correctly configured for the service principal."
+                )
                 # A placeholder for the object ID if not available. In a real scenario, this would cause failure.
                 object_id = "00000000-0000-0000-0000-000000000000"
             else:
                 # In a real scenario, you'd use `az ad sp show --id <client-id> --query objectId` to get this
                 # We will add a placeholder and document that it needs to be updated.
                 logger.info(
-                    "Setting access policy for the current service principal (placeholder). This should be updated for specific identities in production.")
+                    "Setting access policy for the current service principal (placeholder). This should be updated for specific identities in production."
+                )
                 # This is a complex part to automate without more context, so we'll make it explicit.
                 # The principle is sound, though: grant specific permissions.
-                object_id = os.getenv("AZURE_PRINCIPAL_OBJECT_ID")  # Best practice: set this in .env
+                object_id = os.getenv(
+                    "AZURE_PRINCIPAL_OBJECT_ID"
+                )  # Best practice: set this in .env
                 if not object_id:
                     logger.error(
-                        "❌ AZURE_PRINCIPAL_OBJECT_ID is not set. Cannot configure Key Vault access policy. Please set this environment variable.")
+                        "❌ AZURE_PRINCIPAL_OBJECT_ID is not set. Cannot configure Key Vault access policy. Please set this environment variable."
+                    )
                     return False
 
             vault_properties = VaultProperties(
@@ -109,14 +127,14 @@ class KeyVaultManager:
                                 SecretPermissions.SET,
                                 SecretPermissions.DELETE,
                                 SecretPermissions.RECOVER,
-                                SecretPermissions.PURGE
+                                SecretPermissions.PURGE,
                             ]
-                        )
+                        ),
                     )
                 ],
                 enable_soft_delete=True,
                 soft_delete_retention_in_days=90,
-                enable_purge_protection=True
+                enable_purge_protection=True,
             )
 
             parameters = VaultCreateOrUpdateParameters(
@@ -125,14 +143,12 @@ class KeyVaultManager:
                 tags={
                     "Project": "Adaptive Mind Framework",
                     "Environment": "Production",
-                    "Purpose": "Secrets Management"
-                }
+                    "Purpose": "Secrets Management",
+                },
             )
 
             poller = self.keyvault_client.vaults.begin_create_or_update(
-                self.resource_group_name,
-                self.keyvault_name,
-                parameters
+                self.resource_group_name, self.keyvault_name, parameters
             )
 
             result = poller.result()
@@ -141,10 +157,14 @@ class KeyVaultManager:
             return True
 
         except HttpResponseError as e:
-            logger.error(f"❌ An HTTP error occurred during Key Vault creation: {e.message}")
+            logger.error(
+                f"❌ An HTTP error occurred during Key Vault creation: {e.message}"
+            )
             return False
         except Exception as e:
-            logger.error(f"❌ An unexpected error occurred during Key Vault creation: {e}")
+            logger.error(
+                f"❌ An unexpected error occurred during Key Vault creation: {e}"
+            )
             return False
 
     def get_key_vault_uri(self) -> str | None:
@@ -156,7 +176,9 @@ class KeyVaultManager:
         """
         logger.info(f"🔍 Retrieving URI for Key Vault '{self.keyvault_name}'...")
         try:
-            vault = self.keyvault_client.vaults.get(self.resource_group_name, self.keyvault_name)
+            vault = self.keyvault_client.vaults.get(
+                self.resource_group_name, self.keyvault_name
+            )
             return vault.properties.vault_uri
         except HttpResponseError:
             logger.warning(f"⚠️ Key Vault '{self.keyvault_name}' not found.")
@@ -180,7 +202,9 @@ def main():
     try:
         infra_manager = AzureInfrastructureManager()
         if not infra_manager.create_resource_group():
-            logger.error("❌ Prerequisite failed: Could not ensure resource group exists. Aborting Key Vault setup.")
+            logger.error(
+                "❌ Prerequisite failed: Could not ensure resource group exists. Aborting Key Vault setup."
+            )
             return
 
         # Now, create the Key Vault Manager using the established resources
@@ -188,7 +212,7 @@ def main():
             credential=infra_manager.credential,
             subscription_id=infra_manager.subscription_id,
             resource_group_name=infra_manager.resource_group_name,
-            location=infra_manager.location
+            location=infra_manager.location,
         )
 
         success = kv_manager.create_key_vault()
@@ -208,7 +232,9 @@ def main():
             logger.error("❌ Failed to create the Azure Key Vault.")
 
     except ImportError:
-        logger.error("❌ This script should be run in an environment where 'azure_setup' is available.")
+        logger.error(
+            "❌ This script should be run in an environment where 'azure_setup' is available."
+        )
     except Exception as e:
         logger.error(f"A critical error occurred: {e}")
 

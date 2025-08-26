@@ -209,29 +209,22 @@ class CostOptimizer:
             benchmark_cost = self.industry_benchmarks["avg_cost_per_request"]
             cost_reduction_percent = max(
                 0,
-                ((benchmark_cost - avg_cost_per_request) / benchmark_cost)
-                * 100,
+                ((benchmark_cost - avg_cost_per_request) / benchmark_cost) * 100,
             )
 
             return {
                 "total_requests_overall": total_requests,
                 "total_cost_overall_usd": round(total_cost, 4),
-                "avg_cost_per_request_overall_usd": round(
-                    avg_cost_per_request, 6
-                ),
+                "avg_cost_per_request_overall_usd": round(avg_cost_per_request, 6),
                 "industry_benchmark_cost_per_request_usd": benchmark_cost,
-                "cost_reduction_vs_benchmark_percent": round(
-                    cost_reduction_percent, 1
-                ),
+                "cost_reduction_vs_benchmark_percent": round(cost_reduction_percent, 1),
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "cost_efficiency_grade": self._calculate_efficiency_grade(
                     cost_reduction_percent
                 ),
                 "monthly_projected_cost": round(total_cost * 30, 2),
                 "annual_projected_savings": round(
-                    (benchmark_cost - avg_cost_per_request)
-                    * total_requests
-                    * 365,
+                    (benchmark_cost - avg_cost_per_request) * total_requests * 365,
                     2,
                 ),
             }
@@ -293,9 +286,7 @@ class CostOptimizer:
 
             # Generate recommendations based on analysis
             for rule in self.optimization_rules:
-                if self._should_recommend_rule(
-                    rule, cost_analysis, current_mode
-                ):
+                if self._should_recommend_rule(rule, cost_analysis, current_mode):
                     recommendation = {
                         "title": rule["title"],
                         "description": rule["description"],
@@ -333,8 +324,7 @@ class CostOptimizer:
             recent_entries = [
                 entry
                 for entry in self.cost_history
-                if entry["timestamp"]
-                > datetime.now(timezone.utc) - timedelta(hours=1)
+                if entry["timestamp"] > datetime.now(timezone.utc) - timedelta(hours=1)
             ]
 
             if not recent_entries:
@@ -372,9 +362,7 @@ class CostOptimizer:
 
     # Helper methods
 
-    def _calculate_efficiency_grade(
-        self, cost_reduction_percent: float
-    ) -> str:
+    def _calculate_efficiency_grade(self, cost_reduction_percent: float) -> str:
         """Calculate efficiency grade based on cost reduction"""
         if cost_reduction_percent >= 40:
             return "A+"
@@ -443,10 +431,7 @@ class CostOptimizer:
             return True
 
         # Consider current mode
-        if (
-            current_mode == "evaluation"
-            and rule["rule_id"] == "provider_routing"
-        ):
+        if current_mode == "evaluation" and rule["rule_id"] == "provider_routing":
             return True
 
         return random.random() > 0.3
@@ -531,9 +516,7 @@ class CostOptimizer:
         else:
             return "stable"
 
-    def _calculate_efficiency_score(
-        self, avg_cost_per_request: float
-    ) -> float:
+    def _calculate_efficiency_score(self, avg_cost_per_request: float) -> float:
         """Calculate efficiency score (0-100)"""
         benchmark = self.industry_benchmarks["avg_cost_per_request"]
         target = self.industry_benchmarks["enterprise_target_cost"]
@@ -554,10 +537,7 @@ class CostOptimizer:
         alerts = []
 
         # High cost per request alert
-        if (
-            avg_cost_per_request
-            > self.industry_benchmarks["avg_cost_per_request"]
-        ):
+        if avg_cost_per_request > self.industry_benchmarks["avg_cost_per_request"]:
             alerts.append(
                 {
                     "type": "warning",
@@ -674,9 +654,7 @@ class CostOptimizer:
                     }
                 )
 
-            total_forecast = sum(
-                day["projected_cost"] for day in forecast_data
-            )
+            total_forecast = sum(day["projected_cost"] for day in forecast_data)
 
             return {
                 "forecast_period_days": days,
@@ -731,12 +709,10 @@ class CostOptimizer:
 
                 if provider_entries:
                     avg_cost = sum(
-                        entry.get("estimated_cost", 0)
-                        for entry in provider_entries
+                        entry.get("estimated_cost", 0) for entry in provider_entries
                     ) / len(provider_entries)
                     avg_tokens = sum(
-                        entry.get("total_tokens", 0)
-                        for entry in provider_entries
+                        entry.get("total_tokens", 0) for entry in provider_entries
                     ) / len(provider_entries)
                     cost_per_token = avg_cost / max(avg_tokens, 1)
                 else:
@@ -749,11 +725,7 @@ class CostOptimizer:
                     "avg_cost_per_request": round(avg_cost, 6),
                     "cost_per_token": round(cost_per_token, 8),
                     "market_share": round(
-                        (
-                            total_cost
-                            / max(sum(self.provider_costs.values()), 1)
-                        )
-                        * 100,
+                        (total_cost / max(sum(self.provider_costs.values()), 1)) * 100,
                         1,
                     ),
                 }
@@ -802,8 +774,7 @@ class CostOptimizer:
             today_entries = [
                 entry
                 for entry in self.cost_history
-                if entry["timestamp"].date()
-                == datetime.now(timezone.utc).date()
+                if entry["timestamp"].date() == datetime.now(timezone.utc).date()
             ]
 
             current_spend = sum(

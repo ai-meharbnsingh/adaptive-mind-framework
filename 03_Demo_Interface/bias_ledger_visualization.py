@@ -51,9 +51,7 @@ except ImportError:
         # Fall back to relative imports
         from connection_manager import PostgreSQLConnectionManager
     except ImportError:
-        print(
-            "Warning: PostgreSQLConnectionManager not found. Using mock for demo."
-        )
+        print("Warning: PostgreSQLConnectionManager not found. Using mock for demo.")
 
         # Mock class for demo purposes
         class PostgreSQLConnectionManager:
@@ -167,9 +165,7 @@ class BiasPatternAnalyzer:
             "analysis_confidence": min(len(events) / 100.0, 1.0),
         }
 
-    def _analyze_temporal_patterns(
-        self, events: List[BiasEvent]
-    ) -> Dict[str, Any]:
+    def _analyze_temporal_patterns(self, events: List[BiasEvent]) -> Dict[str, Any]:
         """Analyze temporal patterns in bias events"""
         hourly_distribution = defaultdict(int)
         daily_trends = defaultdict(list)
@@ -186,18 +182,14 @@ class BiasPatternAnalyzer:
         )[:3]
 
         return {
-            "peak_bias_hours": [
-                {"hour": h, "count": c} for h, c in peak_hours
-            ],
+            "peak_bias_hours": [{"hour": h, "count": c} for h, c in peak_hours],
             "hourly_distribution": dict(hourly_distribution),
             "daily_variety": {
                 day: len(set(types)) for day, types in daily_trends.items()
             },
         }
 
-    def _analyze_provider_correlations(
-        self, events: List[BiasEvent]
-    ) -> Dict[str, Any]:
+    def _analyze_provider_correlations(self, events: List[BiasEvent]) -> Dict[str, Any]:
         """Analyze correlations between provider performance and bias types"""
         provider_bias_matrix = defaultdict(lambda: defaultdict(int))
         provider_impact_scores = defaultdict(list)
@@ -223,9 +215,7 @@ class BiasPatternAnalyzer:
             "most_problematic_provider": most_problematic,
         }
 
-    def _analyze_impact_trends(
-        self, events: List[BiasEvent]
-    ) -> Dict[str, Any]:
+    def _analyze_impact_trends(self, events: List[BiasEvent]) -> Dict[str, Any]:
         """Analyze trends in bias impact over time"""
         if len(events) < 5:
             return {
@@ -241,8 +231,7 @@ class BiasPatternAnalyzer:
         # Calculate rolling average of impact scores
         window_size = min(10, len(sorted_events) // 2)
         impact_scores = [
-            self._impact_to_score(event.impact_level)
-            for event in sorted_events
+            self._impact_to_score(event.impact_level) for event in sorted_events
         ]
 
         rolling_averages = []
@@ -282,9 +271,7 @@ class BiasPatternAnalyzer:
             "impact_volatility": impact_volatility,
         }
 
-    def _generate_predictions(
-        self, events: List[BiasEvent]
-    ) -> List[Dict[str, Any]]:
+    def _generate_predictions(self, events: List[BiasEvent]) -> List[Dict[str, Any]]:
         """Generate predictions for future bias events"""
         if len(events) < 10:
             return [
@@ -317,9 +304,7 @@ class BiasPatternAnalyzer:
             if delta > 0:
                 time_deltas.append(delta)
 
-        avg_interval = (
-            np.mean(time_deltas) if time_deltas else 3600
-        )  # Default 1 hour
+        avg_interval = np.mean(time_deltas) if time_deltas else 3600  # Default 1 hour
 
         return [
             {
@@ -369,9 +354,7 @@ class LiveBiasLedgerVisualizer:
             self.db_manager = PostgreSQLConnectionManager()
             self.db_available = True
         except Exception as e:
-            logger.warning(
-                f"Database not available: {e}. Running in demo mode."
-            )
+            logger.warning(f"Database not available: {e}. Running in demo mode.")
             self.db_manager = None
             self.db_available = False
 
@@ -537,9 +520,7 @@ class LiveBiasLedgerVisualizer:
                 f"Loaded {len(reconstructed_events)} historical bias events from PostgreSQL."
             )
         except Exception as e:
-            logger.error(
-                f"Error loading historical bias events from database: {e}"
-            )
+            logger.error(f"Error loading historical bias events from database: {e}")
             # Fall back to mock data
             await self._generate_mock_historical_data()
 
@@ -577,9 +558,7 @@ class LiveBiasLedgerVisualizer:
             await self.db_manager.release_connection(conn)
             logger.debug(f"Persisted bias event {event.id} to database.")
         except Exception as e:
-            logger.error(
-                f"Error persisting bias event {event.id} to database: {e}"
-            )
+            logger.error(f"Error persisting bias event {event.id} to database: {e}")
 
     async def add_bias_event(self, event: BiasEvent) -> str:
         """Add a new bias event to the ledger with real-time processing and persistence"""
@@ -661,17 +640,11 @@ class LiveBiasLedgerVisualizer:
                 "real_time_metrics": self._get_real_time_metrics(),
                 "bias_timeline": self._generate_bias_timeline(events),
                 "provider_heatmap": self._generate_provider_heatmap(events),
-                "impact_distribution": self._generate_impact_distribution(
-                    events
-                ),
+                "impact_distribution": self._generate_impact_distribution(events),
                 "learning_progression": self._generate_learning_progression(),
-                "pattern_analysis": self.pattern_analyzer.analyze_patterns(
-                    events
-                ),
+                "pattern_analysis": self.pattern_analyzer.analyze_patterns(events),
                 "live_predictions": self._generate_live_predictions(events),
-                "cost_impact_analysis": self._generate_cost_impact_analysis(
-                    events
-                ),
+                "cost_impact_analysis": self._generate_cost_impact_analysis(events),
                 "antifragile_indicators": self._generate_antifragile_indicators(),
             }
 
@@ -699,15 +672,12 @@ class LiveBiasLedgerVisualizer:
             start_time = current_time - timedelta(minutes=time_window_minutes)
 
             # Create time intervals
-            intervals = []
             labels = []
             data = []
 
             for i in range(0, time_window_minutes, interval_minutes):
                 interval_start = start_time + timedelta(minutes=i)
-                interval_end = interval_start + timedelta(
-                    minutes=interval_minutes
-                )
+                interval_end = interval_start + timedelta(minutes=interval_minutes)
 
                 # Find events in this interval
                 interval_events = [
@@ -720,9 +690,7 @@ class LiveBiasLedgerVisualizer:
                 if interval_events:
                     avg_bias = np.mean(
                         [
-                            self.pattern_analyzer._impact_to_score(
-                                event.impact_level
-                            )
+                            self.pattern_analyzer._impact_to_score(event.impact_level)
                             / 5.0
                             for event in interval_events
                         ]
@@ -801,9 +769,7 @@ class LiveBiasLedgerVisualizer:
         base_score *= event.confidence_score
         return min(base_score, 1.0)
 
-    def _calculate_influence_radius(
-        self, event: BiasEvent
-    ) -> Dict[str, float]:
+    def _calculate_influence_radius(self, event: BiasEvent) -> Dict[str, float]:
         """Calculate the influence radius of this bias event on system components"""
         radius = {}
         radius["provider_" + event.provider] = 0.8
@@ -831,10 +797,7 @@ class LiveBiasLedgerVisualizer:
             total_events = self.metrics["total_bias_events"]
 
             self.metrics["avg_resolution_time"] = (
-                (
-                    (current_avg * (total_events - 1) + resolution_seconds)
-                    / total_events
-                )
+                ((current_avg * (total_events - 1) + resolution_seconds) / total_events)
                 if total_events > 0
                 else 0.0
             )
@@ -870,12 +833,8 @@ class LiveBiasLedgerVisualizer:
 
     def _get_real_time_metrics(self) -> Dict[str, Any]:
         """Get real-time metrics for the dashboard"""
-        self.metrics["learning_acceleration"] = (
-            self._calculate_learning_acceleration()
-        )
-        self.metrics["system_health_score"] = (
-            self._calculate_system_health_score()
-        )
+        self.metrics["learning_acceleration"] = self._calculate_learning_acceleration()
+        self.metrics["system_health_score"] = self._calculate_system_health_score()
 
         return {
             "total_bias_events": self.metrics["total_bias_events"],
@@ -887,9 +846,7 @@ class LiveBiasLedgerVisualizer:
             "system_health_score": self.metrics["system_health_score"],
         }
 
-    def _generate_bias_timeline(
-        self, events: List[BiasEvent]
-    ) -> List[Dict[str, Any]]:
+    def _generate_bias_timeline(self, events: List[BiasEvent]) -> List[Dict[str, Any]]:
         """Generate timeline data for bias events"""
         timeline = []
 
@@ -911,9 +868,7 @@ class LiveBiasLedgerVisualizer:
 
         return timeline[-50:]  # Last 50 events for performance
 
-    def _generate_provider_heatmap(
-        self, events: List[BiasEvent]
-    ) -> Dict[str, Any]:
+    def _generate_provider_heatmap(self, events: List[BiasEvent]) -> Dict[str, Any]:
         """Generate provider performance heatmap data"""
         provider_data = defaultdict(
             lambda: {"count": 0, "severity_sum": 0, "types": set()}
@@ -929,9 +884,7 @@ class LiveBiasLedgerVisualizer:
         heatmap = {}
         for provider, data in provider_data.items():
             avg_severity = (
-                data["severity_sum"] / data["count"]
-                if data["count"] > 0
-                else 0
+                data["severity_sum"] / data["count"] if data["count"] > 0 else 0
             )
             heatmap[provider] = {
                 "event_count": data["count"],
@@ -942,9 +895,7 @@ class LiveBiasLedgerVisualizer:
 
         return heatmap
 
-    def _generate_impact_distribution(
-        self, events: List[BiasEvent]
-    ) -> Dict[str, Any]:
+    def _generate_impact_distribution(self, events: List[BiasEvent]) -> Dict[str, Any]:
         """Generate impact level distribution data"""
         distribution = defaultdict(int)
 
@@ -980,14 +931,10 @@ class LiveBiasLedgerVisualizer:
             window = ledger_list[i - window_size : i]
 
             avg_learning_weight = (
-                np.mean([entry.learning_weight for entry in window])
-                if window
-                else 0.0
+                np.mean([entry.learning_weight for entry in window]) if window else 0.0
             )
             avg_adaptation_score = (
-                np.mean([entry.adaptation_score for entry in window])
-                if window
-                else 0.0
+                np.mean([entry.adaptation_score for entry in window]) if window else 0.0
             )
 
             progression.append(
@@ -1010,11 +957,7 @@ class LiveBiasLedgerVisualizer:
             trend = (
                 "improving"
                 if recent_adaptation > early_adaptation
-                else (
-                    "declining"
-                    if recent_adaptation < early_adaptation
-                    else "stable"
-                )
+                else ("declining" if recent_adaptation < early_adaptation else "stable")
             )
 
         return {
@@ -1023,9 +966,7 @@ class LiveBiasLedgerVisualizer:
             "learning_efficiency": self._calculate_learning_efficiency(),
         }
 
-    def _generate_live_predictions(
-        self, events: List[BiasEvent]
-    ) -> Dict[str, Any]:
+    def _generate_live_predictions(self, events: List[BiasEvent]) -> Dict[str, Any]:
         """Generate live predictions for demonstration"""
         if len(events) < 5:
             return {"status": "insufficient_data", "predictions": []}
@@ -1033,9 +974,7 @@ class LiveBiasLedgerVisualizer:
         base_predictions = self.pattern_analyzer._generate_predictions(events)
 
         demo_predictions = []
-        critical_events = [
-            e for e in events if e.impact_level == BiasImpact.CRITICAL
-        ]
+        critical_events = [e for e in events if e.impact_level == BiasImpact.CRITICAL]
         if critical_events:
             last_critical = critical_events[-1].timestamp
             time_since_critical = (
@@ -1058,18 +997,14 @@ class LiveBiasLedgerVisualizer:
             "prediction_engine_health": "optimal",
         }
 
-    def _generate_cost_impact_analysis(
-        self, events: List[BiasEvent]
-    ) -> Dict[str, Any]:
+    def _generate_cost_impact_analysis(self, events: List[BiasEvent]) -> Dict[str, Any]:
         """Generate cost impact analysis for bias events"""
         total_cost_impact = 0.0
         cost_by_provider = defaultdict(float)
         cost_by_type = defaultdict(float)
 
         for event in events:
-            cost_impact = event.cost_impact or self._estimate_cost_impact(
-                event
-            )
+            cost_impact = event.cost_impact or self._estimate_cost_impact(event)
             total_cost_impact += cost_impact
             cost_by_provider[event.provider] += cost_impact
             cost_by_type[event.bias_type.value] += cost_impact
@@ -1082,10 +1017,7 @@ class LiveBiasLedgerVisualizer:
             "cost_by_provider": dict(cost_by_provider),
             "cost_by_type": dict(cost_by_type),
             "potential_savings": potential_savings,
-            "roi_from_learning": (
-                potential_savings / max(total_cost_impact, 1)
-            )
-            * 100,
+            "roi_from_learning": (potential_savings / max(total_cost_impact, 1)) * 100,
             "cost_trend": self._calculate_cost_trend(events),
         }
 
@@ -1133,9 +1065,7 @@ class LiveBiasLedgerVisualizer:
 
         ledger_list = list(self.bias_ledger)
         recent_weights = [entry.learning_weight for entry in ledger_list[-10:]]
-        historical_weights = [
-            entry.learning_weight for entry in ledger_list[:-10]
-        ]
+        historical_weights = [entry.learning_weight for entry in ledger_list[:-10]]
 
         recent_avg = np.mean(recent_weights) if recent_weights else 0.0
         historical_avg = (
@@ -1151,9 +1081,7 @@ class LiveBiasLedgerVisualizer:
             return 0.5
 
         ledger_list = list(self.bias_ledger)
-        recent_entries = (
-            ledger_list[-20:] if len(ledger_list) >= 20 else ledger_list
-        )
+        recent_entries = ledger_list[-20:] if len(ledger_list) >= 20 else ledger_list
 
         avg_adaptation = (
             np.mean([entry.adaptation_score for entry in recent_entries])
@@ -1162,9 +1090,7 @@ class LiveBiasLedgerVisualizer:
         )
 
         resolved_events = [
-            entry
-            for entry in recent_entries
-            if entry.event.resolution_time is not None
+            entry for entry in recent_entries if entry.event.resolution_time is not None
         ]
         if resolved_events:
             avg_resolution_time = np.mean(
@@ -1183,9 +1109,7 @@ class LiveBiasLedgerVisualizer:
 
         learning_efficiency = self._calculate_learning_efficiency()
         health_score = (
-            avg_adaptation * 0.4
-            + resolution_score * 0.3
-            + learning_efficiency * 0.3
+            avg_adaptation * 0.4 + resolution_score * 0.3 + learning_efficiency * 0.3
         )
 
         return min(health_score, 1.0)
@@ -1203,13 +1127,11 @@ class LiveBiasLedgerVisualizer:
         efficiency_scores = []
         for bias_type, entries in bias_type_groups.items():
             if len(entries) >= 2:
-                adaptation_scores = [
-                    entry.adaptation_score for entry in entries
-                ]
+                adaptation_scores = [entry.adaptation_score for entry in entries]
                 if len(adaptation_scores) >= 2:
-                    improvement = (
-                        adaptation_scores[-1] - adaptation_scores[0]
-                    ) / max(adaptation_scores[0], 0.1)
+                    improvement = (adaptation_scores[-1] - adaptation_scores[0]) / max(
+                        adaptation_scores[0], 0.1
+                    )
                     efficiency_scores.append(max(0, improvement))
 
         return np.mean(efficiency_scores) if efficiency_scores else 0.1
@@ -1244,9 +1166,7 @@ class LiveBiasLedgerVisualizer:
 
             denominator = n * sum_x2 - sum_x * sum_x
             slope = (
-                (n * sum_xy - sum_x * sum_y) / denominator
-                if denominator != 0
-                else 0.0
+                (n * sum_xy - sum_x * sum_y) / denominator if denominator != 0 else 0.0
             )
 
             if slope > 0.1:
@@ -1257,27 +1177,15 @@ class LiveBiasLedgerVisualizer:
                 trend = "stable"
 
         recent_avg_cost = (
-            np.mean(
-                [
-                    self._estimate_cost_impact(event)
-                    for event in sorted_events[-5:]
-                ]
-            )
+            np.mean([self._estimate_cost_impact(event) for event in sorted_events[-5:]])
             if len(sorted_events) >= 5
             else (
-                np.mean(
-                    [
-                        self._estimate_cost_impact(event)
-                        for event in sorted_events
-                    ]
-                )
+                np.mean([self._estimate_cost_impact(event) for event in sorted_events])
                 if sorted_events
                 else 0.0
             )
         )
-        total_cost_impact = sum(
-            self._estimate_cost_impact(event) for event in events
-        )
+        total_cost_impact = sum(self._estimate_cost_impact(event) for event in events)
 
         return {
             "trend": trend,
@@ -1302,23 +1210,16 @@ class LiveBiasLedgerVisualizer:
             }
 
         ledger_list = list(self.bias_ledger)
-        adaptation_scores = [
-            entry.adaptation_score for entry in ledger_list[-20:]
-        ]
-        avg_adaptation = (
-            np.mean(adaptation_scores) if adaptation_scores else 0.0
-        )
+        adaptation_scores = [entry.adaptation_score for entry in ledger_list[-20:]]
+        avg_adaptation = np.mean(adaptation_scores) if adaptation_scores else 0.0
 
-        unique_bias_types = len(
-            set(entry.event.bias_type for entry in ledger_list)
-        )
+        unique_bias_types = len(set(entry.event.bias_type for entry in ledger_list))
         learning_diversity = min(unique_bias_types / len(BiasType), 1.0)
 
         high_impact_events = [
             entry
             for entry in ledger_list
-            if entry.event.impact_level
-            in [BiasImpact.CRITICAL, BiasImpact.HIGH]
+            if entry.event.impact_level in [BiasImpact.CRITICAL, BiasImpact.HIGH]
         ]
         resilience_score = (
             np.mean([entry.adaptation_score for entry in high_impact_events])
@@ -1334,15 +1235,13 @@ class LiveBiasLedgerVisualizer:
                 else 0.0
             )
             recent_performance = (
-                np.mean(
-                    [entry.adaptation_score for entry in ledger_list[-10:]]
-                )
+                np.mean([entry.adaptation_score for entry in ledger_list[-10:]])
                 if ledger_list[-10:]
                 else 0.0
             )
-            antifragile_growth = (
-                recent_performance - early_performance
-            ) / max(early_performance, 0.1)
+            antifragile_growth = (recent_performance - early_performance) / max(
+                early_performance, 0.1
+            )
 
         antifragile_score = (
             avg_adaptation * 0.3
@@ -1371,8 +1270,7 @@ class LiveBiasLedgerVisualizer:
         high_stress_events = [
             entry
             for entry in ledger_list
-            if entry.event.impact_level
-            in [BiasImpact.CRITICAL, BiasImpact.HIGH]
+            if entry.event.impact_level in [BiasImpact.CRITICAL, BiasImpact.HIGH]
         ]
 
         if not high_stress_events:
@@ -1433,9 +1331,7 @@ class LiveBiasLedgerVisualizer:
         evolution_score = adaptation_evolution * 0.6 + learning_evolution * 0.4
         return max(0, min(evolution_score, 1.0))
 
-    async def subscribe_to_updates(
-        self, subscription_id: str
-    ) -> asyncio.Queue:
+    async def subscribe_to_updates(self, subscription_id: str) -> asyncio.Queue:
         """Subscribe to real-time bias ledger updates"""
         queue = asyncio.Queue(maxsize=100)
         self.active_subscriptions[subscription_id] = queue
@@ -1499,13 +1395,10 @@ class BiasLedgerDemoGenerator:
                 ),
             },
             corrective_action=(
-                "Automatic failover initiated"
-                if random.random() > 0.6
-                else None
+                "Automatic failover initiated" if random.random() > 0.6 else None
             ),
             resolution_time=(
-                datetime.now(timezone.utc)
-                - timedelta(minutes=random.randint(1, 30))
+                datetime.now(timezone.utc) - timedelta(minutes=random.randint(1, 30))
                 if random.random() > 0.4
                 else None
             ),
@@ -1589,16 +1482,12 @@ if __name__ == "__main__":
         try:
             print("\n" + "=" * 80)
             print("ADAPTIVE MIND FRAMEWORK - LIVE BIAS LEDGER DEMONSTRATION")
-            print(
-                "SESSION 8 - Advanced Demo Features (Version 2.2.1 - Fixed Imports)"
-            )
+            print("SESSION 8 - Advanced Demo Features (Version 2.2.1 - Fixed Imports)")
             print("=" * 80)
 
             # Populate with demo data
             print("🔄 Populating bias ledger with demo events...")
-            await demo_generator.populate_demo_ledger_with_persistence(
-                visualizer, 10
-            )
+            await demo_generator.populate_demo_ledger_with_persistence(visualizer, 10)
 
             # Simulate framework integration events
             print("🔗 Simulating framework integration events...")
@@ -1618,22 +1507,16 @@ if __name__ == "__main__":
             viz_data = await visualizer.get_real_time_visualization_data()
 
             # Display summary metrics
-            print(f"\n📈 REAL-TIME METRICS:")
+            print("\n📈 REAL-TIME METRICS:")
             metrics = viz_data["real_time_metrics"]
             print(f"  Total Events: {metrics['total_bias_events']}")
             print(f"  Unique Bias Types: {metrics['unique_bias_types']}")
-            print(
-                f"  System Health Score: {metrics['system_health_score']:.3f}"
-            )
-            print(
-                f"  Learning Acceleration: {metrics['learning_acceleration']:.3f}"
-            )
-            print(
-                f"  Database Available: {viz_data['metadata']['database_available']}"
-            )
+            print(f"  System Health Score: {metrics['system_health_score']:.3f}")
+            print(f"  Learning Acceleration: {metrics['learning_acceleration']:.3f}")
+            print(f"  Database Available: {viz_data['metadata']['database_available']}")
 
             # Display antifragile indicators
-            print(f"\n🛡️  ANTIFRAGILE INDICATORS:")
+            print("\n🛡️  ANTIFRAGILE INDICATORS:")
             antifragile = viz_data["antifragile_indicators"]
             print(
                 f"  Antifragile Score: {antifragile.get('antifragile_score', 0.0):.3f}"
@@ -1644,9 +1527,7 @@ if __name__ == "__main__":
             print(
                 f"  Learning Diversity: {antifragile.get('learning_diversity', 0.0):.3f}"
             )
-            print(
-                f"  Resilience Score: {antifragile.get('resilience_score', 0.0):.3f}"
-            )
+            print(f"  Resilience Score: {antifragile.get('resilience_score', 0.0):.3f}")
 
             print("\n" + "=" * 80)
             print("✅ BIAS LEDGER DEMONSTRATION COMPLETE")

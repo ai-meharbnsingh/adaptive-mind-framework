@@ -2,16 +2,104 @@ PROJECT STRUCTURE
 ==================================================
 Project: Adaptive_Mind
 Location: D:\Users\OMEN\Final_MULTI AI ANTIFRAGILE\PRoject Working\Adaptive_Mind
-Generated: 2025-08-25 18:53:59
+Generated: 2025-08-26 20:17:07
 Max Depth: 5
 
 📁 Adaptive_Mind/
 ├── 📁 .pytest_cache
 │   ├── 📁 v
 │   │   └── 📁 cache
+│   │       ├── 📄 lastfailed
 │   │       └── 📄 nodeids
 │   ├── 📄 CACHEDIR.TAG
 │   └── 📄 README.md
+├── 📁 .ruff_cache
+│   ├── 📁 0.12.10
+│   │   ├── 📄 10218044200725795872
+│   │   ├── 📄 10221688869026577356
+│   │   ├── 📄 10293596908303284445
+│   │   ├── 📄 10359892776236933669
+│   │   ├── 📄 1036319537804561053
+│   │   ├── 📄 10579116007003079840
+│   │   ├── 📄 10795805242229941780
+│   │   ├── 📄 10832994382735450986
+│   │   ├── 📄 10901542814784176070
+│   │   ├── 📄 11100191456114223602
+│   │   ├── 📄 11264510614620173927
+│   │   ├── 📄 11274628421332701161
+│   │   ├── 📄 11552536601225022978
+│   │   ├── 📄 11687247054149904277
+│   │   ├── 📄 11691471038177935698
+│   │   ├── 📄 11907787001714766945
+│   │   ├── 📄 12228258682746778155
+│   │   ├── 📄 12346278950673979137
+│   │   ├── 📄 12751464184137947558
+│   │   ├── 📄 12790328597806638236
+│   │   ├── 📄 12797988841008753898
+│   │   ├── 📄 13492185574042540883
+│   │   ├── 📄 13582147693559375612
+│   │   ├── 📄 13628676074126532244
+│   │   ├── 📄 13809672328441686782
+│   │   ├── 📄 14076645809421922207
+│   │   ├── 📄 14435237191124466038
+│   │   ├── 📄 15339819737190423853
+│   │   ├── 📄 15612931779543534852
+│   │   ├── 📄 15811148987947300817
+│   │   ├── 📄 15845224759834757390
+│   │   ├── 📄 15913247865460133822
+│   │   ├── 📄 15944056538947170588
+│   │   ├── 📄 1601727921883508552
+│   │   ├── 📄 1639915515489599788
+│   │   ├── 📄 16516791209306250564
+│   │   ├── 📄 16779868180778454576
+│   │   ├── 📄 17332320316252711431
+│   │   ├── 📄 17581295640107093696
+│   │   ├── 📄 17821792626639189117
+│   │   ├── 📄 17869859116039250189
+│   │   ├── 📄 17917439115944006402
+│   │   ├── 📄 18244955275277360407
+│   │   ├── 📄 1824564897333095573
+│   │   ├── 📄 18426003918504647064
+│   │   ├── 📄 1848762138376207003
+│   │   ├── 📄 2043204426762554044
+│   │   ├── 📄 2156594725614630069
+│   │   ├── 📄 2430945411356454556
+│   │   ├── 📄 2443180100787369371
+│   │   ├── 📄 2482885452019866584
+│   │   ├── 📄 2592370351981807648
+│   │   ├── 📄 2709283776866169006
+│   │   ├── 📄 2763974279636707366
+│   │   ├── 📄 3842644774705363745
+│   │   ├── 📄 3985967982066476174
+│   │   ├── 📄 4512949183458499111
+│   │   ├── 📄 4594396560649020406
+│   │   ├── 📄 476066359552020425
+│   │   ├── 📄 4812702813729551683
+│   │   ├── 📄 4910870682351253781
+│   │   ├── 📄 5685078068279223216
+│   │   ├── 📄 5699938837898519632
+│   │   ├── 📄 5760697007265044330
+│   │   ├── 📄 5770369884070456051
+│   │   ├── 📄 6077892066229549169
+│   │   ├── 📄 6245907682777806823
+│   │   ├── 📄 631392182374355805
+│   │   ├── 📄 7221050403110886916
+│   │   ├── 📄 7458470600076473539
+│   │   ├── 📄 7467381441842231690
+│   │   ├── 📄 7596362053987845376
+│   │   ├── 📄 7789114181935932219
+│   │   ├── 📄 8325534389114921634
+│   │   ├── 📄 8338890016178329885
+│   │   ├── 📄 8349703362016701241
+│   │   ├── 📄 8355443131116328948
+│   │   ├── 📄 8891991675250960705
+│   │   ├── 📄 8991664982169466140
+│   │   ├── 📄 9053096080490721747
+│   │   ├── 📄 9092787621439113461
+│   │   ├── 📄 9356846479115245943
+│   │   ├── 📄 9535224146420636050
+│   │   └── 📄 9668632529235441332
+│   └── 📄 CACHEDIR.TAG
 ├── 📁 01_Framework_Core
 │   ├── 📁 antifragile_framework
 │   │   ├── 📁 api
@@ -68,6 +156,48 @@ Max Depth: 5
 │   │   └── 📄 time_series_db_interface.py
 │   └── 📄 __init__.py
 ├── 📁 02_Testing_Suite
+│   ├── 📁 .pytest_cache
+│   │   ├── 📁 v
+│   │   │   └── 📁 cache
+│   │   │       └── 📄 nodeids
+│   │   ├── 📄 CACHEDIR.TAG
+│   │   └── 📄 README.md
+│   ├── 📁 htmlcov
+│   │   ├── 📄 coverage_html.js
+│   │   ├── 📄 d_0f99ca1b24b62e4a___init___py.html
+│   │   ├── 📄 d_0f99ca1b24b62e4a_bias_ledger_py.html
+│   │   ├── 📄 d_0f99ca1b24b62e4a_llm_based_rewriter_py.html
+│   │   ├── 📄 d_0f99ca1b24b62e4a_prompt_rewriter_py.html
+│   │   ├── 📄 d_830cb59d1d26021e___init___py.html
+│   │   ├── 📄 d_830cb59d1d26021e_claude_adapter_py.html
+│   │   ├── 📄 d_830cb59d1d26021e_gemini_adapter_py.html
+│   │   ├── 📄 d_830cb59d1d26021e_openai_adapter_py.html
+│   │   ├── 📄 d_8553ff26124ffb6e___init___py.html
+│   │   ├── 📄 d_8553ff26124ffb6e_config_loader_py.html
+│   │   ├── 📄 d_8553ff26124ffb6e_schemas_py.html
+│   │   ├── 📄 d_c455d34361a17ae7___init___py.html
+│   │   ├── 📄 d_cc22502b9d8c7ed4___init___py.html
+│   │   ├── 📄 d_cc22502b9d8c7ed4_api_abstraction_layer_py.html
+│   │   ├── 📄 d_cc22502b9d8c7ed4_provider_registry_py.html
+│   │   ├── 📄 d_cda908b90c8ac573___init___py.html
+│   │   ├── 📄 d_cda908b90c8ac573_framework_api_py.html
+│   │   ├── 📄 d_d45d0cae3731fe7e___init___py.html
+│   │   ├── 📄 d_d45d0cae3731fe7e_circuit_breaker_py.html
+│   │   ├── 📄 d_d45d0cae3731fe7e_exceptions_py.html
+│   │   ├── 📄 d_d45d0cae3731fe7e_failover_engine_py.html
+│   │   ├── 📄 d_d45d0cae3731fe7e_learning_engine_py.html
+│   │   ├── 📄 d_d45d0cae3731fe7e_online_learning_subscriber_py.html
+│   │   ├── 📄 d_d45d0cae3731fe7e_provider_ranking_engine_py.html
+│   │   ├── 📄 d_d45d0cae3731fe7e_resource_guard_py.html
+│   │   ├── 📄 d_d45d0cae3731fe7e_schemas_py.html
+│   │   ├── 📄 d_fb7a06c4aff736b9___init___py.html
+│   │   ├── 📄 d_fb7a06c4aff736b9_error_parser_py.html
+│   │   ├── 📄 favicon_32.png
+│   │   ├── 📄 index.html
+│   │   ├── 📄 keybd_closed.png
+│   │   ├── 📄 keybd_open.png
+│   │   ├── 📄 status.json
+│   │   └── 📄 style.css
 │   ├── 📁 session_2_validation
 │   │   ├── 📁 validation_results
 │   │   ├── 📄 integration_test_runner.py
@@ -81,29 +211,30 @@ Max Depth: 5
 │   │   │   └── 📄 README.md
 │   │   ├── 📄 demo_telemetry_integration_test.py
 │   │   └── 📄 telemetry_integration_test.py
-│   └── 📁 tests
-│       ├── 📁 api
-│       │   └── 📄 test_e2e_resilience.py
-│       ├── 📁 config
-│       │   └── 📄 test_config_loader.py
-│       ├── 📁 core
-│       │   ├── 📄 test_circuit_breaker.py
-│       │   ├── 📄 test_failover_engine.py
-│       │   ├── 📄 test_learning_engine.py
-│       │   └── 📄 test_resource_guard.py
-│       ├── 📁 resilience
-│       │   ├── 📄 test_bias_ledger.py
-│       │   └── 📄 test_llm_based_rewriter.py
-│       ├── 📁 telemetry
-│       │   └── 📄 test_telemetry_subscriber.py
-│       ├── 📁 unit tests
-│       │   └── 📁 integration tests
-│       │       └── 📁 functional tests
-│       ├── 📁 utils
-│       │   └── 📄 test_error_parser.py
-│       ├── 📄 test_claude_adapter.py
-│       ├── 📄 test_gemini_adapter.py
-│       └── 📄 test_openai_adapter.py
+│   ├── 📁 tests
+│   │   ├── 📁 api
+│   │   │   └── 📄 test_e2e_resilience.py
+│   │   ├── 📁 config
+│   │   │   └── 📄 test_config_loader.py
+│   │   ├── 📁 core
+│   │   │   ├── 📄 test_circuit_breaker.py
+│   │   │   ├── 📄 test_failover_engine.py
+│   │   │   ├── 📄 test_learning_engine.py
+│   │   │   └── 📄 test_resource_guard.py
+│   │   ├── 📁 resilience
+│   │   │   ├── 📄 test_bias_ledger.py
+│   │   │   └── 📄 test_llm_based_rewriter.py
+│   │   ├── 📁 telemetry
+│   │   │   └── 📄 test_telemetry_subscriber.py
+│   │   ├── 📁 unit tests
+│   │   │   └── 📁 integration tests
+│   │   │       └── 📁 functional tests
+│   │   ├── 📁 utils
+│   │   │   └── 📄 test_error_parser.py
+│   │   ├── 📄 test_claude_adapter.py
+│   │   ├── 📄 test_gemini_adapter.py
+│   │   └── 📄 test_openai_adapter.py
+│   └── 📄 .coverage
 ├── 📁 03_Demo_Interface
 │   ├── 📁 .pytest_cache
 │   │   ├── 📁 v
@@ -125,7 +256,6 @@ Max Depth: 5
 │   ├── 📄 demo_mode_comparison.js
 │   ├── 📄 dual_mode_interface.js
 │   ├── 📄 enhanced_api_key_manager_methods.py
-│   ├── 📄 enhanced_demo_endpoints.py
 │   ├── 📄 enhanced_failover_demo.py
 │   ├── 📄 enhanced_interactive_demo.html
 │   ├── 📄 historical_charts.py
@@ -232,6 +362,247 @@ Max Depth: 5
 │   ├── 📄 Multi_AI_Platform_Strategic_Approach.md
 │   ├── 📄 Strategic_Buyer_Identification.md
 │   └── 📄 Technology_Company_Outreach.md
+├── 📁 DD_Data_Room_2025-08-25
+│   ├── 📁 Code_Quality
+│   │   ├── 📄 code_quality_2025-08-25.txt
+│   │   ├── 📄 test_coverage_2025-08-25.txt
+│   │   └── 📄 verified_test_coverage_2025-08-25.txt
+│   ├── 📁 Dependencies
+│   │   ├── 📄 licenses_audit_2025-08-25.json
+│   │   └── 📄 outdated_dependencies_2025-08-25.txt
+│   ├── 📁 Performance_Reports
+│   │   ├── 📄 performance_benchmark_1756192674.json
+│   │   └── 📄 validation_results_1756192687.json
+│   ├── 📁 Security_Reports
+│   │   ├── 📄 bandit_report_2025-08-25.txt
+│   │   ├── 📄 final_security_status_2025-08-25.txt
+│   │   ├── 📄 pip_audit_2025-08-25.json
+│   │   ├── 📄 pip_audit_clean_2025-08-25.txt
+│   │   └── 📄 pip_audit_final_2025-08-25.txt
+│   └── 📄 AUDIT_SUMMARY.txt
+├── 📁 htmlcov
+│   ├── 📄 coverage_html.js
+│   ├── 📄 d_03e3c72a3c32f0fc_demo_telemetry_integration_test_py.html
+│   ├── 📄 d_03e3c72a3c32f0fc_telemetry_integration_test_py.html
+│   ├── 📄 d_16d520a2ad3bc6b5___init___py.html
+│   ├── 📄 d_1774cd3fc8b79639___init___py.html
+│   ├── 📄 d_1774cd3fc8b79639_framework_api_py.html
+│   ├── 📄 d_246e314d70d1626f___init___py.html
+│   ├── 📄 d_246e314d70d1626f_framework_api_py.html
+│   ├── 📄 d_32858001728af21f_test_circuit_breaker_py.html
+│   ├── 📄 d_32858001728af21f_test_failover_engine_py.html
+│   ├── 📄 d_32858001728af21f_test_learning_engine_py.html
+│   ├── 📄 d_32858001728af21f_test_resource_guard_py.html
+│   ├── 📄 d_363be982b857dd38___init___py.html
+│   ├── 📄 d_363be982b857dd38_core_logger_py.html
+│   ├── 📄 d_363be982b857dd38_event_bus_py.html
+│   ├── 📄 d_363be982b857dd38_event_topics_py.html
+│   ├── 📄 d_363be982b857dd38_telemetry_subscriber_py.html
+│   ├── 📄 d_363be982b857dd38_time_series_db_interface_py.html
+│   ├── 📄 d_391626541ac8f107___init___py.html
+│   ├── 📄 d_391626541ac8f107_api_key_manager_py.html
+│   ├── 📄 d_391626541ac8f107_bias_ledger_visualization_py.html
+│   ├── 📄 d_391626541ac8f107_connection_manager_py.html
+│   ├── 📄 d_391626541ac8f107_context_validator_py.html
+│   ├── 📄 d_391626541ac8f107_cost_optimizer_py.html
+│   ├── 📄 d_391626541ac8f107_demo_backend_py.html
+│   ├── 📄 d_391626541ac8f107_demo_data_manager_py.html
+│   ├── 📄 d_391626541ac8f107_enhanced_api_key_manager_methods_py.html
+│   ├── 📄 d_391626541ac8f107_enhanced_demo_endpoints_py.html
+│   ├── 📄 d_391626541ac8f107_enhanced_failover_demo_py.html
+│   ├── 📄 d_391626541ac8f107_historical_charts_py.html
+│   ├── 📄 d_391626541ac8f107_performance_dashboard_py.html
+│   ├── 📄 d_391626541ac8f107_provider_ranking_system_py.html
+│   ├── 📄 d_391626541ac8f107_real_time_metrics_py.html
+│   ├── 📄 d_391626541ac8f107_websocket_handler_py.html
+│   ├── 📄 d_4cc5e0cb938f59b5___init___py.html
+│   ├── 📄 d_4cc5e0cb938f59b5_bias_ledger_py.html
+│   ├── 📄 d_4cc5e0cb938f59b5_llm_based_rewriter_py.html
+│   ├── 📄 d_4cc5e0cb938f59b5_prompt_rewriter_py.html
+│   ├── 📄 d_4f51a0590f3579da___init___py.html
+│   ├── 📄 d_4f51a0590f3579da_connection_manager_py.html
+│   ├── 📄 d_4f51a0590f3579da_postgres_timeseries_impl_py.html
+│   ├── 📄 d_6d1c449f04d575e6_test_e2e_resilience_py.html
+│   ├── 📄 d_6d9cee0fc8419ae8___init___py.html
+│   ├── 📄 d_6dcf8a67bf6ae1c7___init___py.html
+│   ├── 📄 d_6dcf8a67bf6ae1c7_api_abstraction_layer_py.html
+│   ├── 📄 d_6dcf8a67bf6ae1c7_provider_registry_py.html
+│   ├── 📄 d_77094cb7c61c4f7f___init___py.html
+│   ├── 📄 d_77094cb7c61c4f7f_error_parser_py.html
+│   ├── 📄 d_7fa6623463c7d7d6___init___py.html
+│   ├── 📄 d_7fa6623463c7d7d6_claude_adapter_py.html
+│   ├── 📄 d_7fa6623463c7d7d6_gemini_adapter_py.html
+│   ├── 📄 d_7fa6623463c7d7d6_openai_adapter_py.html
+│   ├── 📄 d_813e8bb0f98a25f2_prepare_session_context_py.html
+│   ├── 📄 d_813e8bb0f98a25f2_test_prepare_context_py.html
+│   ├── 📄 d_83e335ceeac7b960___init___py.html
+│   ├── 📄 d_83e335ceeac7b960_claude_adapter_py.html
+│   ├── 📄 d_83e335ceeac7b960_gemini_adapter_py.html
+│   ├── 📄 d_83e335ceeac7b960_openai_adapter_py.html
+│   ├── 📄 d_85986000a7e4c98c___init___py.html
+│   ├── 📄 d_88deafbbbf0e5fc8___init___py.html
+│   ├── 📄 d_88deafbbbf0e5fc8_bias_ledger_py.html
+│   ├── 📄 d_88deafbbbf0e5fc8_llm_based_rewriter_py.html
+│   ├── 📄 d_88deafbbbf0e5fc8_prompt_rewriter_py.html
+│   ├── 📄 d_897e9201a15e0c6b___init___py.html
+│   ├── 📄 d_897e9201a15e0c6b_provider_ranking_engine_py.html
+│   ├── 📄 d_9887c2f2fdc64873_test_claude_adapter_py.html
+│   ├── 📄 d_9887c2f2fdc64873_test_gemini_adapter_py.html
+│   ├── 📄 d_9887c2f2fdc64873_test_openai_adapter_py.html
+│   ├── 📄 d_a94a8fc5c20e6985___init___py.html
+│   ├── 📄 d_a94a8fc5c20e6985_api_abstraction_layer_py.html
+│   ├── 📄 d_c635f7bee0f38118___init___py.html
+│   ├── 📄 d_c635f7bee0f38118_config_loader_py.html
+│   ├── 📄 d_c635f7bee0f38118_schemas_py.html
+│   ├── 📄 d_c676cf6b7e0bc9be___init___py.html
+│   ├── 📄 d_c676cf6b7e0bc9be_api_abstraction_layer_py.html
+│   ├── 📄 d_c676cf6b7e0bc9be_provider_registry_py.html
+│   ├── 📄 d_c9e4dd51cf5be736_test_config_loader_py.html
+│   ├── 📄 d_ca2d4c00eb46a3d6___init___py.html
+│   ├── 📄 d_ca2d4c00eb46a3d6_circuit_breaker_py.html
+│   ├── 📄 d_ca2d4c00eb46a3d6_exceptions_py.html
+│   ├── 📄 d_ca2d4c00eb46a3d6_failover_engine_py.html
+│   ├── 📄 d_ca2d4c00eb46a3d6_online_learning_subscriber_py.html
+│   ├── 📄 d_ca2d4c00eb46a3d6_provider_ranking_engine_py.html
+│   ├── 📄 d_ca2d4c00eb46a3d6_resource_guard_py.html
+│   ├── 📄 d_ca2d4c00eb46a3d6_schemas_py.html
+│   ├── 📄 d_cd8465957c88eebc___init___py.html
+│   ├── 📄 d_d4a8c1798b85a8a9_test_bias_ledger_py.html
+│   ├── 📄 d_d4a8c1798b85a8a9_test_llm_based_rewriter_py.html
+│   ├── 📄 d_dc25ba7ec1f552bf___init___py.html
+│   ├── 📄 d_dc25ba7ec1f552bf_config_loader_py.html
+│   ├── 📄 d_dc25ba7ec1f552bf_schemas_py.html
+│   ├── 📄 d_dfa24c0170af7e98_test_error_parser_py.html
+│   ├── 📄 d_e0e3eb3675d114a2_core_logger_py.html
+│   ├── 📄 d_e0e3eb3675d114a2_event_bus_py.html
+│   ├── 📄 d_e0e3eb3675d114a2_event_topics_py.html
+│   ├── 📄 d_e0e3eb3675d114a2_telemetry_subscriber_py.html
+│   ├── 📄 d_e0e3eb3675d114a2_time_series_db_interface_py.html
+│   ├── 📄 d_e4eccf20b8158c61___init___py.html
+│   ├── 📄 d_e4eccf20b8158c61_error_parser_py.html
+│   ├── 📄 d_fc237bb5843695e0___init___py.html
+│   ├── 📄 d_fc237bb5843695e0_circuit_breaker_py.html
+│   ├── 📄 d_fc237bb5843695e0_exceptions_py.html
+│   ├── 📄 d_fc237bb5843695e0_failover_engine_py.html
+│   ├── 📄 d_fc237bb5843695e0_learning_engine_py.html
+│   ├── 📄 d_fc237bb5843695e0_online_learning_subscriber_py.html
+│   ├── 📄 d_fc237bb5843695e0_provider_ranking_engine_py.html
+│   ├── 📄 d_fc237bb5843695e0_resource_guard_py.html
+│   ├── 📄 d_fc237bb5843695e0_schemas_py.html
+│   ├── 📄 d_fd56f310fc479024_test_telemetry_subscriber_py.html
+│   ├── 📄 favicon_32.png
+│   ├── 📄 index.html
+│   ├── 📄 keybd_closed.png
+│   ├── 📄 keybd_open.png
+│   ├── 📄 main_backup_py.html
+│   ├── 📄 main_py.html
+│   ├── 📄 show_structure_py.html
+│   ├── 📄 status.json
+│   └── 📄 style.css
+├── 📁 src
+│   └── 📁 adaptive-mind-framework
+│       ├── 📁 adaptive_mind_framework.egg-info
+│       │   ├── 📄 dependency_links.txt
+│       │   ├── 📄 PKG-INFO
+│       │   ├── 📄 SOURCES.txt
+│       │   └── 📄 top_level.txt
+│       ├── 📁 ai_output
+│       │   └── 📁 AdaptiveMindProjectAssistant
+│       │       ├── 📄 2025-08-05_Full_Project_Remediation_Audits.md
+│       │       ├── 📄 2025-08-05_Phase1_OpenAI_Adapter_Audit.md
+│       │       ├── 📄 2025-08-06_Phase1_Claude_Adapter_Audit.md
+│       │       ├── 📄 2025-08-06_Phase1_OpenAI_Adapter_Audit.md
+│       │       └── 📄 2025-08-14_LearningEngine_Offline_Analysis_Design_and_Implementation.md
+│       ├── 📁 antifragile_framework
+│       │   ├── 📁 api
+│       │   │   ├── 📄 __init__.py
+│       │   │   └── 📄 framework_api.py
+│       │   ├── 📁 config
+│       │   │   ├── 📄 __init__.py
+│       │   │   ├── 📄 config_loader.py
+│       │   │   ├── 📄 provider_profiles.json
+│       │   │   ├── 📄 resilience_config.yaml
+│       │   │   └── 📄 schemas.py
+│       │   ├── 📁 core
+│       │   │   ├── 📄 __init__.py
+│       │   │   ├── 📄 circuit_breaker.py
+│       │   │   ├── 📄 exceptions.py
+│       │   │   ├── 📄 failover_engine.py
+│       │   │   ├── 📄 learning_engine.py
+│       │   │   ├── 📄 online_learning_subscriber.py
+│       │   │   ├── 📄 provider_ranking_engine.py
+│       │   │   ├── 📄 resource_guard.py
+│       │   │   └── 📄 schemas.py
+│       │   ├── 📁 providers
+│       │   │   ├── 📁 provider_adapters
+│       │   │   ├── 📄 __init__.py
+│       │   │   ├── 📄 api_abstraction_layer.py
+│       │   │   ├── 📄 checkkkk.md
+│       │   │   └── 📄 provider_registry.py
+│       │   ├── 📁 resilience
+│       │   │   ├── 📄 __init__.py
+│       │   │   ├── 📄 bias_ledger.py
+│       │   │   ├── 📄 llm_based_rewriter.py
+│       │   │   └── 📄 prompt_rewriter.py
+│       │   ├── 📁 utils
+│       │   │   ├── 📄 __init__.py
+│       │   │   └── 📄 error_parser.py
+│       │   └── 📄 __init__.py
+│       ├── 📁 config
+│       │   └── 📄 context_config.json
+│       ├── 📁 docs
+│       │   ├── 📁 commercial
+│       │   │   └── 📄 framework_overview.md
+│       │   ├── 📄 performance_benchmarking.md
+│       │   ├── 📄 README_learning_engine.md
+│       │   ├── 📄 README_phase0.md
+│       │   └── 📄 README_phase1.md
+│       ├── 📁 performance_tests
+│       │   ├── 📄 locustfile.py
+│       │   └── 📄 validate_baseline.py
+│       ├── 📁 scripts
+│       │   ├── 📄 prepare_session_context.py
+│       │   └── 📄 test_prepare_context.py
+│       ├── 📁 telemetry
+│       │   ├── 📄 core_logger.py
+│       │   ├── 📄 event_bus.py
+│       │   ├── 📄 event_topics.py
+│       │   ├── 📄 telemetry_subscriber.py
+│       │   └── 📄 time_series_db_interface.py
+│       ├── 📁 tests
+│       │   ├── 📁 api
+│       │   │   └── 📄 test_e2e_resilience.py
+│       │   ├── 📁 config
+│       │   │   └── 📄 test_config_loader.py
+│       │   ├── 📁 core
+│       │   │   ├── 📄 test_circuit_breaker.py
+│       │   │   ├── 📄 test_failover_engine.py
+│       │   │   ├── 📄 test_learning_engine.py
+│       │   │   └── 📄 test_resource_guard.py
+│       │   ├── 📁 resilience
+│       │   │   ├── 📄 test_bias_ledger.py
+│       │   │   └── 📄 test_llm_based_rewriter.py
+│       │   ├── 📁 telemetry
+│       │   │   └── 📄 test_telemetry_subscriber.py
+│       │   ├── 📁 utils
+│       │   │   └── 📄 test_error_parser.py
+│       │   ├── 📄 test_claude_adapter.py
+│       │   ├── 📄 test_gemini_adapter.py
+│       │   └── 📄 test_openai_adapter.py
+│       ├── 📄 changelog.md
+│       ├── 📄 check_file.py
+│       ├── 📄 context_summary.md
+│       ├── 📄 debug_mock_issue.py
+│       ├── 📄 main.py
+│       ├── 📄 pyproject.toml
+│       ├── 📄 README.md
+│       ├── 📄 requirements.txt
+│       ├── 📄 run_server.py
+│       ├── 📄 server_errors.md
+│       ├── 📄 session_context_latest.md
+│       ├── 📄 show_structure.py
+│       ├── 📄 verify_keys.py
+│       └── 📄 xx.md
 ├── 📁 static
 │   ├── 📁 css
 │   ├── 📁 images
@@ -241,6 +612,7 @@ Max Depth: 5
 │       ├── 📄 demo_mode_comparison.js
 │       ├── 📄 dual_mode_interface.js
 │       └── 📄 roi_calculator.js
+├── 📄 .coverage
 ├── 📄 chk.md
 ├── 📄 CLaude Session 14.md
 ├── 📄 Complete Master Document Adaptive MInd.md
@@ -253,18 +625,19 @@ Max Depth: 5
 ├── 📄 index_backup.html
 ├── 📄 logo.png
 ├── 📄 main.py
-├── 📄 main_backup.py
 ├── 📄 MASTER_DEVELOPMENT_PLAN.md
 ├── 📄 next_sessin_context.md
 ├── 📄 performance_benchmark_1755315811.json
 ├── 📄 performance_benchmark_1755316267.json
+├── 📄 performance_benchmark_1756192674.json
 ├── 📄 project_structure.txt
 ├── 📄 README.md
 ├── 📄 requirements.txt
 ├── 📄 show_structure.py
 ├── 📄 validation_report.json
+├── 📄 validation_results_1756192687.json
 └── 📄 video.html
 
 ==================================================
-Total items displayed: 258
+Total items displayed: 631
 Generated by Project Structure Generator

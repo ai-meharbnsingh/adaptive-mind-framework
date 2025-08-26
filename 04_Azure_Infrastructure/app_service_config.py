@@ -6,16 +6,21 @@
 
 import os
 import logging
-from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
 from azure.mgmt.web import WebSiteManagementClient
-from azure.mgmt.web.models import AppServicePlan, Site, SiteConfig, ManagedServiceIdentity, ManagedServiceIdentityType
+from azure.mgmt.web.models import (
+    AppServicePlan,
+    Site,
+    SiteConfig,
+    ManagedServiceIdentity,
+    ManagedServiceIdentityType,
+)
 from azure.core.exceptions import HttpResponseError
 
 # Configure professional logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -26,7 +31,9 @@ class AppServiceManager:
     for the Adaptive Mind project.
     """
 
-    def __init__(self, credential, subscription_id: str, resource_group_name: str, location: str):
+    def __init__(
+        self, credential, subscription_id: str, resource_group_name: str, location: str
+    ):
         """
         Initializes the AppServiceManager.
 
@@ -46,7 +53,9 @@ class AppServiceManager:
 
         logger.info("Initializing Web Site management client...")
         try:
-            self.web_client = WebSiteManagementClient(self.credential, self.subscription_id)
+            self.web_client = WebSiteManagementClient(
+                self.credential, self.subscription_id
+            )
             logger.info("✅ Web Site management client initialized successfully.")
         except Exception as e:
             logger.error(f"❌ Failed to initialize Web Site management client: {e}")
@@ -74,21 +83,25 @@ class AppServiceManager:
                 "tier": "PremiumV2",
                 "size": "P1v2",
                 "family": "Pv2",
-                "capacity": 1  # Start with one instance, will auto-scale
+                "capacity": 1,  # Start with one instance, will auto-scale
             },
             kind="Linux",
             tags={
                 "Project": "Adaptive Mind Framework",
                 "Environment": "Production",
-                "Purpose": "Application Hosting"
-            }
+                "Purpose": "Application Hosting",
+            },
         )
 
         try:
             # Making this idempotent by checking for existence first
-            existing_plan = self.web_client.app_service_plans.get(self.resource_group_name, self.plan_name)
+            existing_plan = self.web_client.app_service_plans.get(
+                self.resource_group_name, self.plan_name
+            )
             if existing_plan:
-                logger.warning(f"⚠️ App Service Plan '{self.plan_name}' already exists. Using existing plan.")
+                logger.warning(
+                    f"⚠️ App Service Plan '{self.plan_name}' already exists. Using existing plan."
+                )
                 return existing_plan.id
         except HttpResponseError as e:
             if e.status_code == 404:
@@ -99,25 +112,34 @@ class AppServiceManager:
 
         try:
             poller = self.web_client.app_service_plans.begin_create_or_update(
-                self.resource_group_name,
-                self.plan_name,
-                plan_params
+                self.resource_group_name, self.plan_name, plan_params
             )
             logger.info("... App Service Plan creation in progress...")
             plan_result = poller.result()
 
-            logger.info(f"✅ Successfully created App Service Plan '{plan_result.name}'.")
+            logger.info(
+                f"✅ Successfully created App Service Plan '{plan_result.name}'."
+            )
             return plan_result.id
 
         except HttpResponseError as e:
-            logger.error(f"❌ An HTTP error occurred during App Service Plan creation: {e.message}")
+            logger.error(
+                f"❌ An HTTP error occurred during App Service Plan creation: {e.message}"
+            )
             return None
         except Exception as e:
-            logger.error(f"❌ An unexpected error occurred during App Service Plan creation: {e}")
+            logger.error(
+                f"❌ An unexpected error occurred during App Service Plan creation: {e}"
+            )
             return None
 
-    def create_web_app(self, app_service_plan_id: str, acr_login_server: str, acr_username: str, acr_password: str) -> \
-    tuple[str, str] | None:
+    def create_web_app(
+        self,
+        app_service_plan_id: str,
+        acr_login_server: str,
+        acr_username: str,
+        acr_password: str,
+    ) -> tuple[str, str] | None:
         """
         Creates the Web App (App Service) to host the containerized application.
 
@@ -136,16 +158,22 @@ class AppServiceManager:
 
         site_config = SiteConfig(
             app_settings=[
-                {"name": "DOCKER_REGISTRY_SERVER_URL", "value": f"https://{acr_login_server}"},
+                {
+                    "name": "DOCKER_REGISTRY_SERVER_URL",
+                    "value": f"https://{acr_login_server}",
+                },
                 {"name": "DOCKER_REGISTRY_SERVER_USERNAME", "value": acr_username},
                 {"name": "DOCKER_REGISTRY_SERVER_PASSWORD", "value": acr_password},
                 {"name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE", "value": "false"},
                 {"name": "DATABASE_URL", "value": "@Microsoft.KeyVault(SecretUri=...)"},
-                {"name": "TELEMETRY_DB_URL", "value": "@Microsoft.KeyVault(SecretUri=...)"},
+                {
+                    "name": "TELEMETRY_DB_URL",
+                    "value": "@Microsoft.KeyVault(SecretUri=...)",
+                },
             ],
             linux_fx_version=f"DOCKER|{docker_image_name}",
             always_on=True,
-            ftps_state="FtpsOnly"
+            ftps_state="FtpsOnly",
         )
 
         web_app_params = Site(
@@ -153,38 +181,45 @@ class AppServiceManager:
             server_farm_id=app_service_plan_id,
             site_config=site_config,
             https_only=True,
-            identity=ManagedServiceIdentity(type=ManagedServiceIdentityType.SYSTEM_ASSIGNED),
+            identity=ManagedServiceIdentity(
+                type=ManagedServiceIdentityType.SYSTEM_ASSIGNED
+            ),
             # AUDIT FIX: Enable Managed Identity
             tags={
                 "Project": "Adaptive Mind Framework",
                 "Environment": "Production",
-                "Purpose": "Application Instance"
-            }
+                "Purpose": "Application Instance",
+            },
         )
 
         try:
             poller = self.web_client.web_apps.begin_create_or_update(
-                self.resource_group_name,
-                self.app_name,
-                web_app_params
+                self.resource_group_name, self.app_name, web_app_params
             )
             logger.info("... Web App creation in progress...")
             web_app_result = poller.result()
 
             logger.info(
-                f"✅ Successfully created Web App '{web_app_result.name}' with System-Assigned Managed Identity.")
+                f"✅ Successfully created Web App '{web_app_result.name}' with System-Assigned Managed Identity."
+            )
 
             # The principal_id is the unique ID for this app's identity in Azure AD
             managed_identity_principal_id = web_app_result.identity.principal_id
-            logger.info(f"   Managed Identity Principal ID: {managed_identity_principal_id}")
+            logger.info(
+                f"   Managed Identity Principal ID: {managed_identity_principal_id}"
+            )
 
             return web_app_result.default_host_name, managed_identity_principal_id
 
         except HttpResponseError as e:
-            logger.error(f"❌ An HTTP error occurred during Web App creation: {e.message}")
+            logger.error(
+                f"❌ An HTTP error occurred during Web App creation: {e.message}"
+            )
             return None
         except Exception as e:
-            logger.error(f"❌ An unexpected error occurred during Web App creation: {e}")
+            logger.error(
+                f"❌ An unexpected error occurred during Web App creation: {e}"
+            )
             return None
 
 
@@ -205,23 +240,29 @@ def main():
         infra_manager.create_resource_group()
 
         acr_manager = ContainerRegistryManager(
-            infra_manager.credential, infra_manager.subscription_id, infra_manager.resource_group_name,
-            infra_manager.location
+            infra_manager.credential,
+            infra_manager.subscription_id,
+            infra_manager.resource_group_name,
+            infra_manager.location,
         )
         login_server = acr_manager.create_container_registry()
         acr_creds = acr_manager.get_registry_credentials()
 
         app_service_manager = AppServiceManager(
-            infra_manager.credential, infra_manager.subscription_id, infra_manager.resource_group_name,
-            infra_manager.location
+            infra_manager.credential,
+            infra_manager.subscription_id,
+            infra_manager.resource_group_name,
+            infra_manager.location,
         )
 
         plan_id = app_service_manager.create_app_service_plan()
         if plan_id:
-            logger.info(f"✅ App Service Plan '{app_service_manager.plan_name}' is ready.")
+            logger.info(
+                f"✅ App Service Plan '{app_service_manager.plan_name}' is ready."
+            )
 
             result = app_service_manager.create_web_app(
-                plan_id, login_server, acr_creds['username'], acr_creds['password']
+                plan_id, login_server, acr_creds["username"], acr_creds["password"]
             )
 
             if result:
@@ -231,7 +272,9 @@ def main():
                 logger.info(f"  Default URL: https://{app_hostname}")
                 logger.info(f"  Managed Identity Principal ID: {principal_id}")
                 logger.info("---------------------------------------------")
-                logger.info("✅ Azure App Service environment setup is complete and verified.")
+                logger.info(
+                    "✅ Azure App Service environment setup is complete and verified."
+                )
             else:
                 logger.error("❌ Failed to create the Web App.")
         else:

@@ -29,9 +29,7 @@ from typing import Any, Dict, List, Optional
 
 CURRENT_DIR = Path(__file__).parent
 PROJECT_ROOT = CURRENT_DIR.parent.parent
-FRAMEWORK_CORE_PATH = (
-    PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
-)
+FRAMEWORK_CORE_PATH = PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
 DATABASE_LAYER_PATH = PROJECT_ROOT / "05_Database_Layer"
 TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
 
@@ -39,9 +37,7 @@ TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
 sys.path.insert(0, str(FRAMEWORK_CORE_PATH))
 sys.path.insert(0, str(DATABASE_LAYER_PATH))
 sys.path.insert(0, str(TELEMETRY_PATH))
-sys.path.insert(
-    0, str(CURRENT_DIR)
-)  # For sibling modules within 03_Demo_Interface
+sys.path.insert(0, str(CURRENT_DIR))  # For sibling modules within 03_Demo_Interface
 
 # Import TimeSeriesDBInterface (abstract base class, implemented by PostgreSQLTimeSeriesDB)
 # and UniversalEventSchema for structured logging of demo metrics
@@ -72,9 +68,7 @@ except ImportError as e:
 
         async def record_event(self, event_schema: Dict[str, Any]):
             self.records.append(event_schema)
-            logging.debug(
-                f"Mock DB recorded: {event_schema.get('event_type')}"
-            )
+            logging.debug(f"Mock DB recorded: {event_schema.get('event_type')}")
 
         async def query_events(
             self,
@@ -121,8 +115,7 @@ except ImportError as e:
                 ]
                 total_requests = len(relevant_events)
                 total_cost_usd = sum(
-                    e["payload"].get("cost_estimate", 0.0)
-                    for e in relevant_events
+                    e["payload"].get("cost_estimate", 0.0) for e in relevant_events
                 )
                 total_failovers = sum(
                     1
@@ -186,9 +179,7 @@ except ImportError as e:
             return []
 
     class UniversalEventSchema:
-        def __init__(
-            self, event_type, event_source, timestamp_utc, severity, payload
-        ):
+        def __init__(self, event_type, event_source, timestamp_utc, severity, payload):
             self.event_type = event_type
             self.event_source = event_source
             self.timestamp_utc = timestamp_utc
@@ -312,9 +303,7 @@ class RealTimeMetricsCollector:
 
         try:
             await self.timeseries_db.record_event(event_schema)
-            logger.debug(
-                f"Recorded demo execution metric for session {session_id}."
-            )
+            logger.debug(f"Recorded demo execution metric for session {session_id}.")
         except Exception as e:
             logger.error(
                 f"Failed to record demo execution metric for session {session_id}: {e}",
@@ -327,9 +316,7 @@ class RealTimeMetricsCollector:
         This provides a snapshot of current system health and performance.
         """
         if self.timeseries_db is None:
-            logger.warning(
-                "TimeSeriesDB not initialized. Cannot fetch live metrics."
-            )
+            logger.warning("TimeSeriesDB not initialized. Cannot fetch live metrics.")
             return self._get_mock_live_metrics()
 
         end_time = datetime.now(timezone.utc)
@@ -350,23 +337,17 @@ class RealTimeMetricsCollector:
 
             # These values might be None if no data, ensure default to 0.0 or 0
             total_requests = total_metrics.get("total_requests", 0)
-            avg_response_time_ms = total_metrics.get(
-                "avg_response_time_ms", 0.0
-            )
+            avg_response_time_ms = total_metrics.get("avg_response_time_ms", 0.0)
             total_cost_usd = total_metrics.get("total_cost_usd", 0.0)
             total_failovers = total_metrics.get("total_failovers", 0)
             latest_bias_score = total_metrics.get("latest_bias_score", 0.0)
 
             # Calculate additional summary metrics
             avg_cost_per_request = (
-                (total_cost_usd / total_requests)
-                if total_requests > 0
-                else 0.0
+                (total_cost_usd / total_requests) if total_requests > 0 else 0.0
             )
             failover_rate = (
-                (total_failovers / total_requests) * 100
-                if total_requests > 0
-                else 0.0
+                (total_failovers / total_requests) * 100 if total_requests > 0 else 0.0
             )
 
             return {
@@ -450,16 +431,12 @@ class RealTimeMetricsCollector:
             def __init__(self, metrics: Dict[str, Any]):
                 self.total_requests = metrics.get("total_requests", 0)
                 self.total_cost = metrics.get("total_cost_usd", 0.0)
-                self.avg_cost_per_request = metrics.get(
-                    "avg_cost_per_request", 0.0
-                )
+                self.avg_cost_per_request = metrics.get("avg_cost_per_request", 0.0)
                 self.failover_rate = metrics.get(
                     "failover_rate_percent", 0.0
                 )  # This is percentage
                 self.total_failovers = metrics.get("total_failovers", 0)
-                self.avg_response_time_ms = metrics.get(
-                    "avg_response_time_ms", 0.0
-                )
+                self.avg_response_time_ms = metrics.get("avg_response_time_ms", 0.0)
 
                 # Heuristic for demo uptime and efficiency
                 self.system_uptime_percent = 100.0 - (
@@ -510,9 +487,7 @@ if __name__ == "__main__":
                     use_case=random.choice(["general", "customer_service"]),
                     response_time_ms=random.uniform(100, 500),
                     cost_estimate=random.uniform(0.001, 0.015),
-                    provider_used=random.choice(
-                        ["openai", "anthropic", "google"]
-                    ),
+                    provider_used=random.choice(["openai", "anthropic", "google"]),
                     failover_occurred=random.random() < 0.1,
                     bias_score=random.uniform(0.05, 0.25),
                 )

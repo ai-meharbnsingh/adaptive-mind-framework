@@ -21,7 +21,6 @@ def test_demo_backend_telemetry_integration():
     try:
         # Import demo backend (correct path)
         sys.path.insert(0, str(project_root / "03_Demo_Interface"))
-        from demo_backend import app
 
         print("✅ Demo backend import successful")
 
@@ -49,9 +48,7 @@ def test_demo_backend_telemetry_integration():
 
         # Test logging and publishing
         core_logger.log(demo_event)
-        event_bus.publish(
-            event_topics.API_REQUEST_START, demo_event.model_dump()
-        )
+        event_bus.publish(event_topics.API_REQUEST_START, demo_event.model_dump())
         print("✅ Demo telemetry event creation and publishing successful")
 
         return True
@@ -67,14 +64,12 @@ def test_framework_demo_complete_integration():
 
     try:
         # Test framework core with telemetry
-        from antifragile_framework.core.failover_engine import FailoverEngine
         from antifragile_framework.core.learning_engine import LearningEngine
         from antifragile_framework.resilience.bias_ledger import BiasLedger
 
         print("✅ Framework core imports successful")
 
         # Test telemetry components
-        from telemetry.core_logger import core_logger
         from telemetry.event_bus import event_bus
         from telemetry.time_series_db_interface import TimeSeriesDBInterface
 
@@ -87,11 +82,11 @@ def test_framework_demo_complete_integration():
         print("✅ Database interface creation successful")
 
         # Test learning engine with database interface
-        learning_engine = LearningEngine(db_interface)
+        LearningEngine(db_interface)
         print("✅ LearningEngine with database interface successful")
 
         # Test bias ledger with telemetry (correct constructor)
-        bias_ledger = BiasLedger(event_bus=event_bus)
+        BiasLedger(event_bus=event_bus)
         print("✅ BiasLedger with telemetry components successful")
 
         return True
@@ -134,9 +129,7 @@ def main():
             print(f"❌ {test_name} - FAILED")
 
     print("\n" + "=" * 60)
-    print(
-        f"📊 DEMO INTEGRATION RESULTS: {passed_tests}/{total_tests} tests passed"
-    )
+    print(f"📊 DEMO INTEGRATION RESULTS: {passed_tests}/{total_tests} tests passed")
 
     if passed_tests == total_tests:
         print("🎉 DEMO INTEGRATION WITH TELEMETRY - FULLY SUCCESSFUL!")

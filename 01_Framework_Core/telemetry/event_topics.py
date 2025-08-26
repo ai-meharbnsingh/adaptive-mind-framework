@@ -45,9 +45,7 @@ LEARNING_MODEL_UPDATE = (
 # ==============================================================================
 RESOURCE_PENALIZED = "resource.penalized"
 RESOURCE_HEALTH_RESTORED = "resource.health.restored"
-SYSTEM_HEALTH_SNAPSHOT = (
-    "system.health.snapshot"  # Periodic snapshot of system health
-)
+SYSTEM_HEALTH_SNAPSHOT = "system.health.snapshot"  # Periodic snapshot of system health
 API_UNHANDLED_ERROR = (
     "api.unhandled.error"  # For unexpected exceptions at the API boundary
 )

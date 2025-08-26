@@ -70,9 +70,7 @@ class FailoverEngine:
     ):
 
         # Use the provided registry or create a default one
-        self.provider_registry = (
-            provider_registry or get_default_provider_registry()
-        )
+        self.provider_registry = provider_registry or get_default_provider_registry()
 
         self.providers: Dict[str, LLMProvider] = {}
         self.guards: Dict[str, ResourceGuard] = {}
@@ -85,9 +83,7 @@ class FailoverEngine:
         self.logger = core_logger
         self.provider_profiles = provider_profiles
 
-        self.resilience_config = load_resilience_config(
-            config_path=config_path
-        )
+        self.resilience_config = load_resilience_config(config_path=config_path)
         self.resilience_score_penalties: Dict[str, float] = {}
         self._load_and_validate_penalties()
 
@@ -96,13 +92,9 @@ class FailoverEngine:
             # REFACTOR 1: Use the registry to get the provider class dynamically
             # ==============================================================================
             try:
-                provider_class = self.provider_registry.get_provider_class(
-                    name
-                )
+                provider_class = self.provider_registry.get_provider_class(name)
             except KeyError:
-                log.warning(
-                    f"Provider '{name}' not found in registry. Skipping."
-                )
+                log.warning(f"Provider '{name}' not found in registry. Skipping.")
                 continue
 
             api_keys = config.get("api_keys")
@@ -124,15 +116,11 @@ class FailoverEngine:
             self.circuit_breakers.get_breaker(
                 name, **config.get("circuit_breaker_config", {})
             )
-            log.info(
-                f"Initialized provider '{name}' with {len(api_keys)} resources."
-            )
+            log.info(f"Initialized provider '{name}' with {len(api_keys)} resources.")
 
     # ... (methods _load_and_validate_penalties through _is_provider_healthy_for_dynamic_selection remain the same) ...
     def _load_and_validate_penalties(self):
-        penalties_config = self.resilience_config.get(
-            "resilience_score_penalties", {}
-        )
+        penalties_config = self.resilience_config.get("resilience_score_penalties", {})
         expected_penalties = [
             "base_successful_penalty",
             "mitigated_success_penalty",
@@ -154,9 +142,7 @@ class FailoverEngine:
                     f"Resilience score penalty '{penalty_key}' must be between 0.0 and 1.0. Found: {penalty_value}"
                 )
             self.resilience_score_penalties[penalty_key] = float(penalty_value)
-        log.info(
-            "Resilience score penalties loaded and validated successfully."
-        )
+        log.info("Resilience score penalties loaded and validated successfully.")
 
     def _record_lifecycle_event(
         self,
@@ -258,9 +244,9 @@ class FailoverEngine:
                         f"No cost profile or default found for provider '{provider_name}'. Cannot estimate cost."
                     )
                     return None
-            input_cost = (
-                Decimal(input_tokens) * cost_profile.input_cpm
-            ) / Decimal("1000000")
+            input_cost = (Decimal(input_tokens) * cost_profile.input_cpm) / Decimal(
+                "1000000"
+            )
             output_cost = (
                 Decimal(output_tokens_estimate) * cost_profile.output_cpm
             ) / Decimal("1000000")
@@ -311,9 +297,7 @@ class FailoverEngine:
             p for p in static_providers if p.lower() not in filtered_ranked_set
         ]
 
-        final_priority_unfiltered = (
-            filtered_ranked_providers + unranked_providers
-        )
+        final_priority_unfiltered = filtered_ranked_providers + unranked_providers
         final_priority = [
             p
             for p in final_priority_unfiltered
@@ -325,9 +309,7 @@ class FailoverEngine:
         )
         return final_priority
 
-    def _is_provider_healthy_for_dynamic_selection(
-        self, provider_name: str
-    ) -> bool:
+    def _is_provider_healthy_for_dynamic_selection(self, provider_name: str) -> bool:
         if provider_name not in self.providers:
             log.debug(
                 f"Provider '{provider_name}' not initialized. Skipping in dynamic selection."
@@ -396,14 +378,14 @@ class FailoverEngine:
                 if provider_name_lower not in self.providers:
                     failover_reason = f"PREFERRED_PROVIDER_UNKNOWN_OR_UNCONFIGURED:{preferred_provider}"
                 else:
-                    breaker = self.circuit_breakers.get_breaker(
-                        provider_name_lower
-                    )
+                    breaker = self.circuit_breakers.get_breaker(provider_name_lower)
                     guard = self.guards[provider_name_lower]
                     try:
                         breaker.check()
                     except CircuitBreakerError:
-                        failover_reason = f"PREFERRED_PROVIDER_CIRCUIT_OPEN:{preferred_provider}"
+                        failover_reason = (
+                            f"PREFERRED_PROVIDER_CIRCUIT_OPEN:{preferred_provider}"
+                        )
                         self._record_lifecycle_event(
                             context,
                             event_topics.CIRCUIT_TRIPPED,
@@ -413,15 +395,11 @@ class FailoverEngine:
                                 "context": "pre-check",
                             },
                         )
-                    if (
-                        not failover_reason
-                        and not guard.has_healthy_resources()
-                    ):
-                        failover_reason = f"ALL_PREFERRED_KEYS_UNHEALTHY:{preferred_provider}"
-                    if (
-                        not failover_reason
-                        and max_estimated_cost_usd is not None
-                    ):
+                    if not failover_reason and not guard.has_healthy_resources():
+                        failover_reason = (
+                            f"ALL_PREFERRED_KEYS_UNHEALTHY:{preferred_provider}"
+                        )
+                    if not failover_reason and max_estimated_cost_usd is not None:
                         preferred_models = model_priority_map.get(
                             provider_name_lower, []
                         )
@@ -446,9 +424,7 @@ class FailoverEngine:
                             )
 
                 if not failover_reason:
-                    log.info(
-                        f"Attempting preferred provider: {preferred_provider}"
-                    )
+                    log.info(f"Attempting preferred provider: {preferred_provider}")
                     provider_sequence_to_attempt = [provider_name_lower]
                 else:
                     log.warning(
@@ -459,13 +435,11 @@ class FailoverEngine:
                 log.info(
                     "Entering dynamic fallback mode or proceeding with value-driven selection."
                 )
-                dynamic_provider_priority = (
-                    self._get_dynamic_provider_priority(model_priority_map)
+                dynamic_provider_priority = self._get_dynamic_provider_priority(
+                    model_priority_map
                 )
                 if not dynamic_provider_priority:
-                    failover_reason = (
-                        failover_reason or "NO_VIABLE_DYNAMIC_PROVIDERS"
-                    )
+                    failover_reason = failover_reason or "NO_VIABLE_DYNAMIC_PROVIDERS"
                     final_exception = AllProvidersFailedError(
                         errors=[
                             "No viable dynamic providers after health/cost filtering."
@@ -500,8 +474,7 @@ class FailoverEngine:
                     )
                     if not self.prompt_rewriter:
                         failover_reason = (
-                            failover_reason
-                            or "DYNAMIC_MODE_CONTENT_POLICY_NO_REWRITER"
+                            failover_reason or "DYNAMIC_MODE_CONTENT_POLICY_NO_REWRITER"
                         )
                         final_exception = AllProvidersFailedError(
                             errors=[str(e), "No prompt rewriter configured."]
@@ -519,20 +492,16 @@ class FailoverEngine:
                                 {},
                             )
                             dynamic_provider_priority = (
-                                self._get_dynamic_provider_priority(
-                                    model_priority_map
-                                )
+                                self._get_dynamic_provider_priority(model_priority_map)
                             )
-                            final_response = (
-                                await self._attempt_request_sequence(
-                                    context,
-                                    dynamic_provider_priority,
-                                    model_priority_map,
-                                    context.final_messages,
-                                    estimated_input_tokens,
-                                    output_tokens_for_estimate,
-                                    **kwargs,
-                                )
+                            final_response = await self._attempt_request_sequence(
+                                context,
+                                dynamic_provider_priority,
+                                model_priority_map,
+                                context.final_messages,
+                                estimated_input_tokens,
+                                output_tokens_for_estimate,
+                                **kwargs,
                             )
                             final_outcome = "MITIGATED_SUCCESS"
                         except (
@@ -541,8 +510,7 @@ class FailoverEngine:
                             AllProvidersFailedError,
                         ) as rfe:
                             failover_reason = (
-                                failover_reason
-                                or "DYNAMIC_MODE_MITIGATION_FAILED"
+                                failover_reason or "DYNAMIC_MODE_MITIGATION_FAILED"
                             )
                             final_exception = AllProvidersFailedError(
                                 errors=[
@@ -553,21 +521,19 @@ class FailoverEngine:
                 except AllProvidersFailedError as e:
                     final_exception = e
                     if preferred_provider and not failover_reason:
-                        failover_reason = f"PREFERRED_PROVIDER_EXHAUSTED:{preferred_provider}"
+                        failover_reason = (
+                            f"PREFERRED_PROVIDER_EXHAUSTED:{preferred_provider}"
+                        )
                     elif not failover_reason:
                         failover_reason = "ALL_DYNAMIC_PROVIDERS_FAILED"
 
         except Exception as e:
             final_exception = e
             failover_reason = failover_reason or "UNEXPECTED_ENGINE_FAILURE"
-            log.error(
-                f"Unexpected error in FailoverEngine: {e}", exc_info=True
-            )
+            log.error(f"Unexpected error in FailoverEngine: {e}", exc_info=True)
 
         finally:
-            resilience_score = self._calculate_resilience_score(
-                context, final_outcome
-            )
+            resilience_score = self._calculate_resilience_score(context, final_outcome)
             if self.bias_ledger:
                 ledger_entry = self.bias_ledger.log_request_lifecycle(
                     context=context,
@@ -666,9 +632,7 @@ class FailoverEngine:
                     context.max_estimated_cost_usd is not None
                     and estimated_cost is not None
                 ):
-                    if estimated_cost > Decimal(
-                        str(context.max_estimated_cost_usd)
-                    ):
+                    if estimated_cost > Decimal(str(context.max_estimated_cost_usd)):
                         self._record_lifecycle_event(
                             context,
                             event_topics.MODEL_SKIPPED_DUE_TO_COST,
@@ -677,9 +641,7 @@ class FailoverEngine:
                                 "provider": provider_name,
                                 "model": model_name,
                                 "estimated_cost_usd": str(estimated_cost),
-                                "max_cost_cap_usd": str(
-                                    context.max_estimated_cost_usd
-                                ),
+                                "max_cost_cap_usd": str(context.max_estimated_cost_usd),
                             },
                         )
                         context.cost_cap_enforced = True
@@ -720,9 +682,7 @@ class FailoverEngine:
                         messages,
                         **kwargs,
                     )
-                    was_half_open = (
-                        breaker.state == CircuitBreakerState.HALF_OPEN
-                    )
+                    was_half_open = breaker.state == CircuitBreakerState.HALF_OPEN
                     breaker.record_success()
                     if was_half_open:
                         self._record_lifecycle_event(
@@ -784,8 +744,7 @@ class FailoverEngine:
                             return response
 
                         last_key_error = (
-                            response.error_message
-                            or "Provider returned non-success."
+                            response.error_message or "Provider returned non-success."
                         )
                         raw_exception = (
                             response.metadata.get("raw_exception")
@@ -819,10 +778,7 @@ class FailoverEngine:
                             e, provider_name
                         )
 
-                        if (
-                            error_details.category
-                            == ErrorCategory.CONTENT_POLICY
-                        ):
+                        if error_details.category == ErrorCategory.CONTENT_POLICY:
                             raise ContentPolicyError(
                                 provider=provider_name,
                                 model=model,
@@ -841,9 +797,7 @@ class FailoverEngine:
                         continue
             except NoResourcesAvailableError:
                 error_msg = f"All keys for '{provider_name}' (model: {model}) failed or are in cooldown. Last key error: {last_key_error}"
-                raise AllProviderKeysFailedError(
-                    provider_name, key_attempts, error_msg
-                )
+                raise AllProviderKeysFailedError(provider_name, key_attempts, error_msg)
 
     # ======================================================================
     # REFACTOR 2: Remove the old, fragile string-matching method.

@@ -25,9 +25,7 @@ from typing import Any, Dict, List
 
 CURRENT_DIR = Path(__file__).parent
 PROJECT_ROOT = CURRENT_DIR.parent.parent
-FRAMEWORK_CORE_PATH = (
-    PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
-)
+FRAMEWORK_CORE_PATH = PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
 DATABASE_LAYER_PATH = PROJECT_ROOT / "05_Database_Layer"
 TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
 
@@ -35,9 +33,7 @@ TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
 sys.path.insert(0, str(FRAMEWORK_CORE_PATH))
 sys.path.insert(0, str(DATABASE_LAYER_PATH))
 sys.path.insert(0, str(TELEMETRY_PATH))
-sys.path.insert(
-    0, str(CURRENT_DIR)
-)  # For sibling modules within 03_Demo_Interface
+sys.path.insert(0, str(CURRENT_DIR))  # For sibling modules within 03_Demo_Interface
 
 # Enterprise logging setup
 logging.basicConfig(
@@ -63,12 +59,8 @@ class ChartData:
     Aligns with Chart.js expectations.
     """
 
-    chart_id: str = field(
-        metadata={"description": "Unique ID for the canvas element."}
-    )
-    title: str = field(
-        metadata={"description": "Title displayed on the chart."}
-    )
+    chart_id: str = field(metadata={"description": "Unique ID for the canvas element."})
+    title: str = field(metadata={"description": "Title displayed on the chart."})
     chart_type: ChartType = field(
         metadata={"description": "Type of chart (e.g., 'line', 'bar')."}
     )
@@ -110,9 +102,7 @@ class PerformanceDashboard:
 
     async def initialize(self, *args, **kwargs):
         """Placeholder for any future initialization logic."""
-        logger.info(
-            "PerformanceDashboard initialization placeholder executed."
-        )
+        logger.info("PerformanceDashboard initialization placeholder executed.")
 
     async def get_dashboard_data(self) -> Dict[str, Any]:
         """

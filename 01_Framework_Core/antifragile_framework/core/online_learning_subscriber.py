@@ -97,9 +97,7 @@ class OnlineLearningSubscriber:
         self.logger = core_logger
         log.info("OnlineLearningSubscriber initialized.")
 
-    def handle_event(
-        self, event_data: Dict[str, Any]
-    ):  # CORRECTED: Removed 'async'
+    def handle_event(self, event_data: Dict[str, Any]):  # CORRECTED: Removed 'async'
         """
         Handles incoming events from the EventBus.
 
@@ -190,9 +188,7 @@ async def main():
             super().__init__()
             self.updates_received = []
 
-        def update_provider_score(
-            self, provider_name: str, resilience_score: float
-        ):
+        def update_provider_score(self, provider_name: str, resilience_score: float):
             super().update_provider_score(provider_name, resilience_score)
             self.updates_received.append((provider_name, resilience_score))
             print(
@@ -244,9 +240,7 @@ async def main():
 
     print("\n--- Processing Valid Event ---")
     subscriber.handle_event(valid_event_payload)
-    print(
-        f"Updates received by mock engine: {mock_ranking_engine.updates_received}"
-    )
+    print(f"Updates received by mock engine: {mock_ranking_engine.updates_received}")
 
     print("\n--- Processing Event with Missing Score ---")
     subscriber.handle_event(missing_score_payload)

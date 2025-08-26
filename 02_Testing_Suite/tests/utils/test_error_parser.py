@@ -5,7 +5,6 @@ from unittest.mock import Mock
 import pytest
 from antifragile_framework.utils.error_parser import (
     ErrorCategory,
-    ErrorDetails,
     ErrorParser,
 )
 
@@ -70,9 +69,7 @@ if ANTHROPIC_AVAILABLE:
     }
     mock_anthropic_content_policy = anthropic.BadRequestError(
         "Content policy",
-        response=create_mock_response(
-            400, json_body=anthropic_content_policy_body
-        ),
+        response=create_mock_response(400, json_body=anthropic_content_policy_body),
         body=anthropic_content_policy_body,
     )
     anthropic_bad_request_body = {
@@ -80,9 +77,7 @@ if ANTHROPIC_AVAILABLE:
     }
     mock_anthropic_bad_request = anthropic.BadRequestError(
         "Invalid request",
-        response=create_mock_response(
-            400, json_body=anthropic_bad_request_body
-        ),
+        response=create_mock_response(400, json_body=anthropic_bad_request_body),
         body=anthropic_bad_request_body,
     )
 
@@ -106,9 +101,7 @@ def test_openai_classification(parser):
     assert details.category == ErrorCategory.FATAL
 
 
-@pytest.mark.skipif(
-    not ANTHROPIC_AVAILABLE, reason="Anthropic SDK not installed"
-)
+@pytest.mark.skipif(not ANTHROPIC_AVAILABLE, reason="Anthropic SDK not installed")
 def test_anthropic_classification(parser):
     details = parser.classify_error(mock_anthropic_content_policy, "anthropic")
     assert details.category == ErrorCategory.CONTENT_POLICY

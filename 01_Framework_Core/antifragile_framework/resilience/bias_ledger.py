@@ -129,9 +129,7 @@ class BiasLedgerEntry(BaseModel):
     )
 
     class Config:
-        json_encoders = {
-            Decimal: lambda v: str(v)  # Serialize Decimal to string
-        }
+        json_encoders = {Decimal: lambda v: str(v)}  # Serialize Decimal to string
 
 
 class BiasLedger:
@@ -171,12 +169,12 @@ class BiasLedger:
                     )
                     return None
 
-            input_cost = (
-                Decimal(in_tokens) * cost_profile.input_cpm
-            ) / Decimal("1000000")
-            output_cost = (
-                Decimal(out_tokens) * cost_profile.output_cpm
-            ) / Decimal("1000000")
+            input_cost = (Decimal(in_tokens) * cost_profile.input_cpm) / Decimal(
+                "1000000"
+            )
+            output_cost = (Decimal(out_tokens) * cost_profile.output_cpm) / Decimal(
+                "1000000"
+            )
 
             total_cost = (input_cost + output_cost).quantize(
                 Decimal("0.000001"), rounding=ROUND_HALF_UP
@@ -214,11 +212,7 @@ class BiasLedger:
         input_tokens, output_tokens, estimated_cost_usd = None, None, None
 
         if final_response and final_response.success:
-            outcome = (
-                "MITIGATED_SUCCESS"
-                if context.mitigation_attempted
-                else "SUCCESS"
-            )
+            outcome = "MITIGATED_SUCCESS" if context.mitigation_attempted else "SUCCESS"
             final_prompt_content = next(
                 (
                     msg.content
@@ -231,9 +225,7 @@ class BiasLedger:
         try:
             timestamp_utc = datetime.now(timezone.utc).isoformat()
             total_latency_ms = round(
-                (
-                    datetime.now(timezone.utc) - context.start_time
-                ).total_seconds()
+                (datetime.now(timezone.utc) - context.start_time).total_seconds()
                 * 1000,
                 2,
             )
@@ -264,9 +256,7 @@ class BiasLedger:
                     initial_user_content, self.prompt_preview_len
                 ),
                 final_prompt_preview=(
-                    _truncate_text(
-                        final_prompt_content, self.prompt_preview_len
-                    )
+                    _truncate_text(final_prompt_content, self.prompt_preview_len)
                     if final_prompt_content != initial_user_content
                     else None
                 ),

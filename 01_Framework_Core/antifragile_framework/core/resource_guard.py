@@ -57,9 +57,7 @@ class MonitoredResource:
         self.event_bus = event_bus
         self.logger = core_logger
         self.safe_value = (
-            f"{self.value[:4]}...{self.value[-4:]}"
-            if len(self.value) > 8
-            else "..."
+            f"{self.value[:4]}...{self.value[-4:]}" if len(self.value) > 8 else "..."
         )
 
     def __repr__(self) -> str:
@@ -112,9 +110,7 @@ class MonitoredResource:
                     time_since_last_update // self._healing_interval_seconds
                 )
                 healing_amount = intervals_passed * self._healing_increment
-                self.health_score = min(
-                    1.0, self.health_score + healing_amount
-                )
+                self.health_score = min(1.0, self.health_score + healing_amount)
                 self.last_health_update_timestamp = now
                 if self.health_score > old_score:
                     self._log_and_publish_event(
@@ -215,16 +211,12 @@ class ResourceGuard:
             for res in self._resources:
                 res._update_health()  # Call internal update to reflect latest state
 
-            available_resources = [
-                res for res in self._resources if res.is_available()
-            ]
+            available_resources = [res for res in self._resources if res.is_available()]
             if not available_resources:
                 return None
 
             # Prioritize resources by health score (highest first)
-            available_resources.sort(
-                key=lambda r: r.health_score, reverse=True
-            )
+            available_resources.sort(key=lambda r: r.health_score, reverse=True)
 
             healthiest_resource = available_resources[0]
             with healthiest_resource.lock:  # Acquire lock on the specific resource

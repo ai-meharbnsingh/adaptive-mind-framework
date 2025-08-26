@@ -104,13 +104,9 @@ def test_success_in_half_open_state_closes_circuit(breaker: CircuitBreaker):
 
 
 def test_invalid_thresholds_raise_error():
-    with pytest.raises(
-        ValueError, match="Failure threshold must be positive."
-    ):
+    with pytest.raises(ValueError, match="Failure threshold must be positive."):
         CircuitBreaker("test_service", failure_threshold=0)
-    with pytest.raises(
-        ValueError, match="Failure threshold must be positive."
-    ):
+    with pytest.raises(ValueError, match="Failure threshold must be positive."):
         CircuitBreaker("test_service", failure_threshold=-1)
 
     with pytest.raises(ValueError, match="Reset timeout must be positive."):

@@ -29,9 +29,7 @@ def _extract_anthropic_usage(response: Any) -> Optional[TokenUsage]:
                 output_tokens=response.usage.output_tokens,
             )
     except (AttributeError, TypeError) as e:
-        log.warning(
-            f"Could not extract token usage from Anthropic response: {e}"
-        )
+        log.warning(f"Could not extract token usage from Anthropic response: {e}")
     return None
 
 
@@ -67,9 +65,7 @@ class ClaudeProvider(LLMProvider):
         # Simulate variable token usage
         input_tokens = random.randint(50, 250)
         output_tokens = random.randint(100, 500)
-        usage = TokenUsage(
-            input_tokens=input_tokens, output_tokens=output_tokens
-        )
+        usage = TokenUsage(input_tokens=input_tokens, output_tokens=output_tokens)
 
         # Create a unique response content
         content = f"Mocked Anthropic response for model {model_to_use}. UUID: {uuid.uuid4().hex[:12]}"
@@ -104,9 +100,7 @@ class ClaudeProvider(LLMProvider):
 
         # Performance test mocking logic (keep existing mock logic)
         if os.getenv("PERFORMANCE_TEST_MODE", "False").lower() == "true":
-            return await self._generate_mock_response(
-                model_to_use, framework_start
-            )
+            return await self._generate_mock_response(model_to_use, framework_start)
 
         # Framework processing: client setup
         usage = None
@@ -115,15 +109,11 @@ class ClaudeProvider(LLMProvider):
                 client_to_use = AsyncAnthropic(
                     api_key=api_key_override, max_retries=self.max_retries
                 )
-                log.debug(
-                    "Created temporary Anthropic client for key override."
-                )
+                log.debug("Created temporary Anthropic client for key override.")
             except Exception as e:
                 error_msg = f"Failed to initialize temporary Anthropic client with override key: {e}"
                 log.error(error_msg)
-                framework_latency = (
-                    time.perf_counter() - framework_start
-                ) * 1000
+                framework_latency = (time.perf_counter() - framework_start) * 1000
                 return CompletionResponse(
                     success=False,
                     content=None,
@@ -135,8 +125,8 @@ class ClaudeProvider(LLMProvider):
             client_to_use = self.client
 
         # Framework processing: message preparation
-        system_prompt, user_assistant_messages = (
-            self._prepare_provider_messages(messages)
+        system_prompt, user_assistant_messages = self._prepare_provider_messages(
+            messages
         )
         if not user_assistant_messages:
             framework_latency = (time.perf_counter() - framework_start) * 1000
@@ -172,8 +162,7 @@ class ClaudeProvider(LLMProvider):
             ):
                 framework_end = time.perf_counter()
                 framework_latency = (
-                    (api_call_start - framework_start)
-                    + (framework_end - api_call_end)
+                    (api_call_start - framework_start) + (framework_end - api_call_end)
                 ) * 1000
                 return CompletionResponse(
                     success=False,
@@ -194,8 +183,7 @@ class ClaudeProvider(LLMProvider):
 
             # Calculate ONLY framework overhead (excluding external API time)
             framework_latency = (
-                (api_call_start - framework_start)
-                + (framework_end - api_call_end)
+                (api_call_start - framework_start) + (framework_end - api_call_end)
             ) * 1000
 
             return CompletionResponse(
@@ -213,9 +201,7 @@ class ClaudeProvider(LLMProvider):
             api_call_end = time.perf_counter()
             error_body = getattr(e, "body", {})
             error_details = (
-                error_body.get("error", {})
-                if isinstance(error_body, dict)
-                else {}
+                error_body.get("error", {}) if isinstance(error_body, dict) else {}
             )
             error_message = (
                 error_details.get("message", "An unknown API error occurred.")
@@ -230,9 +216,7 @@ class ClaudeProvider(LLMProvider):
             error_msg = f"Anthropic API Error ({error_type}): {error_message}"
         except Exception as e:
             api_call_end = time.perf_counter()
-            error_msg = (
-                f"An unexpected error occurred with Anthropic: {str(e)}"
-            )
+            error_msg = f"An unexpected error occurred with Anthropic: {str(e)}"
             log.exception("Unexpected Anthropic Error")
 
         # Calculate framework overhead for error cases

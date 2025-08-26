@@ -5,18 +5,21 @@
 
 import os
 import logging
-import time
-from azure.identity import DefaultAzureCredential
 from azure.mgmt.rdbms.postgresql import PostgreSQLManagementClient
-from azure.mgmt.rdbms.postgresql.models import Server, ServerPropertiesForDefaultCreate, Sku, ServerVersion, \
-    GeoRedundantBackup
+from azure.mgmt.rdbms.postgresql.models import (
+    Server,
+    ServerPropertiesForDefaultCreate,
+    Sku,
+    ServerVersion,
+    GeoRedundantBackup,
+)
 from azure.core.exceptions import HttpResponseError
 
 # Configure professional logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -27,7 +30,9 @@ class DatabaseManager:
     for the Adaptive Mind project.
     """
 
-    def __init__(self, credential, subscription_id: str, resource_group_name: str, location: str):
+    def __init__(
+        self, credential, subscription_id: str, resource_group_name: str, location: str
+    ):
         """
         Initializes the DatabaseManager.
 
@@ -54,7 +59,9 @@ class DatabaseManager:
 
         logger.info("Initializing PostgreSQL management client...")
         try:
-            self.psql_client = PostgreSQLManagementClient(self.credential, self.subscription_id)
+            self.psql_client = PostgreSQLManagementClient(
+                self.credential, self.subscription_id
+            )
             logger.info("✅ PostgreSQL management client initialized successfully.")
         except Exception as e:
             logger.error(f"❌ Failed to initialize PostgreSQL management client: {e}")
@@ -67,10 +74,7 @@ class DatabaseManager:
         logger.info(f"🚀 Preparing to create PostgreSQL server '{self.server_name}'...")
 
         sku_config = Sku(
-            name="GP_Gen5_2",
-            tier="GeneralPurpose",
-            family="Gen5",
-            capacity=2
+            name="GP_Gen5_2", tier="GeneralPurpose", family="Gen5", capacity=2
         )
 
         properties = ServerPropertiesForDefaultCreate(
@@ -82,8 +86,8 @@ class DatabaseManager:
             storage_profile={
                 "storage_mb": 51200,
                 "backup_retention_days": 28,
-                "storage_autogrow": "Enabled"
-            }
+                "storage_autogrow": "Enabled",
+            },
         )
 
         server_params = Server(
@@ -93,49 +97,61 @@ class DatabaseManager:
             tags={
                 "Project": "Adaptive Mind Framework",
                 "Environment": "Production",
-                "Purpose": "Primary Database"
-            }
+                "Purpose": "Primary Database",
+            },
         )
 
         try:
             poller = self.psql_client.servers.begin_create(
-                self.resource_group_name,
-                self.server_name,
-                server_params
+                self.resource_group_name, self.server_name, server_params
             )
-            logger.info("... Server creation in progress. This may take several minutes...")
+            logger.info(
+                "... Server creation in progress. This may take several minutes..."
+            )
             server_result = poller.result()
 
-            logger.info(f"✅ Successfully created PostgreSQL server '{server_result.name}'.")
+            logger.info(
+                f"✅ Successfully created PostgreSQL server '{server_result.name}'."
+            )
             return server_result.fully_qualified_domain_name
 
         except HttpResponseError as e:
-            logger.error(f"❌ An HTTP error occurred during PostgreSQL server creation: {e.message}")
+            logger.error(
+                f"❌ An HTTP error occurred during PostgreSQL server creation: {e.message}"
+            )
             return None
         except Exception as e:
-            logger.error(f"❌ An unexpected error occurred during PostgreSQL server creation: {e}")
+            logger.error(
+                f"❌ An unexpected error occurred during PostgreSQL server creation: {e}"
+            )
             return None
 
     def create_database(self) -> bool:
         """
         Creates a database within the newly provisioned PostgreSQL server.
         """
-        logger.info(f"🚀 Creating database '{self.database_name}' on server '{self.server_name}'...")
+        logger.info(
+            f"🚀 Creating database '{self.database_name}' on server '{self.server_name}'..."
+        )
         try:
             poller = self.psql_client.databases.begin_create_or_update(
                 self.resource_group_name,
                 self.server_name,
                 self.database_name,
-                {"charset": "UTF8", "collation": "en_US.UTF-8"}
+                {"charset": "UTF8", "collation": "en_US.UTF-8"},
             )
             poller.result()
             logger.info(f"✅ Successfully created database '{self.database_name}'.")
             return True
         except HttpResponseError as e:
-            logger.error(f"❌ An HTTP error occurred during database creation: {e.message}")
+            logger.error(
+                f"❌ An HTTP error occurred during database creation: {e.message}"
+            )
             return False
         except Exception as e:
-            logger.error(f"❌ An unexpected error occurred during database creation: {e}")
+            logger.error(
+                f"❌ An unexpected error occurred during database creation: {e}"
+            )
             return False
 
     def configure_firewall_for_azure_services(self) -> bool:
@@ -144,7 +160,9 @@ class DatabaseManager:
         This is a significant security improvement over allowing all IPs.
         """
         rule_name = "AllowAllWindowsAzureIps"
-        logger.info(f"🛡️ Hardening firewall: Configuring rule '{rule_name}' to allow Azure internal traffic...")
+        logger.info(
+            f"🛡️ Hardening firewall: Configuring rule '{rule_name}' to allow Azure internal traffic..."
+        )
         try:
             # This special IP range '0.0.0.0' for this specific rule name is interpreted by Azure
             # to mean "allow all traffic originating from Azure datacenters".
@@ -152,16 +170,22 @@ class DatabaseManager:
                 self.resource_group_name,
                 self.server_name,
                 rule_name,
-                {"start_ip_address": "0.0.0.0", "end_ip_address": "0.0.0.0"}
+                {"start_ip_address": "0.0.0.0", "end_ip_address": "0.0.0.0"},
             )
             poller.result()
-            logger.info(f"✅ Successfully configured secure firewall rule '{rule_name}'.")
+            logger.info(
+                f"✅ Successfully configured secure firewall rule '{rule_name}'."
+            )
             return True
         except HttpResponseError as e:
-            logger.error(f"❌ An HTTP error occurred during firewall configuration: {e.message}")
+            logger.error(
+                f"❌ An HTTP error occurred during firewall configuration: {e.message}"
+            )
             return False
         except Exception as e:
-            logger.error(f"❌ An unexpected error occurred during firewall configuration: {e}")
+            logger.error(
+                f"❌ An unexpected error occurred during firewall configuration: {e}"
+            )
             return False
 
 
@@ -183,7 +207,7 @@ def main():
             credential=infra_manager.credential,
             subscription_id=infra_manager.subscription_id,
             resource_group_name=infra_manager.resource_group_name,
-            location=infra_manager.location
+            location=infra_manager.location,
         )
 
         server_fqdn = db_manager.create_postgresql_server()
@@ -193,7 +217,7 @@ def main():
 
             logger.info("\n--- PostgreSQL Deployment Verification ---")
             logger.info(f"  Server FQDN: {server_fqdn}")
-            logger.info(f"  Firewall: Azure services access enabled (Hardened)")
+            logger.info("  Firewall: Azure services access enabled (Hardened)")
             logger.info("----------------------------------------")
             logger.info("✅ Azure PostgreSQL deployment is complete and verified.")
         else:

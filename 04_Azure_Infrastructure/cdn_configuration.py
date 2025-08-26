@@ -4,7 +4,6 @@
 
 import os
 import logging
-from azure.identity import DefaultAzureCredential
 from azure.mgmt.cdn import CdnManagementClient
 from azure.mgmt.cdn.models import Profile, Sku, SkuName, Endpoint
 from azure.core.exceptions import HttpResponseError
@@ -12,8 +11,8 @@ from azure.core.exceptions import HttpResponseError
 # Configure professional logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -23,7 +22,9 @@ class PerformanceManager:
     Manages the deployment of Azure CDN for global content delivery and performance.
     """
 
-    def __init__(self, credential, subscription_id: str, resource_group_name: str, location: str):
+    def __init__(
+        self, credential, subscription_id: str, resource_group_name: str, location: str
+    ):
         """
         Initializes the PerformanceManager.
 
@@ -63,8 +64,11 @@ class PerformanceManager:
                 Profile(
                     location="global",  # CDN profiles are global resources
                     sku=Sku(name=SkuName.STANDARD_MICROSOFT),
-                    tags={"Project": "Adaptive Mind Framework", "Environment": "Production"}
-                )
+                    tags={
+                        "Project": "Adaptive Mind Framework",
+                        "Environment": "Production",
+                    },
+                ),
             ).result()
             logger.info(f"✅ Successfully created CDN Profile '{profile.name}'.")
             return profile
@@ -90,15 +94,17 @@ class PerformanceManager:
                 self.cdn_endpoint_name,
                 Endpoint(
                     location=self.location,
-                    origins=[{
-                        "name": "appServiceOrigin",
-                        "host_name": app_service_hostname
-                    }],
+                    origins=[
+                        {"name": "appServiceOrigin", "host_name": app_service_hostname}
+                    ],
                     is_https_allowed=True,
                     is_http_allowed=False,  # Enforce HTTPS
                     query_string_caching_behavior="IgnoreQueryString",  # Good for static assets
-                    tags={"Project": "Adaptive Mind Framework", "Environment": "Production"}
-                )
+                    tags={
+                        "Project": "Adaptive Mind Framework",
+                        "Environment": "Production",
+                    },
+                ),
             ).result()
             logger.info(f"✅ Successfully created CDN Endpoint '{endpoint.name}'.")
             logger.info(f"   CDN Hostname: {endpoint.host_name}")
@@ -127,19 +133,30 @@ def main():
         infra_manager = AzureInfrastructureManager()
         infra_manager.create_resource_group()
 
-        acr_manager = ContainerRegistryManager(infra_manager.credential, infra_manager.subscription_id,
-                                               infra_manager.resource_group_name, infra_manager.location)
+        acr_manager = ContainerRegistryManager(
+            infra_manager.credential,
+            infra_manager.subscription_id,
+            infra_manager.resource_group_name,
+            infra_manager.location,
+        )
         login_server = acr_manager.create_container_registry()
         acr_creds = acr_manager.get_registry_credentials()
 
-        app_service_manager = AppServiceManager(infra_manager.credential, infra_manager.subscription_id,
-                                                infra_manager.resource_group_name, infra_manager.location)
+        app_service_manager = AppServiceManager(
+            infra_manager.credential,
+            infra_manager.subscription_id,
+            infra_manager.resource_group_name,
+            infra_manager.location,
+        )
         plan_id = app_service_manager.create_app_service_plan()
-        app_hostname = app_service_manager.create_web_app(plan_id, login_server, acr_creds['username'],
-                                                          acr_creds['password'])
+        app_hostname = app_service_manager.create_web_app(
+            plan_id, login_server, acr_creds["username"], acr_creds["password"]
+        )
 
         if not app_hostname:
-            logger.error("❌ Prerequisite failed: Web App not available. Aborting CDN setup.")
+            logger.error(
+                "❌ Prerequisite failed: Web App not available. Aborting CDN setup."
+            )
             return
 
         # Now, create the CDN
@@ -147,7 +164,7 @@ def main():
             credential=infra_manager.credential,
             subscription_id=infra_manager.subscription_id,
             resource_group_name=infra_manager.resource_group_name,
-            location=infra_manager.location
+            location=infra_manager.location,
         )
 
         cdn_profile = perf_manager.create_cdn_profile()
@@ -160,7 +177,7 @@ def main():
                 logger.info(f"  CDN Endpoint Name: {cdn_endpoint.name}")
                 logger.info(f"  CDN URL: https://{cdn_endpoint.host_name}")
                 logger.info(f"  Origin Hostname: {cdn_endpoint.origins[0].host_name}")
-                logger.info(f"  SKU: Standard Microsoft")
+                logger.info("  SKU: Standard Microsoft")
                 logger.info("----------------------------")
                 logger.info("✅ Azure CDN setup is complete.")
 

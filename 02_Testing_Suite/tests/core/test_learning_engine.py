@@ -54,9 +54,7 @@ class TestLearningEngine(unittest.TestCase):
             ).model_dump(),
             BiasLedgerEntry(
                 request_id="req2",
-                timestamp_utc=(
-                    self.start_time + timedelta(hours=1)
-                ).isoformat(),
+                timestamp_utc=(self.start_time + timedelta(hours=1)).isoformat(),
                 initial_prompt_hash="h2",
                 initial_prompt_preview="p2",
                 outcome="FAILURE",
@@ -86,14 +84,10 @@ class TestLearningEngine(unittest.TestCase):
         self.assertIsInstance(entries[0], BiasLedgerEntry)
         self.assertEqual(entries[0].request_id, "req1")
         self.assertEqual(entries[1].request_id, "req2")
-        self.assertEqual(
-            entries[0].schema_version, 4
-        )  # Assert updated schema version
+        self.assertEqual(entries[0].schema_version, 4)  # Assert updated schema version
 
     @patch("antifragile_framework.core.learning_engine.log")
-    def test_get_raw_bias_ledger_entries_malformed_data_skipped(
-        self, mock_log
-    ):
+    def test_get_raw_bias_ledger_entries_malformed_data_skipped(self, mock_log):
         malformed_entry_data = {
             "request_id": "malformed_req",
             "timestamp_utc": self.start_time.isoformat(),
@@ -145,9 +139,7 @@ class TestLearningEngine(unittest.TestCase):
 
     # TEST RESTORED
     @patch("antifragile_framework.core.learning_engine.log")
-    def test_get_raw_bias_ledger_entries_different_schema_version(
-        self, mock_log
-    ):
+    def test_get_raw_bias_ledger_entries_different_schema_version(self, mock_log):
         # This test ensures that even if an OLD schema_version comes from the DB,
         # it will be correctly passed through if it matches the current BiasLedgerEntry model's validation requirements
         # for a specific schema_version field. The model_validate will still require all current fields.
@@ -339,8 +331,7 @@ class TestLearningEngine(unittest.TestCase):
         ).model_dump()
 
         self.mock_db_interface.query_events_generator.return_value = (
-            self._create_mock_raw_event(e)
-            for e in [entry1, entry2, entry3, entry4]
+            self._create_mock_raw_event(e) for e in [entry1, entry2, entry3, entry4]
         )
         analyses = self.learning_engine.analyze_provider_performance(
             self.start_time, self.end_time
@@ -348,9 +339,7 @@ class TestLearningEngine(unittest.TestCase):
         self.assertEqual(len(analyses), 3)
 
         # RESTORED FULL ASSERTIONS
-        openai_analysis = next(
-            a for a in analyses if a.provider_name == "openai"
-        )
+        openai_analysis = next(a for a in analyses if a.provider_name == "openai")
         self.assertEqual(openai_analysis.total_requests, 2)
         self.assertEqual(openai_analysis.successful_requests, 1)
         self.assertEqual(openai_analysis.success_rate, 0.5)
@@ -358,9 +347,7 @@ class TestLearningEngine(unittest.TestCase):
         self.assertEqual(openai_analysis.error_distribution, {"rate_limit": 1})
         self.assertEqual(openai_analysis.avg_resilience_score, (0.9 + 0.5) / 2)
 
-        anthropic_analysis = next(
-            a for a in analyses if a.provider_name == "anthropic"
-        )
+        anthropic_analysis = next(a for a in analyses if a.provider_name == "anthropic")
         self.assertEqual(anthropic_analysis.total_requests, 1)
         self.assertEqual(anthropic_analysis.successful_requests, 1)
         self.assertEqual(anthropic_analysis.mitigation_attempted_count, 1)

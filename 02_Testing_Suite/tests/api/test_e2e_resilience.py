@@ -3,7 +3,7 @@
 import logging
 from copy import deepcopy
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock, call
+from unittest.mock import AsyncMock, MagicMock
 
 import anthropic
 import openai
@@ -11,7 +11,6 @@ import pytest
 import pytest_asyncio
 from antifragile_framework.api.framework_api import app
 from antifragile_framework.config.config_loader import load_provider_profiles
-from antifragile_framework.core.exceptions import ContentPolicyError
 from antifragile_framework.providers.api_abstraction_layer import (
     ChatMessage,
     CompletionResponse,
@@ -35,9 +34,7 @@ async def async_client() -> AsyncClient:
 
     async with LifespanManager(app):
         transport = ASGITransport(app=app)
-        async with AsyncClient(
-            transport=transport, base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
             yield client
 
 
@@ -66,13 +63,9 @@ class TestE2EHappyPathAndFailover:
             "model_priority_map": {"openai": ["gpt-4o"]},
             "messages": [{"role": "user", "content": "Hello, world!"}],
         }
-        response = await async_client.post(
-            "/v1/chat/completions", json=request_payload
-        )
+        response = await async_client.post("/v1/chat/completions", json=request_payload)
         assert response.status_code == 200
-        assert (
-            response.json()["content"] == "This is a successful test response."
-        )
+        assert response.json()["content"] == "This is a successful test response."
         mock_agenerate.assert_called_once()
 
     @pytest.mark.asyncio
@@ -112,9 +105,7 @@ class TestE2EHappyPathAndFailover:
             },
             "messages": [{"role": "user", "content": "Test resilience"}],
         }
-        response = await async_client.post(
-            "/v1/chat/completions", json=request_payload
-        )
+        response = await async_client.post("/v1/chat/completions", json=request_payload)
         assert response.status_code == 200
         assert response.json()["content"] == "Success from Gemini!"
         mock_gemini.assert_called_once()
@@ -160,12 +151,10 @@ class TestE2ECostCapping:
         original_profiles = app.state.failover_engine.provider_profiles
         test_profiles = deepcopy(mock_provider_profiles)
         # Make both primary providers expensive
-        test_profiles.profiles["openai"]["gpt-4o"].input_cpm = Decimal(
-            "100000.00"
+        test_profiles.profiles["openai"]["gpt-4o"].input_cpm = Decimal("100000.00")
+        test_profiles.profiles["anthropic"]["claude-3-opus-20240229"].input_cpm = (
+            Decimal("100000.00")
         )
-        test_profiles.profiles["anthropic"][
-            "claude-3-opus-20240229"
-        ].input_cpm = Decimal("100000.00")
         app.state.failover_engine.provider_profiles = test_profiles
 
         mock_openai = mocker.patch(
@@ -209,9 +198,7 @@ class TestE2ECostCapping:
             "max_estimated_cost_usd": scenario["max_cost"],
         }
 
-        response = await async_client.post(
-            "/v1/chat/completions", json=request_payload
-        )
+        response = await async_client.post("/v1/chat/completions", json=request_payload)
 
         assert response.status_code == scenario["expected_status"]
         if response.is_success:
@@ -230,19 +217,15 @@ class TestE2EContentPolicy:
         self, async_client: AsyncClient, mocker
     ):
         # Arrange
-        original_messages = [
-            ChatMessage(role="user", content="A risky prompt")
-        ]
-        safe_messages = [
-            ChatMessage(role="user", content="A rephrased safe prompt")
-        ]
+        original_messages = [ChatMessage(role="user", content="A risky prompt")]
+        safe_messages = [ChatMessage(role="user", content="A rephrased safe prompt")]
 
         realistic_error = openai.BadRequestError(
             "Your request was rejected as a result of our safety system.",
             response=mocker.Mock(),
             body={"error": {"code": "content_policy_violation"}},
         )
-        mock_provider = mocker.patch(
+        mocker.patch(
             "antifragile_framework.providers.provider_adapters.openai_adapter.OpenAIProvider.agenerate_completion",
             new_callable=AsyncMock,
             side_effect=[
@@ -269,9 +252,7 @@ class TestE2EContentPolicy:
         }
 
         # Act
-        response = await async_client.post(
-            "/v1/chat/completions", json=request_payload
-        )
+        response = await async_client.post("/v1/chat/completions", json=request_payload)
 
         # Assert
         assert response.status_code == 200

@@ -97,9 +97,7 @@ class LearningEngine:
 
     def __init__(self, db_interface: TimeSeriesDBInterface):
         if not isinstance(db_interface, TimeSeriesDBInterface):
-            raise TypeError(
-                "db_interface must be an instance of TimeSeriesDBInterface"
-            )
+            raise TypeError("db_interface must be an instance of TimeSeriesDBInterface")
         self.db_interface = db_interface
         log.info("LearningEngine initialized.")
 
@@ -116,9 +114,7 @@ class LearningEngine:
 
         Yields: UniversalEventSchema.model_dump() dictionaries from TimeSeriesDB.
         """
-        log.info(
-            f"Retrieving BiasLedger entries from {start_time} to {end_time}..."
-        )
+        log.info(f"Retrieving BiasLedger entries from {start_time} to {end_time}...")
 
         # Use query_events_generator directly as it already yields the raw UniversalEventSchema payload (dict)
         # Note: BiasLedgerEntry is the payload of BIAS_LOG_ENTRY_CREATED event.
@@ -140,9 +136,7 @@ class LearningEngine:
         """
         Analyzes BiasLedger entries to aggregate performance metrics for each provider/model.
         """
-        log.info(
-            f"Analyzing provider performance from {start_time} to {end_time}..."
-        )
+        log.info(f"Analyzing provider performance from {start_time} to {end_time}...")
 
         aggregated_data = defaultdict(
             lambda: defaultdict(
@@ -167,17 +161,13 @@ class LearningEngine:
             try:
                 # The payload of the telemetry event IS the BiasLedgerEntry data
                 ledger_entry_data = event_payload_dict.get("payload", {})
-                ledger_entry = BiasLedgerEntry.model_validate(
-                    ledger_entry_data
-                )
+                ledger_entry = BiasLedgerEntry.model_validate(ledger_entry_data)
 
                 # CORRECTED: Use the new, separate fields from the updated BiasLedgerEntry schema
                 provider_name = ledger_entry.final_provider or "unknown"
                 model_name = ledger_entry.final_model or "unknown"
 
-                provider_model_metrics = aggregated_data[provider_name][
-                    model_name
-                ]
+                provider_model_metrics = aggregated_data[provider_name][model_name]
                 provider_model_metrics["total_requests"] += 1
 
                 if (
@@ -202,39 +192,27 @@ class LearningEngine:
                             ):
                                 error_type = payload_inner["error_type"]
                                 break
-                            elif (
-                                event_type == event_topics.ALL_PROVIDERS_FAILED
-                            ):
+                            elif event_type == event_topics.ALL_PROVIDERS_FAILED:
                                 error_type = "all_providers_failed"
                                 break
-                    provider_model_metrics["error_distribution"][
-                        error_type
-                    ] += 1
+                    provider_model_metrics["error_distribution"][error_type] += 1
 
                 if ledger_entry.mitigation_attempted:
                     provider_model_metrics["mitigation_attempted_count"] += 1
                     if ledger_entry.mitigation_succeeded:
-                        provider_model_metrics[
-                            "mitigation_successful_count"
-                        ] += 1
+                        provider_model_metrics["mitigation_successful_count"] += 1
 
                 for (
                     event
-                ) in (
-                    ledger_entry.resilience_events
-                ):  # Iterate through lifecycle events
+                ) in ledger_entry.resilience_events:  # Iterate through lifecycle events
                     if event.get("event_type") in [
                         event_topics.PROVIDER_FAILOVER,
                         event_topics.MODEL_FAILOVER,
                         event_topics.API_KEY_ROTATION,
                     ]:
                         provider_model_metrics["failover_occurred_count"] += 1
-                    elif (
-                        event.get("event_type") == event_topics.CIRCUIT_TRIPPED
-                    ):
-                        provider_model_metrics[
-                            "circuit_breaker_tripped_count"
-                        ] += 1
+                    elif event.get("event_type") == event_topics.CIRCUIT_TRIPPED:
+                        provider_model_metrics["circuit_breaker_tripped_count"] += 1
 
                 if ledger_entry.resilience_score is not None:
                     provider_model_metrics[
@@ -264,9 +242,7 @@ class LearningEngine:
                 mitigation_successful = metrics["mitigation_successful_count"]
 
                 success_rate = (
-                    successful_requests / total_requests
-                    if total_requests > 0
-                    else 0.0
+                    successful_requests / total_requests if total_requests > 0 else 0.0
                 )
                 # Ensure successful_requests > 0 before division
                 avg_latency_ms = (
@@ -290,8 +266,7 @@ class LearningEngine:
                     else 0.0
                 )
                 avg_resilience_score = (
-                    metrics["resilience_scores_sum"]
-                    / metrics["resilience_score_count"]
+                    metrics["resilience_scores_sum"] / metrics["resilience_score_count"]
                     if metrics["resilience_score_count"] > 0
                     else 1.0
                 )  # Default to 1.0 if no scores recorded
@@ -308,9 +283,7 @@ class LearningEngine:
                         mitigation_attempted_count=mitigation_attempted,
                         mitigation_successful_count=mitigation_successful,
                         mitigation_success_rate=mitigation_success_rate,
-                        failover_occurred_count=metrics[
-                            "failover_occurred_count"
-                        ],
+                        failover_occurred_count=metrics["failover_occurred_count"],
                         failover_rate=failover_rate,
                         circuit_breaker_tripped_count=metrics[
                             "circuit_breaker_tripped_count"
@@ -378,9 +351,7 @@ async def main():
                     )
                     outcome = "SUCCESS" if i % 3 != 0 else "FAILURE"
                     resilience_score = (
-                        1.0
-                        if outcome == "SUCCESS"
-                        else (0.5 if i % 3 == 1 else 0.2)
+                        1.0 if outcome == "SUCCESS" else (0.5 if i % 3 == 1 else 0.2)
                     )
                     latency = (
                         random.uniform(100, 500)
@@ -391,8 +362,7 @@ async def main():
                     event_payload = {
                         "request_id": str(uuid.uuid4()),
                         "timestamp_utc": (
-                            datetime.now(timezone.utc)
-                            - timedelta(minutes=15 - i)
+                            datetime.now(timezone.utc) - timedelta(minutes=15 - i)
                         ).isoformat(),
                         "schema_version": 4,
                         "initial_prompt_hash": "abc",
@@ -413,9 +383,7 @@ async def main():
                             )
                         ],
                         "mitigation_attempted": (i % 3 == 1),
-                        "mitigation_succeeded": (
-                            outcome == "MITIGATED_SUCCESS"
-                        ),
+                        "mitigation_succeeded": (outcome == "MITIGATED_SUCCESS"),
                         "resilience_score": resilience_score,
                         "preferred_provider_requested": None,
                         "initial_selection_mode": "VALUE_DRIVEN",
@@ -442,23 +410,17 @@ async def main():
     end_t = datetime.now(timezone.utc)
 
     print("\n--- Analyzing Provider Performance ---")
-    analysis_results = await engine.analyze_provider_performance(
-        start_t, end_t
-    )
+    analysis_results = await engine.analyze_provider_performance(start_t, end_t)
 
     for result in analysis_results:
-        print(
-            f"\nProvider: {result.provider_name}, Model: {result.model_name}"
-        )
+        print(f"\nProvider: {result.provider_name}, Model: {result.model_name}")
         print(f"  Total Requests: {result.total_requests}")
         print(f"  Success Rate: {result.success_rate:.2f}")
         print(f"  Avg Latency: {result.avg_latency_ms:.2f}ms")
         print(f"  Avg Resilience Score: {result.avg_resilience_score:.2f}")
         print(f"  Error Distribution: {result.error_distribution}")
         print(f"  Failover Rate: {result.failover_rate:.2f}")
-        print(
-            f"  Mitigation Success Rate: {result.mitigation_success_rate:.2f}"
-        )
+        print(f"  Mitigation Success Rate: {result.mitigation_success_rate:.2f}")
 
     print("\nLearningEngine demo completed.")
 

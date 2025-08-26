@@ -5,14 +5,14 @@ Based on the ACTUAL project structure and master plan
 """
 
 import asyncio
-import json
 import logging
-import time
 import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +39,7 @@ class CorrectedSystemValidator:
             ("ROI Calculator (Session 9)", self._validate_roi_calculator_correct),
             ("Azure Infrastructure (Session 10)", self._validate_azure),
             ("Deployment Package (Session 11)", self._validate_deployment_package),
-            ("Project Structure", self._validate_project_structure)
+            ("Project Structure", self._validate_project_structure),
         ]
 
         for name, validator in validations:
@@ -58,7 +58,9 @@ class CorrectedSystemValidator:
     def _print_result(self, name: str, result: Dict[str, Any]):
         """Print validation result"""
         status = result.get("status", "UNKNOWN")
-        icon = {"PASS": "✅", "FAIL": "❌", "WARNING": "⚠️", "SKIP": "⏭️"}.get(status, "❓")
+        icon = {"PASS": "✅", "FAIL": "❌", "WARNING": "⚠️", "SKIP": "⏭️"}.get(
+            status, "❓"
+        )
 
         print(f"{icon} {name}: {status}")
 
@@ -73,7 +75,9 @@ class CorrectedSystemValidator:
 
     async def _validate_framework_core(self) -> Dict[str, Any]:
         """Validate framework core - CORRECT PATH"""
-        framework_path = self.project_root / "01_Framework_Core" / "antifragile_framework"
+        framework_path = (
+            self.project_root / "01_Framework_Core" / "antifragile_framework"
+        )
 
         if not framework_path.exists():
             return {"status": "FAIL", "error": "Framework core directory not found"}
@@ -90,8 +94,7 @@ class CorrectedSystemValidator:
         # Test imports
         try:
             sys.path.insert(0, str(self.project_root / "01_Framework_Core"))
-            from antifragile_framework.core.failover_engine import FailoverEngine
-            from antifragile_framework.core.circuit_breaker import CircuitBreaker
+
             import_success = True
         except ImportError as e:
             import_success = False
@@ -102,17 +105,17 @@ class CorrectedSystemValidator:
                 "status": "PASS",
                 "details": {
                     "core_files_found": f"{len(found_files)}/{len(expected_files)}",
-                    "imports_working": "Yes"
-                }
+                    "imports_working": "Yes",
+                },
             }
         else:
             return {
                 "status": "FAIL" if not import_success else "WARNING",
                 "details": {
                     "core_files_found": f"{len(found_files)}/{len(expected_files)}",
-                    "imports_working": "No" if not import_success else "Yes"
+                    "imports_working": "No" if not import_success else "Yes",
                 },
-                "error": import_error if not import_success else None
+                "error": import_error if not import_success else None,
             }
 
     async def _validate_telemetry_correct(self) -> Dict[str, Any]:
@@ -120,7 +123,10 @@ class CorrectedSystemValidator:
         telemetry_path = self.project_root / "01_Framework_Core" / "telemetry"
 
         if not telemetry_path.exists():
-            return {"status": "FAIL", "error": "Telemetry directory not found in framework core"}
+            return {
+                "status": "FAIL",
+                "error": "Telemetry directory not found in framework core",
+            }
 
         telemetry_files = list(telemetry_path.glob("*.py"))
 
@@ -137,16 +143,16 @@ class CorrectedSystemValidator:
                 "status": "PASS",
                 "details": {
                     "telemetry_files": len(telemetry_files),
-                    "key_files_found": f"{len(found_files)}/{len(expected_files)}"
-                }
+                    "key_files_found": f"{len(found_files)}/{len(expected_files)}",
+                },
             }
         else:
             return {
                 "status": "WARNING",
                 "details": {
                     "telemetry_files": len(telemetry_files),
-                    "key_files_found": f"{len(found_files)}/{len(expected_files)}"
-                }
+                    "key_files_found": f"{len(found_files)}/{len(expected_files)}",
+                },
             }
 
     async def _validate_database(self) -> Dict[str, Any]:
@@ -157,7 +163,11 @@ class CorrectedSystemValidator:
             return {"status": "FAIL", "error": "Database layer directory not found"}
 
         # Check for key database files
-        key_files = ["database_schema.sql", "connection_manager.py", "postgres_timeseries_impl.py"]
+        key_files = [
+            "database_schema.sql",
+            "connection_manager.py",
+            "postgres_timeseries_impl.py",
+        ]
         found_files = []
 
         for file in key_files:
@@ -175,16 +185,16 @@ class CorrectedSystemValidator:
                 "status": "PASS",
                 "details": {
                     "key_files_found": f"{len(found_files)}/{len(key_files)}",
-                    "migration_files": migration_files
-                }
+                    "migration_files": migration_files,
+                },
             }
         else:
             return {
                 "status": "WARNING",
                 "details": {
                     "key_files_found": f"{len(found_files)}/{len(key_files)}",
-                    "migration_files": migration_files
-                }
+                    "migration_files": migration_files,
+                },
             }
 
     async def _validate_demo_interface(self) -> Dict[str, Any]:
@@ -196,9 +206,13 @@ class CorrectedSystemValidator:
 
         # Check for key demo files from Sessions 7-8
         key_files = [
-            "demo_backend.py", "api_key_manager.py", "real_time_metrics.py",
-            "websocket_handler.py", "bias_ledger_visualization.py",
-            "provider_ranking_system.py", "cost_optimizer.py"
+            "demo_backend.py",
+            "api_key_manager.py",
+            "real_time_metrics.py",
+            "websocket_handler.py",
+            "bias_ledger_visualization.py",
+            "provider_ranking_system.py",
+            "cost_optimizer.py",
         ]
 
         found_files = []
@@ -209,7 +223,7 @@ class CorrectedSystemValidator:
         # Test demo backend import
         try:
             sys.path.insert(0, str(demo_path))
-            import demo_backend
+
             import_success = True
         except ImportError:
             import_success = False
@@ -219,16 +233,16 @@ class CorrectedSystemValidator:
                 "status": "PASS",
                 "details": {
                     "demo_files_found": f"{len(found_files)}/{len(key_files)}",
-                    "demo_backend_import": "Success"
-                }
+                    "demo_backend_import": "Success",
+                },
             }
         else:
             return {
                 "status": "WARNING" if len(found_files) >= 3 else "FAIL",
                 "details": {
                     "demo_files_found": f"{len(found_files)}/{len(key_files)}",
-                    "demo_backend_import": "Success" if import_success else "Failed"
-                }
+                    "demo_backend_import": "Success" if import_success else "Failed",
+                },
             }
 
     async def _validate_roi_calculator_correct(self) -> Dict[str, Any]:
@@ -243,8 +257,11 @@ class CorrectedSystemValidator:
         # Check sales materials for ROI components
         if sales_path.exists():
             roi_sales_files = [
-                "cost_analysis.py", "generate_roi_models.py", "api_cost_optimizer.py",
-                "cfo_business_case.py", "generate_industry_roi_models.py"
+                "cost_analysis.py",
+                "generate_roi_models.py",
+                "api_cost_optimizer.py",
+                "cfo_business_case.py",
+                "generate_industry_roi_models.py",
             ]
 
             for file in roi_sales_files:
@@ -254,8 +271,10 @@ class CorrectedSystemValidator:
         # Check demo interface for ROI components
         if demo_path.exists():
             roi_demo_files = [
-                "roi_calculator.js", "business_metrics.js", "demo_mode_comparison.js",
-                "carrier_grade_value_prop.js"
+                "roi_calculator.js",
+                "business_metrics.js",
+                "demo_mode_comparison.js",
+                "carrier_grade_value_prop.js",
             ]
 
             for file in roi_demo_files:
@@ -273,16 +292,16 @@ class CorrectedSystemValidator:
                 "details": {
                     "roi_components_found": len(roi_files_found),
                     "excel_models": len(excel_files),
-                    "location": "07_Sales_Materials + 03_Demo_Interface (correct per Session 9)"
-                }
+                    "location": "07_Sales_Materials + 03_Demo_Interface (correct per Session 9)",
+                },
             }
         else:
             return {
                 "status": "WARNING",
                 "details": {
                     "roi_components_found": len(roi_files_found),
-                    "excel_models": len(excel_files)
-                }
+                    "excel_models": len(excel_files),
+                },
             }
 
     async def _validate_azure(self) -> Dict[str, Any]:
@@ -290,12 +309,18 @@ class CorrectedSystemValidator:
         azure_path = self.project_root / "04_Azure_Infrastructure"
 
         if not azure_path.exists():
-            return {"status": "FAIL", "error": "Azure infrastructure directory not found"}
+            return {
+                "status": "FAIL",
+                "error": "Azure infrastructure directory not found",
+            }
 
         # Check for Session 10 Azure scripts
         azure_scripts = [
-            "azure_setup.py", "key_vault_manager.py", "database_deployment.py",
-            "container_registry_setup.py", "app_service_config.py"
+            "azure_setup.py",
+            "key_vault_manager.py",
+            "database_deployment.py",
+            "container_registry_setup.py",
+            "app_service_config.py",
         ]
 
         found_scripts = []
@@ -308,14 +333,14 @@ class CorrectedSystemValidator:
                 "status": "PASS",
                 "details": {
                     "azure_scripts_found": f"{len(found_scripts)}/{len(azure_scripts)}"
-                }
+                },
             }
         else:
             return {
                 "status": "WARNING",
                 "details": {
                     "azure_scripts_found": f"{len(found_scripts)}/{len(azure_scripts)}"
-                }
+                },
             }
 
     async def _validate_deployment_package(self) -> Dict[str, Any]:
@@ -327,9 +352,13 @@ class CorrectedSystemValidator:
 
         # Check for Session 11 deliverables
         session_11_files = [
-            "Dockerfile", "docker-compose.yml", "azure-pipelines.yml",
-            "prometheus_config.yml", "grafana_dashboards.json",
-            "dual_mode_config.yml", "security_monitoring.py"
+            "Dockerfile",
+            "docker-compose.yml",
+            "azure-pipelines.yml",
+            "prometheus_config.yml",
+            "grafana_dashboards.json",
+            "dual_mode_config.yml",
+            "security_monitoring.py",
         ]
 
         found_files = []
@@ -342,14 +371,14 @@ class CorrectedSystemValidator:
                 "status": "PASS",
                 "details": {
                     "session_11_files": f"{len(found_files)}/{len(session_11_files)}"
-                }
+                },
             }
         else:
             return {
                 "status": "WARNING",
                 "details": {
                     "session_11_files": f"{len(found_files)}/{len(session_11_files)}"
-                }
+                },
             }
 
     async def _validate_project_structure(self) -> Dict[str, Any]:
@@ -357,9 +386,13 @@ class CorrectedSystemValidator:
 
         # Required directories per master plan
         required_dirs = [
-            "01_Framework_Core", "02_Testing_Suite", "03_Demo_Interface",
-            "04_Azure_Infrastructure", "05_Database_Layer", "07_Sales_Materials",
-            "09_Deployment_Package"
+            "01_Framework_Core",
+            "02_Testing_Suite",
+            "03_Demo_Interface",
+            "04_Azure_Infrastructure",
+            "05_Database_Layer",
+            "07_Sales_Materials",
+            "09_Deployment_Package",
         ]
 
         existing_dirs = []
@@ -374,8 +407,8 @@ class CorrectedSystemValidator:
                 "status": "PASS",
                 "details": {
                     "directories_found": f"{len(existing_dirs)}/{len(required_dirs)}",
-                    "completion_rate": f"{completion_rate:.1f}%"
-                }
+                    "completion_rate": f"{completion_rate:.1f}%",
+                },
             }
         else:
             return {
@@ -383,8 +416,8 @@ class CorrectedSystemValidator:
                 "details": {
                     "directories_found": f"{len(existing_dirs)}/{len(required_dirs)}",
                     "completion_rate": f"{completion_rate:.1f}%",
-                    "missing": [d for d in required_dirs if d not in existing_dirs]
-                }
+                    "missing": [d for d in required_dirs if d not in existing_dirs],
+                },
             }
 
     def _generate_final_report(self) -> Dict[str, Any]:
@@ -421,7 +454,7 @@ class CorrectedSystemValidator:
             "health_score": health_score,
             "passed_tests": passed_tests,
             "total_tests": total_tests,
-            "results": self.results
+            "results": self.results,
         }
 
 

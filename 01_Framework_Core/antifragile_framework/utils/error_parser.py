@@ -107,13 +107,9 @@ class ErrorParser:
         if not message:
             return False
         lower_message = message.lower()
-        return any(
-            keyword in lower_message for keyword in self.model_error_keywords
-        )
+        return any(keyword in lower_message for keyword in self.model_error_keywords)
 
-    def classify_error(
-        self, exception: Exception, provider_name: str
-    ) -> ErrorDetails:
+    def classify_error(self, exception: Exception, provider_name: str) -> ErrorDetails:
         error_message = str(exception)
 
         # ==============================================================================
@@ -138,9 +134,7 @@ class ErrorParser:
                     **error_details
                 )
             # Check for model issue even in bad requests, as context length errors are often 400s
-            if self._is_model_error_by_message(
-                error_details.get("error_message", "")
-            ):
+            if self._is_model_error_by_message(error_details.get("error_message", "")):
                 return ErrorDetails(
                     category=ErrorCategory.MODEL_ISSUE,
                     is_retriable=False,
@@ -154,9 +148,7 @@ class ErrorParser:
                 **error_details
             )
 
-        if ANTHROPIC_AVAILABLE and isinstance(
-            exception, anthropic.BadRequestError
-        ):
+        if ANTHROPIC_AVAILABLE and isinstance(exception, anthropic.BadRequestError):
             error_details = self._extract_anthropic_error_details(exception)
             error_type = error_details.get("error_code", "")
             if (
@@ -169,9 +161,7 @@ class ErrorParser:
                     provider=provider_name,
                     **error_details
                 )
-            if self._is_model_error_by_message(
-                error_details.get("error_message", "")
-            ):
+            if self._is_model_error_by_message(error_details.get("error_message", "")):
                 return ErrorDetails(
                     category=ErrorCategory.MODEL_ISSUE,
                     is_retriable=False,

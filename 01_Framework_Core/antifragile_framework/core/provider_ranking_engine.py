@@ -40,9 +40,7 @@ class ProviderRankingEngine:
         self._request_counts: Dict[str, int] = {}
         self.logger = core_logger
 
-    def update_provider_score(
-        self, provider_name: str, resilience_score: float
-    ):
+    def update_provider_score(self, provider_name: str, resilience_score: float):
         """
         Updates a provider's performance score using the latest ResilienceScore.
         This method is thread-safe.
@@ -111,13 +109,8 @@ class ProviderRankingEngine:
 
             def get_score(provider_name: str) -> float:
                 # Use the real EMA if we have enough data, otherwise use the default score
-                if (
-                    self._request_counts.get(provider_name, 0)
-                    >= self._min_requests
-                ):
-                    return self._provider_emas.get(
-                        provider_name, self._default_score
-                    )
+                if self._request_counts.get(provider_name, 0) >= self._min_requests:
+                    return self._provider_emas.get(provider_name, self._default_score)
                 return self._default_score
 
             sorted_providers = sorted(

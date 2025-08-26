@@ -49,9 +49,7 @@ async def test_rephrase_success(mock_llm_client):
         ChatMessage(role="user", content="This is the original content."),
     ]
 
-    new_messages = await rewriter.rephrase_for_policy_compliance(
-        original_messages
-    )
+    new_messages = await rewriter.rephrase_for_policy_compliance(original_messages)
 
     mock_llm_client.agenerate_completion.assert_awaited_once()
 

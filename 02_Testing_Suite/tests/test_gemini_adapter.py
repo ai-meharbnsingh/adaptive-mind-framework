@@ -77,9 +77,7 @@ async def test_gemini_with_system_prompt(gemini_provider: GeminiProvider):
         ),
         ChatMessage(role="user", content="Write a short poem about the moon."),
     ]
-    response = await gemini_provider.agenerate_completion(
-        messages, temperature=0.5
-    )
+    response = await gemini_provider.agenerate_completion(messages, temperature=0.5)
     assert response.success is True
     assert len(response.content.strip().split("\n")) >= 2
 
@@ -89,15 +87,9 @@ async def test_gemini_with_system_prompt(gemini_provider: GeminiProvider):
 @pytest.mark.parametrize(
     "test_model", ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"]
 )
-async def test_gemini_model_override(
-    gemini_provider: GeminiProvider, test_model: str
-):
-    messages = [
-        ChatMessage(role="user", content=f"Confirm you are a Google model.")
-    ]
-    response = await gemini_provider.agenerate_completion(
-        messages, model=test_model
-    )
+async def test_gemini_model_override(gemini_provider: GeminiProvider, test_model: str):
+    messages = [ChatMessage(role="user", content="Confirm you are a Google model.")]
+    response = await gemini_provider.agenerate_completion(messages, model=test_model)
     assert response.success is True
     assert "google" in response.content.lower()
 

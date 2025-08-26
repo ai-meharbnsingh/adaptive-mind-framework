@@ -28,9 +28,7 @@ from typing import Any, Dict, List, Optional
 
 CURRENT_DIR = Path(__file__).parent
 PROJECT_ROOT = CURRENT_DIR.parent.parent
-FRAMEWORK_CORE_PATH = (
-    PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
-)
+FRAMEWORK_CORE_PATH = PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
 DATABASE_LAYER_PATH = PROJECT_ROOT / "05_Database_Layer"
 TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
 
@@ -38,9 +36,7 @@ TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
 sys.path.insert(0, str(FRAMEWORK_CORE_PATH))
 sys.path.insert(0, str(DATABASE_LAYER_PATH))
 sys.path.insert(0, str(TELEMETRY_PATH))
-sys.path.insert(
-    0, str(CURRENT_DIR)
-)  # For sibling modules within 03_Demo_Interface
+sys.path.insert(0, str(CURRENT_DIR))  # For sibling modules within 03_Demo_Interface
 
 # Import RealTimeMetricsCollector for periodic updates
 try:
@@ -112,9 +108,7 @@ class WebSocketManager:
                 "Attempted to disconnect a WebSocket that was not in active_connections."
             )
 
-    async def send_personal_message(
-        self, message: Dict[str, Any], websocket: Any
-    ):
+    async def send_personal_message(self, message: Dict[str, Any], websocket: Any):
         """
         Sends a message to a specific WebSocket client.
         """
@@ -143,9 +137,7 @@ class WebSocketManager:
                     f"Client queue full for {connection.client}. Disconnecting due to backlog."
                 )
                 disconnected_clients.append(connection)
-            except (
-                KeyError
-            ):  # Client might have disconnected between list() and here
+            except KeyError:  # Client might have disconnected between list() and here
                 pass  # Already handled by disconnect
             except Exception as e:
                 logger.error(
@@ -194,9 +186,7 @@ class WebSocketManager:
             self.disconnect(websocket)
         finally:
             if hasattr(websocket, "_websocket_listener_task"):
-                del (
-                    websocket._websocket_listener_task
-                )  # Clean up task attribute
+                del websocket._websocket_listener_task  # Clean up task attribute
 
     async def broadcast_dashboard_updates_periodically(
         self,
@@ -218,16 +208,12 @@ class WebSocketManager:
             while True:
                 try:
                     # Fetch overall live metrics from the collector
-                    live_metrics_data = (
-                        await metrics_collector.get_live_metrics()
-                    )
+                    live_metrics_data = await metrics_collector.get_live_metrics()
                     await self.broadcast(
                         {
                             "type": "dashboard_update",
                             "data": live_metrics_data,
-                            "timestamp": datetime.now(
-                                timezone.utc
-                            ).isoformat(),
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
                         }
                     )
                 except Exception as e:
@@ -280,9 +266,7 @@ class WebSocketManager:
                     f"Error closing WebSocket connection during shutdown: {e}"
                 )
             self.disconnect(websocket)
-        logger.info(
-            "WebSocketManager shutdown complete. All connections closed."
-        )
+        logger.info("WebSocketManager shutdown complete. All connections closed.")
 
 
 if __name__ == "__main__":

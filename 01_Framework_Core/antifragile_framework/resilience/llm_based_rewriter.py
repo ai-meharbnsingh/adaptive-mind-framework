@@ -101,9 +101,7 @@ class LLMBasedRewriter(PromptRewriter):
             )
 
             if not response.success or not response.content:
-                error_msg = (
-                    response.error_message or "LLM returned no content."
-                )
+                error_msg = response.error_message or "LLM returned no content."
                 raise RewriteFailedError(
                     f"LLM API call for rephrasing failed: {error_msg}"
                 )

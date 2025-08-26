@@ -12,8 +12,8 @@ from azure.core.exceptions import HttpResponseError
 # Configure professional logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
@@ -45,12 +45,17 @@ class AzureInfrastructureManager:
             # Uses environment variables for authentication (AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET)
             # This is the standard, secure way for service principal authentication in production.
             self.credential = DefaultAzureCredential()
-            self.resource_client = ResourceManagementClient(self.credential, self.subscription_id)
-            logger.info("✅ Azure credentials and resource client initialized successfully.")
+            self.resource_client = ResourceManagementClient(
+                self.credential, self.subscription_id
+            )
+            logger.info(
+                "✅ Azure credentials and resource client initialized successfully."
+            )
         except Exception as e:
             logger.error(f"❌ Failed to initialize Azure credentials: {e}")
             logger.error(
-                "Ensure your environment is configured for Azure authentication (e.g., `az login` or service principal environment variables).")
+                "Ensure your environment is configured for Azure authentication (e.g., `az login` or service principal environment variables)."
+            )
             raise
 
     def create_resource_group(self) -> bool:
@@ -63,12 +68,18 @@ class AzureInfrastructureManager:
         Returns:
             bool: True if the resource group was created or already exists, False otherwise.
         """
-        logger.info(f"Checking for resource group '{self.resource_group_name}' in location '{self.location}'...")
+        logger.info(
+            f"Checking for resource group '{self.resource_group_name}' in location '{self.location}'..."
+        )
 
         try:
             # Check if the resource group already exists to make the script idempotent
-            if self.resource_client.resource_groups.check_existence(self.resource_group_name):
-                logger.warning(f"⚠️ Resource group '{self.resource_group_name}' already exists. No action taken.")
+            if self.resource_client.resource_groups.check_existence(
+                self.resource_group_name
+            ):
+                logger.warning(
+                    f"⚠️ Resource group '{self.resource_group_name}' already exists. No action taken."
+                )
                 return True
 
             logger.info(f"🚀 Creating resource group '{self.resource_group_name}'...")
@@ -77,18 +88,21 @@ class AzureInfrastructureManager:
                 "tags": {
                     "Project": "Adaptive Mind Framework",
                     "Environment": "Production",
-                    "ManagedBy": "PythonSDK"
-                }
+                    "ManagedBy": "PythonSDK",
+                },
             }
             self.resource_client.resource_groups.create_or_update(
-                self.resource_group_name,
-                rg_params
+                self.resource_group_name, rg_params
             )
-            logger.info(f"✅ Successfully created resource group '{self.resource_group_name}'.")
+            logger.info(
+                f"✅ Successfully created resource group '{self.resource_group_name}'."
+            )
             return True
 
         except HttpResponseError as e:
-            logger.error(f"❌ An HTTP error occurred during resource group creation: {e.message}")
+            logger.error(
+                f"❌ An HTTP error occurred during resource group creation: {e.message}"
+            )
             return False
         except Exception as e:
             logger.error(f"❌ An unexpected error occurred: {e}")
@@ -101,7 +115,9 @@ class AzureInfrastructureManager:
         Returns:
             dict: A dictionary containing details of the resource group, or an empty dict on failure.
         """
-        logger.info(f"🔍 Retrieving details for resource group '{self.resource_group_name}'...")
+        logger.info(
+            f"🔍 Retrieving details for resource group '{self.resource_group_name}'..."
+        )
         try:
             rg = self.resource_client.resource_groups.get(self.resource_group_name)
             details = {
@@ -109,7 +125,7 @@ class AzureInfrastructureManager:
                 "id": rg.id,
                 "location": rg.location,
                 "provisioning_state": rg.properties.provisioning_state,
-                "tags": rg.tags
+                "tags": rg.tags,
             }
             logger.info(f"✅ Successfully retrieved details for '{rg.name}'.")
             return details
@@ -144,11 +160,15 @@ def main():
                 for key, value in details.items():
                     logger.info(f"  {key.capitalize():<20}: {value}")
                 logger.info("-----------------------------------")
-                logger.info("✅ Foundational infrastructure setup is complete and verified.")
+                logger.info(
+                    "✅ Foundational infrastructure setup is complete and verified."
+                )
             else:
                 logger.error("❌ Resource group created but verification failed.")
         else:
-            logger.error("❌ Failed to create the foundational resource group. Aborting.")
+            logger.error(
+                "❌ Failed to create the foundational resource group. Aborting."
+            )
 
     except ValueError as e:
         logger.error(f"Configuration error: {e}")

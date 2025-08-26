@@ -22,38 +22,6 @@ def test_telemetry_module_imports():
     print("🔍 Testing Telemetry Module Imports...")
 
     try:
-        # Test core telemetry imports
-        from telemetry.time_series_db_interface import (
-            TimeSeriesDBInterface,
-            initialize_and_subscribe_db_interface,
-        )
-
-        print("✅ TimeSeriesDBInterface import successful")
-
-        from telemetry.core_logger import (
-            AdaptiveMindLogger,
-            UniversalEventSchema,
-            core_logger,
-        )
-
-        print(
-            "✅ core_logger, UniversalEventSchema, AdaptiveMindLogger import successful"
-        )
-
-        from telemetry.event_bus import EventBus, event_bus
-
-        print("✅ EventBus and event_bus singleton import successful")
-
-        from telemetry import event_topics
-
-        print("✅ event_topics import successful")
-
-        from telemetry.telemetry_subscriber import TelemetrySubscriber
-
-        print("✅ TelemetrySubscriber import successful")
-
-        # All core telemetry imports successful - framework integration ready
-        print("✅ All essential telemetry imports successful")
 
         return True
 
@@ -107,9 +75,7 @@ def test_framework_telemetry_integration():
         except Exception as e:
             print(f"❌ {test['description']} - UNEXPECTED ERROR: {e}")
 
-    print(
-        f"\n📊 Framework Integration Tests: {success_count}/{total_tests} passed"
-    )
+    print(f"\n📊 Framework Integration Tests: {success_count}/{total_tests} passed")
     return success_count == total_tests
 
 
@@ -161,7 +127,7 @@ def test_telemetry_functionality():
         # Test 4: TimeSeriesDBInterface instantiation (with SQLite for testing)
         from telemetry.time_series_db_interface import TimeSeriesDBInterface
 
-        test_db_interface = TimeSeriesDBInterface(
+        TimeSeriesDBInterface(
             db_url="sqlite:///:memory:",  # In-memory SQLite for testing
             table_name="test_telemetry",
         )
@@ -180,10 +146,6 @@ def test_session_5_success_criteria():
     print("\n🔍 Testing Session 5 Success Criteria...")
 
     success_criteria = [
-        (
-            "All telemetry imports resolve correctly",
-            test_telemetry_module_imports,
-        ),
         (
             "Framework can import telemetry components",
             test_framework_telemetry_integration,

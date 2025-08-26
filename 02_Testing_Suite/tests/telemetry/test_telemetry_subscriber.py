@@ -1,6 +1,5 @@
 # tests/telemetry/test_telemetry_subscriber.py
 
-import asyncio
 import logging
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -28,9 +27,7 @@ def mock_db_interface():
 @pytest.fixture(autouse=True)
 def mock_logger():
     # Patch the singleton instance directly where it's imported
-    with patch(
-        "telemetry.telemetry_subscriber.core_logger"
-    ) as mock_logger_instance:
+    with patch("telemetry.telemetry_subscriber.core_logger") as mock_logger_instance:
         yield mock_logger_instance
 
 
@@ -44,9 +41,7 @@ async def test_subscriber_initialization(mock_event_bus, mock_db_interface):
 
 
 @pytest.mark.asyncio
-async def test_subscribe_to_all_events(
-    mock_event_bus, mock_db_interface, mock_logger
-):
+async def test_subscribe_to_all_events(mock_event_bus, mock_db_interface, mock_logger):
     """Test that the subscriber correctly subscribes to all defined topics."""
     subscriber = TelemetrySubscriber(mock_event_bus, mock_db_interface)
     subscriber.subscribe_to_all_events()

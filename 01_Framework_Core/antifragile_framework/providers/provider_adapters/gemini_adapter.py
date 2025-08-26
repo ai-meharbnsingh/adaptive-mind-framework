@@ -37,9 +37,7 @@ def _extract_gemini_usage(response: Any) -> Optional[TokenUsage]:
 class GeminiProvider(LLMProvider):
     def __init__(self, config: Dict[str, Any]):
         super().__init__(config)
-        self.default_model = self.config.get(
-            "default_model", "gemini-1.5-flash-latest"
-        )
+        self.default_model = self.config.get("default_model", "gemini-1.5-flash-latest")
         self.primary_api_key = self.config.get("api_key")
         if not self.primary_api_key:
             raise ValueError(
@@ -60,9 +58,7 @@ class GeminiProvider(LLMProvider):
         # Simulate variable token usage
         input_tokens = random.randint(50, 250)
         output_tokens = random.randint(100, 500)
-        usage = TokenUsage(
-            input_tokens=input_tokens, output_tokens=output_tokens
-        )
+        usage = TokenUsage(input_tokens=input_tokens, output_tokens=output_tokens)
 
         # Create a unique response content
         content = f"Mocked Gemini response for model {model_to_use}. UUID: {uuid.uuid4().hex[:12]}"
@@ -91,9 +87,7 @@ class GeminiProvider(LLMProvider):
         api_key_override: Optional[str] = None,
         **kwargs: Any,
     ) -> CompletionResponse:
-        print(
-            "🔥 ADAPTER CALLED! This proves the Gemini adapter is being used!"
-        )
+        print("🔥 ADAPTER CALLED! This proves the Gemini adapter is being used!")
         # Start timing framework processing
         framework_start = time.perf_counter()
         print(f"🐛 DEBUG: framework_start = {framework_start}")
@@ -102,9 +96,7 @@ class GeminiProvider(LLMProvider):
 
         # Performance test mocking logic (keep existing mock logic)
         if os.getenv("PERFORMANCE_TEST_MODE", "False").lower() == "true":
-            return await self._generate_mock_response(
-                model_to_use, framework_start
-            )
+            return await self._generate_mock_response(model_to_use, framework_start)
 
         # Framework processing: API key setup
         usage = None
@@ -119,9 +111,7 @@ class GeminiProvider(LLMProvider):
                 self._prepare_provider_messages(messages)
             )
             if not user_assistant_messages_raw:
-                framework_latency = (
-                    time.perf_counter() - framework_start
-                ) * 1000
+                framework_latency = (time.perf_counter() - framework_start) * 1000
                 return CompletionResponse(
                     success=False,
                     latency_ms=framework_latency,
@@ -132,9 +122,7 @@ class GeminiProvider(LLMProvider):
             formatted_messages = []
             for msg in user_assistant_messages_raw:
                 role = "model" if msg["role"] == "assistant" else msg["role"]
-                formatted_messages.append(
-                    {"role": role, "parts": [msg["content"]]}
-                )
+                formatted_messages.append({"role": role, "parts": [msg["content"]]})
 
             # Framework processing: setup model and config
             model = genai.GenerativeModel(
@@ -178,13 +166,10 @@ class GeminiProvider(LLMProvider):
             ):
                 framework_end = time.perf_counter()
                 framework_latency = (
-                    (api_call_start - framework_start)
-                    + (framework_end - api_call_end)
+                    (api_call_start - framework_start) + (framework_end - api_call_end)
                 ) * 1000
-                print(
-                    f"🐛 DEBUG: framework_latency = {framework_latency:.2f}ms"
-                )
-                print(f"🐛 DEBUG: BREAKDOWN:")
+                print(f"🐛 DEBUG: framework_latency = {framework_latency:.2f}ms")
+                print("🐛 DEBUG: BREAKDOWN:")
                 print(
                     f"🐛 DEBUG:   (api_call_start - framework_start) = {(api_call_start - framework_start) * 1000:.2f}ms"
                 )
@@ -225,13 +210,12 @@ class GeminiProvider(LLMProvider):
 
             # Calculate ONLY framework overhead (excluding external API time)
             framework_latency = (
-                (api_call_start - framework_start)
-                + (framework_end - api_call_end)
+                (api_call_start - framework_start) + (framework_end - api_call_end)
             ) * 1000
 
             print(f"🐛 DEBUG: framework_end = {framework_end}")
             print(f"🐛 DEBUG: framework_latency = {framework_latency:.2f}ms")
-            print(f"🐛 DEBUG: BREAKDOWN:")
+            print("🐛 DEBUG: BREAKDOWN:")
             print(
                 f"🐛 DEBUG:   preprocessing = {(api_call_start - framework_start) * 1000:.2f}ms"
             )
@@ -261,17 +245,13 @@ class GeminiProvider(LLMProvider):
             api_call_time = (api_call_end - api_call_start) * 1000
             print(f"🐛 DEBUG: api_call_end = {api_call_end}")
             print(f"🐛 DEBUG: api_call_time = {api_call_time:.2f}ms")
-            error_msg = (
-                f"Google Gemini API Error: {getattr(e, 'message', str(e))}"
-            )
+            error_msg = f"Google Gemini API Error: {getattr(e, 'message', str(e))}"
         except Exception as e:
             api_call_end = time.perf_counter()
             api_call_time = (api_call_end - api_call_start) * 1000
             print(f"🐛 DEBUG: api_call_end = {api_call_end}")
             print(f"🐛 DEBUG: api_call_time = {api_call_time:.2f}ms")
-            error_msg = (
-                f"An unexpected error occurred with Google Gemini: {str(e)}"
-            )
+            error_msg = f"An unexpected error occurred with Google Gemini: {str(e)}"
             log.exception("Unexpected Google Gemini Error")
 
         # Calculate framework overhead for error cases

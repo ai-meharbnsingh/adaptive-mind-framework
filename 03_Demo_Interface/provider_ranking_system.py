@@ -51,9 +51,7 @@ except ImportError:
     try:
         from connection_manager import PostgreSQLConnectionManager
     except ImportError:
-        print(
-            "Warning: PostgreSQLConnectionManager not found. Using mock for demo."
-        )
+        print("Warning: PostgreSQLConnectionManager not found. Using mock for demo.")
 
         class PostgreSQLConnectionManager:
             async def get_connection(self):
@@ -177,17 +175,13 @@ class ProviderPerformanceTracker:
             self.db_manager = PostgreSQLConnectionManager()
             self.db_available = True
         except Exception as e:
-            logger.warning(
-                f"Database not available: {e}. Running in demo mode."
-            )
+            logger.warning(f"Database not available: {e}. Running in demo mode.")
             self.db_manager = None
             self.db_available = False
 
         # Load historical data if DB is available
         if self.db_available:
-            asyncio.create_task(
-                self._load_historical_performance_records_from_db()
-            )
+            asyncio.create_task(self._load_historical_performance_records_from_db())
         else:
             # Generate mock data for demo
             asyncio.create_task(self._generate_mock_performance_data())
@@ -209,26 +203,20 @@ class ProviderPerformanceTracker:
         for provider in providers:
             # Generate 50 mock records per provider
             for i in range(50):
-                timestamp = datetime.now(timezone.utc) - timedelta(
-                    minutes=i * 5
-                )
+                timestamp = datetime.now(timezone.utc) - timedelta(minutes=i * 5)
                 performance_record = {
                     "timestamp": timestamp,
                     "success": np.random.random() > 0.05,  # 95% success rate
                     "response_time_ms": np.random.uniform(150, 500),
                     "cost": np.random.uniform(0.001, 0.01),
                     "quality_score": np.random.uniform(0.85, 0.98),
-                    "error_type": (
-                        None if np.random.random() > 0.05 else "timeout"
-                    ),
+                    "error_type": (None if np.random.random() > 0.05 else "timeout"),
                     "scenario": np.random.choice(scenarios),
                     "load_level": np.random.choice(load_levels),
                 }
                 self.performance_history[provider].append(performance_record)
 
-        logger.info(
-            f"Generated mock performance data for {len(providers)} providers"
-        )
+        logger.info(f"Generated mock performance data for {len(providers)} providers")
 
     async def _load_historical_performance_records_from_db(self):
         """
@@ -264,9 +252,7 @@ class ProviderPerformanceTracker:
                     "scenario": record["scenario"],
                     "load_level": record["load_level"],
                 }
-                self.performance_history[provider_id].append(
-                    performance_record
-                )
+                self.performance_history[provider_id].append(performance_record)
 
             logger.info(
                 f"Loaded {sum(len(d) for d in self.performance_history.values())} historical performance records from database."
@@ -309,9 +295,7 @@ class ProviderPerformanceTracker:
                 record["load_level"],
             )
             await self.db_manager.release_connection(conn)
-            logger.debug(
-                f"Persisted performance record for {provider_id} to database."
-            )
+            logger.debug(f"Persisted performance record for {provider_id} to database.")
         except Exception as e:
             logger.error(
                 f"Error persisting performance record for {provider_id} to database: {e}"
@@ -335,9 +319,7 @@ class ProviderPerformanceTracker:
         }
 
         self.performance_history[provider_id].append(performance_record)
-        await self._persist_performance_record_to_db(
-            provider_id, performance_record
-        )
+        await self._persist_performance_record_to_db(provider_id, performance_record)
 
         # Invalidate cache for this provider
         if provider_id in self.last_cache_update:
@@ -354,8 +336,7 @@ class ProviderPerformanceTracker:
         # Check cache
         if (
             provider_id in self.last_cache_update
-            and current_time - self.last_cache_update[provider_id]
-            < self.cache_ttl
+            and current_time - self.last_cache_update[provider_id] < self.cache_ttl
             and provider_id in self.metrics_cache
         ):
             return self.metrics_cache[provider_id]
@@ -391,35 +372,23 @@ class ProviderPerformanceTracker:
         )
 
         response_times = [
-            record["response_time_ms"]
-            for record in history
-            if record["success"]
+            record["response_time_ms"] for record in history if record["success"]
         ]
-        avg_response_time = (
-            statistics.mean(response_times) if response_times else 0.0
-        )
+        avg_response_time = statistics.mean(response_times) if response_times else 0.0
         performance_score = max(0.0, 1.0 - (avg_response_time / 5000.0))
 
-        costs_per_request = [
-            record["cost"] for record in history if record["cost"] > 0
-        ]
-        avg_cost = (
-            statistics.mean(costs_per_request) if costs_per_request else 0.0
-        )
+        costs_per_request = [record["cost"] for record in history if record["cost"] > 0]
+        avg_cost = statistics.mean(costs_per_request) if costs_per_request else 0.0
         cost_efficiency_score = max(0.0, 1.0 - (avg_cost / 1.0))
 
         quality_scores = [
             record["quality_score"] for record in history if record["success"]
         ]
-        quality_score = (
-            statistics.mean(quality_scores) if quality_scores else 0.0
-        )
+        quality_score = statistics.mean(quality_scores) if quality_scores else 0.0
 
         # Advanced antifragile metrics
         bias_resistance_score = self._calculate_bias_resistance(history)
-        learning_compatibility_score = self._calculate_learning_compatibility(
-            history
-        )
+        learning_compatibility_score = self._calculate_learning_compatibility(history)
         adaptation_velocity = self._calculate_adaptation_velocity(history)
         stress_tolerance = self._calculate_stress_tolerance(history)
 
@@ -457,9 +426,7 @@ class ProviderPerformanceTracker:
             load_performance=load_performance,
         )
 
-    def _calculate_bias_resistance(
-        self, history: List[Dict[str, Any]]
-    ) -> float:
+    def _calculate_bias_resistance(self, history: List[Dict[str, Any]]) -> float:
         """Calculate how resistant the provider is to bias-inducing conditions"""
         if len(history) < 10:
             return 0.5
@@ -485,9 +452,7 @@ class ProviderPerformanceTracker:
         bias_resistance = max(0.0, 1.0 - (variance * 4.0))
         return min(bias_resistance, 1.0)
 
-    def _calculate_learning_compatibility(
-        self, history: List[Dict[str, Any]]
-    ) -> float:
+    def _calculate_learning_compatibility(self, history: List[Dict[str, Any]]) -> float:
         """Calculate how well the provider works with learning systems"""
         if len(history) < 20:
             return 0.5
@@ -497,21 +462,15 @@ class ProviderPerformanceTracker:
         if window_size == 0:
             return 0.5
 
-        for i in range(
-            0, len(history) - window_size + 1, window_size // 2 or 1
-        ):
+        for i in range(0, len(history) - window_size + 1, window_size // 2 or 1):
             window = history[i : i + window_size]
             if not window:
                 continue
 
             success_rate = sum(1 for r in window if r["success"]) / len(window)
-            valid_quality_scores = [
-                r["quality_score"] for r in window if r["success"]
-            ]
+            valid_quality_scores = [r["quality_score"] for r in window if r["success"]]
             avg_quality = (
-                statistics.mean(valid_quality_scores)
-                if valid_quality_scores
-                else 0.0
+                statistics.mean(valid_quality_scores) if valid_quality_scores else 0.0
             )
 
             combined_score = (success_rate + avg_quality) / 2.0
@@ -530,9 +489,7 @@ class ProviderPerformanceTracker:
 
         return max(0.0, min(learning_compatibility, 1.0))
 
-    def _calculate_adaptation_velocity(
-        self, history: List[Dict[str, Any]]
-    ) -> float:
+    def _calculate_adaptation_velocity(self, history: List[Dict[str, Any]]) -> float:
         """Calculate how quickly the provider adapts to changes"""
         if len(history) < 15:
             return 0.5
@@ -556,9 +513,7 @@ class ProviderPerformanceTracker:
 
         return min(adaptation_velocity, 1.0)
 
-    def _calculate_stress_tolerance(
-        self, history: List[Dict[str, Any]]
-    ) -> float:
+    def _calculate_stress_tolerance(self, history: List[Dict[str, Any]]) -> float:
         """Calculate provider performance under high load conditions"""
         if len(history) < 10:
             return 0.5
@@ -601,9 +556,9 @@ class ProviderPerformanceTracker:
         hourly_performance = {}
         for hour, successes in hourly_data.items():
             if successes:
-                hourly_performance[hour] = sum(
-                    1 for s in successes if s
-                ) / len(successes)
+                hourly_performance[hour] = sum(1 for s in successes if s) / len(
+                    successes
+                )
 
         return hourly_performance
 
@@ -620,9 +575,7 @@ class ProviderPerformanceTracker:
         daily_trends = {}
         for day, successes in daily_data.items():
             if successes:
-                daily_trends[day] = sum(1 for s in successes if s) / len(
-                    successes
-                )
+                daily_trends[day] = sum(1 for s in successes if s) / len(successes)
 
         return daily_trends
 
@@ -639,9 +592,9 @@ class ProviderPerformanceTracker:
         scenario_performance = {}
         for scenario, successes in scenario_data.items():
             if successes:
-                scenario_performance[scenario] = sum(
-                    1 for s in successes if s
-                ) / len(successes)
+                scenario_performance[scenario] = sum(1 for s in successes if s) / len(
+                    successes
+                )
 
         return scenario_performance
 
@@ -658,23 +611,19 @@ class ProviderPerformanceTracker:
         load_performance = {}
         for load_level, successes in load_data.items():
             if successes:
-                load_performance[load_level] = sum(
-                    1 for s in successes if s
-                ) / len(successes)
+                load_performance[load_level] = sum(1 for s in successes if s) / len(
+                    successes
+                )
 
         return load_performance
 
-    def _calculate_availability_score(
-        self, history: List[Dict[str, Any]]
-    ) -> float:
+    def _calculate_availability_score(self, history: List[Dict[str, Any]]) -> float:
         """Calculate availability score based on recent performance"""
         if not history:
             return 0.0
 
         recent_cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
-        recent_history = [
-            r for r in history if r["timestamp"] >= recent_cutoff
-        ]
+        recent_history = [r for r in history if r["timestamp"] >= recent_cutoff]
 
         if not recent_history:
             recent_history = history[-50:] if len(history) >= 50 else history
@@ -691,9 +640,7 @@ class InteractiveProviderRankingSystem:
     Demonstrates intelligent provider selection and real-time ranking updates
     """
 
-    def __init__(
-        self, ranking_weights: Optional[Dict[RankingMetric, float]] = None
-    ):
+    def __init__(self, ranking_weights: Optional[Dict[RankingMetric, float]] = None):
         self.performance_tracker = ProviderPerformanceTracker()
         self.ranking_weights = ranking_weights or self._get_default_weights()
         self.current_rankings: List[ProviderRanking] = []
@@ -743,9 +690,7 @@ class InteractiveProviderRankingSystem:
         if provider_id not in self.active_providers:
             await self.register_provider(provider_id)
 
-        await self.performance_tracker.record_request_outcome(
-            provider_id, outcome_data
-        )
+        await self.performance_tracker.record_request_outcome(provider_id, outcome_data)
         await self._check_ranking_update_trigger()
 
     async def get_current_rankings(self) -> List[ProviderRanking]:
@@ -780,27 +725,19 @@ class InteractiveProviderRankingSystem:
                 sorted_providers, 1
             ):
                 prev_ranking = next(
-                    (
-                        r
-                        for r in self.current_rankings
-                        if r.provider_id == provider_id
-                    ),
+                    (r for r in self.current_rankings if r.provider_id == provider_id),
                     None,
                 )
                 rank_change = (prev_ranking.rank - rank) if prev_ranking else 0
 
                 metric_scores = self._calculate_detailed_scores(metrics)
-                status = self.provider_statuses.get(
-                    provider_id, ProviderStatus.ACTIVE
-                )
+                status = self.provider_statuses.get(provider_id, ProviderStatus.ACTIVE)
                 confidence_level = self._calculate_ranking_confidence(metrics)
 
-                strengths, weaknesses = (
-                    self._analyze_provider_strengths_weaknesses(metrics)
+                strengths, weaknesses = self._analyze_provider_strengths_weaknesses(
+                    metrics
                 )
-                trending = self._determine_trending_direction(
-                    provider_id, metrics
-                )
+                trending = self._determine_trending_direction(provider_id, metrics)
                 recommendation = self._generate_provider_recommendation(
                     metrics, status, rank
                 )
@@ -841,9 +778,7 @@ class InteractiveProviderRankingSystem:
                 }
             )
 
-            logger.info(
-                f"Rankings updated: {len(new_rankings)} providers ranked"
-            )
+            logger.info(f"Rankings updated: {len(new_rankings)} providers ranked")
 
         except Exception as e:
             logger.error(f"Error updating rankings: {str(e)}")
@@ -956,9 +891,7 @@ class InteractiveProviderRankingSystem:
             return "stable"
 
         sorted_days = sorted(metrics.daily_trends.items())
-        recent_performance = [
-            performance for day, performance in sorted_days[-5:]
-        ]
+        recent_performance = [performance for day, performance in sorted_days[-5:]]
 
         if len(recent_performance) < 3:
             return "stable"
@@ -992,10 +925,7 @@ class InteractiveProviderRankingSystem:
             return "Primary choice - Top performer"
         elif rank <= 3:
             return "Recommended - High performance"
-        elif (
-            metrics.reliability_score > 0.8
-            and metrics.cost_efficiency_score > 0.7
-        ):
+        elif metrics.reliability_score > 0.8 and metrics.cost_efficiency_score > 0.7:
             return "Good backup choice - Reliable and cost-effective"
         elif metrics.cost_efficiency_score > 0.8:
             return "Cost-effective option - Good for budget optimization"
@@ -1013,9 +943,7 @@ class InteractiveProviderRankingSystem:
                 seconds=self.ranking_update_interval
             )
 
-        time_since_update = (
-            current_time - self._last_ranking_update
-        ).total_seconds()
+        time_since_update = (current_time - self._last_ranking_update).total_seconds()
 
         if time_since_update >= self.ranking_update_interval:
             await self._update_rankings()
@@ -1025,9 +953,7 @@ class InteractiveProviderRankingSystem:
         self, provider_id: str, new_status: ProviderStatus, reason: str = ""
     ):
         """Update provider operational status"""
-        old_status = self.provider_statuses.get(
-            provider_id, ProviderStatus.ACTIVE
-        )
+        old_status = self.provider_statuses.get(provider_id, ProviderStatus.ACTIVE)
         self.provider_statuses[provider_id] = new_status
 
         logger.info(
@@ -1097,15 +1023,11 @@ class InteractiveProviderRankingSystem:
             return trends
 
         active_providers = [
-            r
-            for r in self.current_rankings
-            if r.status == ProviderStatus.ACTIVE
+            r for r in self.current_rankings if r.status == ProviderStatus.ACTIVE
         ]
 
         if active_providers:
-            avg_score = statistics.mean(
-                [r.overall_score for r in active_providers]
-            )
+            avg_score = statistics.mean([r.overall_score for r in active_providers])
             trends["overall_system_health"] = avg_score
 
         for ranking in self.current_rankings:
@@ -1158,9 +1080,7 @@ class InteractiveProviderRankingSystem:
                     ),
                 },
                 "recommendations": [ranking.recommendation],
-                "risk_factors": (
-                    ranking.weaknesses[:2] if ranking.weaknesses else []
-                ),
+                "risk_factors": (ranking.weaknesses[:2] if ranking.weaknesses else []),
             }
             insights[ranking.provider_id] = provider_insights
 
@@ -1179,9 +1099,7 @@ class InteractiveProviderRankingSystem:
             }
 
         active_providers = [
-            r
-            for r in self.current_rankings
-            if r.status == ProviderStatus.ACTIVE
+            r for r in self.current_rankings if r.status == ProviderStatus.ACTIVE
         ]
         system_resilience = (
             len(active_providers) / len(self.current_rankings)
@@ -1209,9 +1127,7 @@ class InteractiveProviderRankingSystem:
         recommendations = []
 
         if not self.current_rankings:
-            return [
-                "No providers currently ranked - register providers to begin"
-            ]
+            return ["No providers currently ranked - register providers to begin"]
 
         if len(self.current_rankings) < 3:
             recommendations.append(
@@ -1230,9 +1146,7 @@ class InteractiveProviderRankingSystem:
 
         return recommendations
 
-    async def subscribe_to_ranking_updates(
-        self, subscription_id: str
-    ) -> asyncio.Queue:
+    async def subscribe_to_ranking_updates(self, subscription_id: str) -> asyncio.Queue:
         """Subscribe to real-time ranking updates"""
         queue = asyncio.Queue(maxsize=50)
         self.subscribers[subscription_id] = queue
@@ -1259,9 +1173,7 @@ class InteractiveProviderRankingSystem:
                 logger.warning(f"Failed to deliver ranking update to {sub_id}")
                 disconnected_subs.append(sub_id)
             except Exception as e:
-                logger.error(
-                    f"Error delivering ranking update to {sub_id}: {str(e)}"
-                )
+                logger.error(f"Error delivering ranking update to {sub_id}: {str(e)}")
                 disconnected_subs.append(sub_id)
 
         for sub_id in disconnected_subs:
@@ -1334,9 +1246,7 @@ class ProviderRankingDemoGenerator:
         while datetime.now(timezone.utc) < end_time:
             provider = random.choice(self.providers)
             scenario = random.choice(self.scenarios)
-            load_level = random.choices(
-                self.load_levels, weights=[0.3, 0.5, 0.2]
-            )[0]
+            load_level = random.choices(self.load_levels, weights=[0.3, 0.5, 0.2])[0]
 
             profile = provider_profiles[provider]
 
@@ -1351,15 +1261,11 @@ class ProviderRankingDemoGenerator:
 
             load_factor = {"low": 1.1, "normal": 1.0, "high": 0.8}[load_level]
 
-            success_rate = (
-                profile["base_success_rate"] * time_factor * load_factor
-            )
+            success_rate = profile["base_success_rate"] * time_factor * load_factor
             success_rate += random.uniform(-0.05, 0.05)
             success = random.random() < max(0.0, min(success_rate, 1.0))
 
-            response_time = (
-                profile["base_response_time"] / time_factor / load_factor
-            )
+            response_time = profile["base_response_time"] / time_factor / load_factor
             response_time += random.uniform(-200, 200)
             response_time = max(100, response_time)
 
@@ -1405,9 +1311,7 @@ class ProviderRankingDemoGenerator:
                 "load_level": load_level,
             }
 
-            await ranking_system.record_provider_performance(
-                provider, outcome_data
-            )
+            await ranking_system.record_provider_performance(provider, outcome_data)
 
             request_count += 1
 
@@ -1435,12 +1339,8 @@ if __name__ == "__main__":
 
         try:
             print("\n" + "=" * 80)
-            print(
-                "ADAPTIVE MIND FRAMEWORK - INTERACTIVE PROVIDER RANKING SYSTEM"
-            )
-            print(
-                "SESSION 8 - Advanced Demo Features (Version 2.2.1 - Complete)"
-            )
+            print("ADAPTIVE MIND FRAMEWORK - INTERACTIVE PROVIDER RANKING SYSTEM")
+            print("SESSION 8 - Advanced Demo Features (Version 2.2.1 - Complete)")
             print("=" * 80)
 
             print("🚀 Starting provider ranking demonstration...")
@@ -1495,7 +1395,7 @@ if __name__ == "__main__":
             print("\n📈 FINAL RANKINGS AND ANALYTICS:")
             rankings = await ranking_system.get_current_rankings()
 
-            print(f"\n🏆 PROVIDER RANKINGS:")
+            print("\n🏆 PROVIDER RANKINGS:")
             if not rankings:
                 print("  No providers ranked yet.")
             for ranking in rankings:
@@ -1505,15 +1405,13 @@ if __name__ == "__main__":
                 )
                 print(f"      Recommendation: {ranking.recommendation}")
                 if ranking.strengths:
-                    print(
-                        f"      Strengths: {', '.join(ranking.strengths[:2])}"
-                    )
+                    print(f"      Strengths: {', '.join(ranking.strengths[:2])}")
                 print()
 
             # Get comprehensive analytics
             analytics = await ranking_system.get_ranking_analytics()
 
-            print(f"📊 SYSTEM ANALYTICS:")
+            print("📊 SYSTEM ANALYTICS:")
             overview = analytics["overview"]
             print(f"  Total Providers: {overview['total_providers']}")
             print(f"  Active Providers: {overview['active_providers']}")
@@ -1521,19 +1419,15 @@ if __name__ == "__main__":
                 f"  Database Available: {ranking_system.performance_tracker.db_available}"
             )
 
-            print(f"\n🛡️  ANTIFRAGILE METRICS:")
+            print("\n🛡️  ANTIFRAGILE METRICS:")
             antifragile = analytics["antifragile_metrics"]
-            print(
-                f"  System Resilience: {antifragile['system_resilience']:.3f}"
-            )
+            print(f"  System Resilience: {antifragile['system_resilience']:.3f}")
             print(
                 f"  Overall Antifragile Score: {antifragile['overall_antifragile_score']:.3f}"
             )
 
             # Unsubscribe from updates
-            await ranking_system.unsubscribe_from_ranking_updates(
-                subscription_id
-            )
+            await ranking_system.unsubscribe_from_ranking_updates(subscription_id)
 
             print("\n" + "=" * 80)
             print("✅ PROVIDER RANKING SYSTEM DEMONSTRATION COMPLETE")

@@ -9,13 +9,12 @@ WebSocket support for real-time metrics, and enterprise-grade API endpoints.
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import json
 import asyncio
 import os
-from pathlib import Path
 from typing import List, Dict, Any
 import logging
 from datetime import datetime
@@ -31,7 +30,7 @@ app = FastAPI(
     description="Enterprise AI Resilience Platform with Interactive Demo",
     version="2.0.0",
     docs_url="/api/docs",
-    redoc_url="/api/redoc"
+    redoc_url="/api/redoc",
 )
 
 # CORS middleware for development
@@ -56,17 +55,21 @@ class ConnectionManager:
             "response_time": 127,
             "cost_savings": 34,
             "requests_processed": 2400000,
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
         self.active_connections.append(websocket)
-        logger.info(f"WebSocket connection established. Total connections: {len(self.active_connections)}")
+        logger.info(
+            f"WebSocket connection established. Total connections: {len(self.active_connections)}"
+        )
 
     def disconnect(self, websocket: WebSocket):
         self.active_connections.remove(websocket)
-        logger.info(f"WebSocket connection closed. Total connections: {len(self.active_connections)}")
+        logger.info(
+            f"WebSocket connection closed. Total connections: {len(self.active_connections)}"
+        )
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
@@ -81,18 +84,18 @@ class ConnectionManager:
     async def broadcast_metrics_update(self):
         """Broadcast real-time metrics to all connected clients"""
         # Simulate real-time metrics updates
-        self.metrics_cache.update({
-            "uptime": round(99.95 + random.random() * 0.04, 2),
-            "response_time": int(120 + random.random() * 20),
-            "cost_savings": int(30 + random.random() * 10),
-            "requests_processed": self.metrics_cache["requests_processed"] + random.randint(100, 1000),
-            "last_updated": datetime.now().isoformat()
-        })
+        self.metrics_cache.update(
+            {
+                "uptime": round(99.95 + random.random() * 0.04, 2),
+                "response_time": int(120 + random.random() * 20),
+                "cost_savings": int(30 + random.random() * 10),
+                "requests_processed": self.metrics_cache["requests_processed"]
+                + random.randint(100, 1000),
+                "last_updated": datetime.now().isoformat(),
+            }
+        )
 
-        message = json.dumps({
-            "type": "metrics_update",
-            "metrics": self.metrics_cache
-        })
+        message = json.dumps({"type": "metrics_update", "metrics": self.metrics_cache})
         await self.broadcast(message)
 
 
@@ -110,7 +113,7 @@ async def serve_landing_page():
     except FileNotFoundError:
         return HTMLResponse(
             content="<h1>Landing page not found</h1><p>Please ensure index.html exists in the project root.</p>",
-            status_code=404
+            status_code=404,
         )
 
 
@@ -124,7 +127,7 @@ async def serve_video_demo():
     except FileNotFoundError:
         return HTMLResponse(
             content="<h1>Video demo not found</h1><p>Please ensure video.html exists in the project root.</p>",
-            status_code=404
+            status_code=404,
         )
 
 
@@ -135,11 +138,8 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         # Send initial metrics
         await manager.send_personal_message(
-            json.dumps({
-                "type": "initial_metrics",
-                "metrics": manager.metrics_cache
-            }),
-            websocket
+            json.dumps({"type": "initial_metrics", "metrics": manager.metrics_cache}),
+            websocket,
         )
 
         # Keep connection alive and listen for client messages
@@ -150,23 +150,20 @@ async def websocket_endpoint(websocket: WebSocket):
 
                 if message.get("type") == "ping":
                     await manager.send_personal_message(
-                        json.dumps({"type": "pong"}),
-                        websocket
+                        json.dumps({"type": "pong"}), websocket
                     )
                 elif message.get("type") == "request_metrics":
                     await manager.send_personal_message(
-                        json.dumps({
-                            "type": "metrics_update",
-                            "metrics": manager.metrics_cache
-                        }),
-                        websocket
+                        json.dumps(
+                            {"type": "metrics_update", "metrics": manager.metrics_cache}
+                        ),
+                        websocket,
                     )
 
             except asyncio.TimeoutError:
                 # Send heartbeat
                 await manager.send_personal_message(
-                    json.dumps({"type": "heartbeat"}),
-                    websocket
+                    json.dumps({"type": "heartbeat"}), websocket
                 )
             except WebSocketDisconnect:
                 break
@@ -188,7 +185,7 @@ async def health_check():
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "version": "2.0.0",
-        "active_connections": len(manager.active_connections)
+        "active_connections": len(manager.active_connections),
     }
 
 
@@ -198,7 +195,7 @@ async def get_metrics():
     return {
         "status": "success",
         "data": manager.metrics_cache,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -219,10 +216,12 @@ async def calculate_roi(request: Request):
             "healthcare": {"efficiency": 1.2, "downtime_cost": 30000},
             "ecommerce": {"efficiency": 1.6, "downtime_cost": 25000},
             "saas": {"efficiency": 1.5, "downtime_cost": 35000},
-            "enterprise": {"efficiency": 1.3, "downtime_cost": 40000}
+            "enterprise": {"efficiency": 1.3, "downtime_cost": 40000},
         }
 
-        multiplier = industry_multipliers.get(industry_sector, industry_multipliers["enterprise"])
+        multiplier = industry_multipliers.get(
+            industry_sector, industry_multipliers["enterprise"]
+        )
 
         # Calculate savings
         monthly_cost_savings = monthly_spend * 0.34  # 34% average cost reduction
@@ -230,10 +229,12 @@ async def calculate_roi(request: Request):
         downtime_savings = downtime_reduction * multiplier["downtime_cost"]
         efficiency_gains = team_size * 2000 * multiplier["efficiency"]
 
-        total_monthly_savings = monthly_cost_savings + downtime_savings + efficiency_gains
+        total_monthly_savings = (
+            monthly_cost_savings + downtime_savings + efficiency_gains
+        )
         annual_savings = total_monthly_savings * 12
         implementation_cost = 150000
-        roi = ((annual_savings - implementation_cost) / implementation_cost * 100)
+        roi = (annual_savings - implementation_cost) / implementation_cost * 100
         payback_months = implementation_cost / total_monthly_savings
 
         return {
@@ -247,9 +248,9 @@ async def calculate_roi(request: Request):
                 "breakdown": {
                     "cost_reduction": round(monthly_cost_savings),
                     "downtime_savings": round(downtime_savings),
-                    "efficiency_gains": round(efficiency_gains)
-                }
-            }
+                    "efficiency_gains": round(efficiency_gains),
+                },
+            },
         }
 
     except Exception as e:
@@ -257,7 +258,7 @@ async def calculate_roi(request: Request):
         return {
             "status": "error",
             "message": "Failed to calculate ROI",
-            "error": str(e)
+            "error": str(e),
         }
 
 
@@ -271,11 +272,13 @@ async def demo_status():
             "roi_calculator": "active",
             "business_metrics": "active",
             "carrier_grade_value_prop": "active",
-            "websocket_connection": "active" if manager.active_connections else "inactive",
-            "terminal_demo": "active"  # Added terminal demo status
+            "websocket_connection": (
+                "active" if manager.active_connections else "inactive"
+            ),
+            "terminal_demo": "active",  # Added terminal demo status
         },
         "metrics": manager.metrics_cache,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
 
 
@@ -283,12 +286,30 @@ async def demo_status():
 async def simulate_failover():
     """Simulate provider failover for demonstration"""
     steps = [
-        {"timestamp": datetime.now().isoformat(), "step": "Detecting OpenAI latency spike (>2000ms)"},
-        {"timestamp": datetime.now().isoformat(), "step": "Circuit breaker triggered for OpenAI"},
-        {"timestamp": datetime.now().isoformat(), "step": "Initiating failover to Claude 3.5 Sonnet"},
-        {"timestamp": datetime.now().isoformat(), "step": "Provider switch completed successfully"},
-        {"timestamp": datetime.now().isoformat(), "step": "Response time normalized: 156ms"},
-        {"timestamp": datetime.now().isoformat(), "step": "System operating normally on backup provider"}
+        {
+            "timestamp": datetime.now().isoformat(),
+            "step": "Detecting OpenAI latency spike (>2000ms)",
+        },
+        {
+            "timestamp": datetime.now().isoformat(),
+            "step": "Circuit breaker triggered for OpenAI",
+        },
+        {
+            "timestamp": datetime.now().isoformat(),
+            "step": "Initiating failover to Claude 3.5 Sonnet",
+        },
+        {
+            "timestamp": datetime.now().isoformat(),
+            "step": "Provider switch completed successfully",
+        },
+        {
+            "timestamp": datetime.now().isoformat(),
+            "step": "Response time normalized: 156ms",
+        },
+        {
+            "timestamp": datetime.now().isoformat(),
+            "step": "System operating normally on backup provider",
+        },
     ]
 
     return {
@@ -296,7 +317,7 @@ async def simulate_failover():
         "simulation": "failover_completed",
         "steps": steps,
         "duration_ms": 847,
-        "success_rate": 99.97
+        "success_rate": 99.97,
     }
 
 
@@ -344,5 +365,5 @@ if __name__ == "__main__":
         host=host,
         port=port,
         reload=True if not os.environ.get("RENDER") else False,
-        log_level="info"
+        log_level="info",
     )

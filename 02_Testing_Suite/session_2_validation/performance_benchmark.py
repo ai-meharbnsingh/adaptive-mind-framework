@@ -104,7 +104,7 @@ class PerformanceBenchmarkSuite:
         }
 
         logger.info("🚀 Performance Benchmark Suite Initialized")
-        logger.info(f"🎯 Enterprise Performance Targets Loaded")
+        logger.info("🎯 Enterprise Performance Targets Loaded")
 
     async def run_complete_benchmark_suite(self) -> Dict[str, Any]:
         """Run the complete performance benchmark suite."""
@@ -145,9 +145,7 @@ class PerformanceBenchmarkSuite:
                     }
                 )
 
-                logger.info(
-                    f"✅ {test_name} - COMPLETED ({test_duration:.3f}s)"
-                )
+                logger.info(f"✅ {test_name} - COMPLETED ({test_duration:.3f}s)")
 
             except Exception as e:
                 test_duration = (
@@ -191,7 +189,7 @@ class PerformanceBenchmarkSuite:
 
         # Log final results
         logger.info(f"\n{'=' * 80}")
-        logger.info(f"🏁 PERFORMANCE BENCHMARK COMPLETE")
+        logger.info("🏁 PERFORMANCE BENCHMARK COMPLETE")
         logger.info(f"{'=' * 80}")
         logger.info(
             f"⏱️ Total Duration: {benchmark_results['total_duration_seconds']:.3f}s"
@@ -233,18 +231,15 @@ class PerformanceBenchmarkSuite:
                 ChatMessage,
             )
 
-            messages = [ChatMessage(role="user", content="test")]
+            [ChatMessage(role="user", content="test")]
 
-            provider_count = len(engine.providers)
-            guard_count = len(engine.guards)
+            len(engine.providers)
+            len(engine.guards)
 
             # Test circuit breaker (this definitely works from our earlier test)
-            breaker = engine.circuit_breakers.get_breaker("openai")
+            engine.circuit_breakers.get_breaker("openai")
 
             # Simple real framework validation
-            framework_healthy = (
-                provider_count > 0 and guard_count > 0 and breaker is not None
-            )
 
             end_time = time.perf_counter()
             overhead_ms = (end_time - start_time) * 1000
@@ -256,9 +251,7 @@ class PerformanceBenchmarkSuite:
         p95_overhead = np.percentile(overhead_measurements, 95)
         p99_overhead = np.percentile(overhead_measurements, 99)
 
-        logger.info(
-            f"✅ Framework overhead measured: {avg_overhead:.3f}ms average"
-        )
+        logger.info(f"✅ Framework overhead measured: {avg_overhead:.3f}ms average")
 
         return {
             "total_measurements": len(overhead_measurements),
@@ -278,10 +271,9 @@ class PerformanceBenchmarkSuite:
         logger.info("⚡ Measuring latency baseline...")
 
         # Simulate latency measurements
-        latency_measurements = []
 
         for i in range(100):
-            start_time = time.perf_counter()
+            time.perf_counter()
 
     def _calculate_performance_summary(self) -> Dict[str, Any]:
         """Calculate overall performance summary."""
@@ -322,13 +314,11 @@ async def main():
         # Print performance summary
         enterprise_validation = results["enterprise_grade_validation"]
 
-        print(f"\n🎯 PERFORMANCE SUMMARY:")
+        print("\n🎯 PERFORMANCE SUMMARY:")
         print(
             f"   Performance Score: {enterprise_validation['performance_score']:.1f}/100"
         )
-        print(
-            f"   Enterprise Grade: {enterprise_validation['meets_enterprise_grade']}"
-        )
+        print(f"   Enterprise Grade: {enterprise_validation['meets_enterprise_grade']}")
 
         return enterprise_validation["meets_enterprise_grade"]
 
@@ -342,11 +332,9 @@ if __name__ == "__main__":
     success = asyncio.run(main())
 
     if success:
-        print(
-            f"\n✅ PERFORMANCE BENCHMARKING: Enterprise-grade performance validated!"
-        )
+        print("\n✅ PERFORMANCE BENCHMARKING: Enterprise-grade performance validated!")
     else:
-        print(f"\n❌ PERFORMANCE BENCHMARKING: Issues detected!")
+        print("\n❌ PERFORMANCE BENCHMARKING: Issues detected!")
 
     import sys
 

@@ -21,9 +21,7 @@ class RequestContext:
 
     # Default fields follow.
     request_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    start_time: datetime = field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    start_time: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     lifecycle_events: List[Dict[str, Any]] = field(default_factory=list)
     api_call_count: int = 0
     mitigation_attempted: bool = False
@@ -33,9 +31,7 @@ class RequestContext:
     cost_cap_enforced: bool = (
         False  # NEW: Track if cost cap was enforced for this request
     )
-    cost_cap_skip_reason: Optional[str] = (
-        None  # NEW: Reason for cost cap enforcement
-    )
+    cost_cap_skip_reason: Optional[str] = None  # NEW: Reason for cost cap enforcement
 
 
 class ProviderPerformanceAnalysis(BaseModel):

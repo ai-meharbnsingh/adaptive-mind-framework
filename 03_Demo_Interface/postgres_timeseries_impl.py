@@ -59,7 +59,9 @@ except ImportError:
         List[Dict[str, Any]]: return []
 
         async def query_events_generator(self, event_type: str, start_time: datetime, end_time: datetime,
-                                         batch_size: int = 1000) -> Iterator[Dict[str, Any]]: yield from []
+                                         batch_size: int = 1000) -> Iterator[Dict[str, Any]]:
+                                            for item in []:
+                                                yield item
 
         async def aggregate_events(self, event_type: str, start_time: datetime, end_time: datetime,
                                    aggregate_by: str) -> List[Dict[str, Any]]: return []

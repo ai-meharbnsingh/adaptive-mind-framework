@@ -41,7 +41,9 @@ except ImportError as e:
 
         async def record_event(self, event_schema): pass
 
-        async def query_events_generator(self, *args, **kwargs): yield from []
+        async def query_events_generator(self, *args, **kwargs):
+            for item in []:
+                yield item
 
 
     class EventTopics:  # Mock selected topics

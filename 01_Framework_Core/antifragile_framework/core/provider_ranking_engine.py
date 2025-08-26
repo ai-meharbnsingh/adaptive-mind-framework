@@ -1,10 +1,8 @@
 # antifragile_framework/core/provider_ranking_engine.py
 
 import threading
-from typing import Dict, List, Optional
-import logging
-
-from telemetry.core_logger import core_logger, UniversalEventSchema
+from typing import Dict, List
+from telemetry.core_logger import UniversalEventSchema, core_logger
 
 
 class ProviderRankingEngine:
@@ -13,7 +11,12 @@ class ProviderRankingEngine:
     based on an Exponential Moving Average (EMA) of their ResilienceScores.
     """
 
-    def __init__(self, smoothing_factor: float = 0.2, default_score: float = 0.75, min_requests_threshold: int = 5):
+    def __init__(
+        self,
+        smoothing_factor: float = 0.2,
+        default_score: float = 0.75,
+        min_requests_threshold: int = 5,
+    ):
         """
         Initializes the ProviderRankingEngine.
 
@@ -37,7 +40,9 @@ class ProviderRankingEngine:
         self._request_counts: Dict[str, int] = {}
         self.logger = core_logger
 
-    def update_provider_score(self, provider_name: str, resilience_score: float):
+    def update_provider_score(
+        self, provider_name: str, resilience_score: float
+    ):
         """
         Updates a provider's performance score using the latest ResilienceScore.
         This method is thread-safe.
@@ -47,13 +52,18 @@ class ProviderRankingEngine:
             resilience_score (float): The ResilienceScore from the completed request.
         """
         if not (0.0 <= resilience_score <= 1.0):
-            self.logger.log(UniversalEventSchema(
-                event_type="learning.score.invalid",
-                event_source=self.__class__.__name__,
-                severity="WARNING",
-                payload={"provider": provider_name, "received_score": resilience_score,
-                         "reason": "Score out of 0.0-1.0 range."}
-            ))
+            self.logger.log(
+                UniversalEventSchema(
+                    event_type="learning.score.invalid",
+                    event_source=self.__class__.__name__,
+                    severity="WARNING",
+                    payload={
+                        "provider": provider_name,
+                        "received_score": resilience_score,
+                        "reason": "Score out of 0.0-1.0 range.",
+                    },
+                )
+            )
             return
 
         with self._lock:
@@ -62,7 +72,9 @@ class ProviderRankingEngine:
             if provider_name in self._provider_emas:
                 # Standard EMA update
                 previous_ema = self._provider_emas[provider_name]
-                new_ema = (self._alpha * resilience_score) + (1 - self._alpha) * previous_ema
+                new_ema = (self._alpha * resilience_score) + (
+                    1 - self._alpha
+                ) * previous_ema
                 self._provider_emas[provider_name] = new_ema
             else:
                 # First data point for this provider (cold start)
@@ -71,13 +83,18 @@ class ProviderRankingEngine:
 
             self._request_counts[provider_name] = current_count + 1
 
-            self.logger.log(UniversalEventSchema(
-                event_type="learning.score.update",
-                event_source=self.__class__.__name__,
-                severity="DEBUG",
-                payload={"provider": provider_name, "new_ema_score": new_ema,
-                         "request_count": self._request_counts[provider_name]}
-            ))
+            self.logger.log(
+                UniversalEventSchema(
+                    event_type="learning.score.update",
+                    event_source=self.__class__.__name__,
+                    severity="DEBUG",
+                    payload={
+                        "provider": provider_name,
+                        "new_ema_score": new_ema,
+                        "request_count": self._request_counts[provider_name],
+                    },
+                )
+            )
 
     def get_ranked_providers(self) -> List[str]:
         """
@@ -94,14 +111,19 @@ class ProviderRankingEngine:
 
             def get_score(provider_name: str) -> float:
                 # Use the real EMA if we have enough data, otherwise use the default score
-                if self._request_counts.get(provider_name, 0) >= self._min_requests:
-                    return self._provider_emas.get(provider_name, self._default_score)
+                if (
+                    self._request_counts.get(provider_name, 0)
+                    >= self._min_requests
+                ):
+                    return self._provider_emas.get(
+                        provider_name, self._default_score
+                    )
                 return self._default_score
 
             sorted_providers = sorted(
                 all_providers,
                 key=get_score,
-                reverse=True  # Highest score first
+                reverse=True,  # Highest score first
             )
             return sorted_providers
 
@@ -116,6 +138,7 @@ class ProviderRankingEngine:
             return {
                 provider: {
                     "ema_score": self._provider_emas.get(provider),
-                    "request_count": self._request_counts.get(provider, 0)
-                } for provider in self._provider_emas
+                    "request_count": self._request_counts.get(provider, 0),
+                }
+                for provider in self._provider_emas
             }

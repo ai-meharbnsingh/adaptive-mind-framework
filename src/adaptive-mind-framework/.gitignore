@@ -1,0 +1,54 @@
+# Python specific ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+build/
+dist/
+*.egg-info/
+.env
+venv/
+.venv/
+.pytest_cache/
+
+# Operating System Files
+.DS_Store
+.Trash-*
+Thumbs.db
+ehthumbs.db
+
+# IDE specific ignores (for PyCharm, VS Code, etc.)
+.idea/
+.vscode/
+*.swp
+*.bak
+*.swo
+
+# Sensitive files and logs (critical for security)
+*.log
+*.sqlite3
+*.db
+*.jsonl
+api_keys.yaml
+secrets.yaml
+config/credentials.json # Example for credentials, adjust as needed
+
+# AI outputs not meant for version control (e.g., raw, intermediate AI-generated content that is very large)
+# Keep ai_output/ but ignore potentially large/redundant files within.
+# For now, we want to keep all AI output, so this section is commented out or only for very specific large temporary files.
+# ai_output/**/*.tmp
+# ai_output/**/*.log
+
+# Other common ignores
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.dmg
+*.iso
+*.exe
+*.dllsession_context_latest.md
+
+# Environment files
+.env*

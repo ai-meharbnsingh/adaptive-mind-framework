@@ -7,8 +7,8 @@ Validates that all telemetry components integrate correctly with the framework.
 Follows our established testing organization pattern.
 """
 
+
 import sys
-import os
 import traceback
 from pathlib import Path
 
@@ -23,19 +23,33 @@ def test_telemetry_module_imports():
 
     try:
         # Test core telemetry imports
-        from telemetry.time_series_db_interface import TimeSeriesDBInterface, initialize_and_subscribe_db_interface
+        from telemetry.time_series_db_interface import (
+            TimeSeriesDBInterface,
+            initialize_and_subscribe_db_interface,
+        )
+
         print("✅ TimeSeriesDBInterface import successful")
 
-        from telemetry.core_logger import core_logger, UniversalEventSchema, AdaptiveMindLogger
-        print("✅ core_logger, UniversalEventSchema, AdaptiveMindLogger import successful")
+        from telemetry.core_logger import (
+            AdaptiveMindLogger,
+            UniversalEventSchema,
+            core_logger,
+        )
+
+        print(
+            "✅ core_logger, UniversalEventSchema, AdaptiveMindLogger import successful"
+        )
 
         from telemetry.event_bus import EventBus, event_bus
+
         print("✅ EventBus and event_bus singleton import successful")
 
         from telemetry import event_topics
+
         print("✅ event_topics import successful")
 
         from telemetry.telemetry_subscriber import TelemetrySubscriber
+
         print("✅ TelemetrySubscriber import successful")
 
         # All core telemetry imports successful - framework integration ready
@@ -61,23 +75,23 @@ def test_framework_telemetry_integration():
         {
             "framework_component": "learning_engine.py",
             "import_statement": "from telemetry.time_series_db_interface import TimeSeriesDBInterface",
-            "description": "LearningEngine database interface integration"
+            "description": "LearningEngine database interface integration",
         },
         {
             "framework_component": "bias_ledger.py",
             "import_statement": "from telemetry.core_logger import core_logger, UniversalEventSchema",
-            "description": "BiasLedger logging integration"
+            "description": "BiasLedger logging integration",
         },
         {
             "framework_component": "framework components",
             "import_statement": "from telemetry.event_bus import EventBus",
-            "description": "Framework EventBus integration"
+            "description": "Framework EventBus integration",
         },
         {
             "framework_component": "all framework files",
             "import_statement": "from telemetry import event_topics",
-            "description": "Event topics constants access"
-        }
+            "description": "Event topics constants access",
+        },
     ]
 
     success_count = 0
@@ -93,7 +107,9 @@ def test_framework_telemetry_integration():
         except Exception as e:
             print(f"❌ {test['description']} - UNEXPECTED ERROR: {e}")
 
-    print(f"\n📊 Framework Integration Tests: {success_count}/{total_tests} passed")
+    print(
+        f"\n📊 Framework Integration Tests: {success_count}/{total_tests} passed"
+    )
     return success_count == total_tests
 
 
@@ -102,10 +118,11 @@ def test_telemetry_functionality():
     print("\n🔍 Testing Basic Telemetry Functionality...")
 
     try:
+        from datetime import datetime, timezone
+
+        from telemetry import event_topics
         from telemetry.core_logger import UniversalEventSchema
         from telemetry.event_bus import event_bus
-        from telemetry import event_topics
-        from datetime import datetime, timezone
 
         # Test 1: UniversalEventSchema creation and validation
         test_event = UniversalEventSchema(
@@ -116,8 +133,8 @@ def test_telemetry_functionality():
             payload={
                 "test_type": "Session 5 Integration Test",
                 "validation": "telemetry_functionality",
-                "framework_integration": True
-            }
+                "framework_integration": True,
+            },
         )
         print("✅ UniversalEventSchema creation and validation successful")
 
@@ -127,23 +144,26 @@ def test_telemetry_functionality():
 
         # Test 3: Event topics constants accessibility
         required_topics = [
-            'BIAS_LOG_ENTRY_CREATED',
-            'API_CALL_SUCCESS',
-            'API_CALL_FAILURE',
-            'CIRCUIT_TRIPPED',
-            'RESOURCE_PENALIZED'
+            "BIAS_LOG_ENTRY_CREATED",
+            "API_CALL_SUCCESS",
+            "API_CALL_FAILURE",
+            "CIRCUIT_TRIPPED",
+            "RESOURCE_PENALIZED",
         ]
 
         for topic in required_topics:
-            assert hasattr(event_topics, topic), f"Missing required event topic: {topic}"
+            assert hasattr(
+                event_topics, topic
+            ), f"Missing required event topic: {topic}"
 
         print("✅ All required event topics constants accessible")
 
         # Test 4: TimeSeriesDBInterface instantiation (with SQLite for testing)
         from telemetry.time_series_db_interface import TimeSeriesDBInterface
+
         test_db_interface = TimeSeriesDBInterface(
             db_url="sqlite:///:memory:",  # In-memory SQLite for testing
-            table_name="test_telemetry"
+            table_name="test_telemetry",
         )
         print("✅ TimeSeriesDBInterface instantiation successful")
 
@@ -160,9 +180,18 @@ def test_session_5_success_criteria():
     print("\n🔍 Testing Session 5 Success Criteria...")
 
     success_criteria = [
-        ("All telemetry imports resolve correctly", test_telemetry_module_imports),
-        ("Framework can import telemetry components", test_framework_telemetry_integration),
-        ("Basic telemetry functionality operational", test_telemetry_functionality)
+        (
+            "All telemetry imports resolve correctly",
+            test_telemetry_module_imports,
+        ),
+        (
+            "Framework can import telemetry components",
+            test_framework_telemetry_integration,
+        ),
+        (
+            "Basic telemetry functionality operational",
+            test_telemetry_functionality,
+        ),
     ]
 
     passed_criteria = 0
@@ -192,7 +221,9 @@ def main():
     passed_criteria, total_criteria = test_session_5_success_criteria()
 
     print("\n" + "=" * 70)
-    print(f"📊 SESSION 5 VALIDATION RESULTS: {passed_criteria}/{total_criteria} criteria met")
+    print(
+        f"📊 SESSION 5 VALIDATION RESULTS: {passed_criteria}/{total_criteria} criteria met"
+    )
 
     if passed_criteria == total_criteria:
         print("🎉 SESSION 5 TELEMETRY INTEGRATION - FULLY SUCCESSFUL!")

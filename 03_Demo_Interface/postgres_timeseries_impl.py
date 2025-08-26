@@ -1,84 +1,132 @@
 # 05_Database_Layer/postgres_timeseries_impl.py
-
+import uuid
+import json
+import os
+from datetime import timedelta
+import sys
+import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Iterator
-import asyncio
 
 # Standardized path setup relative to the current file
 # Assuming current file is in PROJECT_ROOT/05_Database_Layer/
 from pathlib import Path
+from typing import Any, Dict, Iterator, List
 
 CURRENT_DIR = Path(__file__).parent
 PROJECT_ROOT = CURRENT_DIR.parent.parent
-FRAMEWORK_CORE_PATH = PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
+FRAMEWORK_CORE_PATH = (
+    PROJECT_ROOT / "01_Framework_Core" / "antifragile_framework"
+)
 TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
 
-import sys
 
 sys.path.insert(0, str(FRAMEWORK_CORE_PATH))
 sys.path.insert(0, str(TELEMETRY_PATH))
-sys.path.insert(0, str(CURRENT_DIR))  # For sibling modules within 05_Database_Layer
+sys.path.insert(
+    0, str(CURRENT_DIR)
+)  # For sibling modules within 05_Database_Layer
 
 # Preferred import pattern for core components
 try:
     from connection_manager import PostgreSQLConnectionManager
+    from telemetry.core_logger import (  # For mock event creation
+        UniversalEventSchema,
+    )
+    from telemetry.event_topics import (  # For mock events
+        API_CALL_FAILURE,
+        API_CALL_SUCCESS,
+        BIAS_LOG_ENTRY_CREATED,
+        PROVIDER_FAILOVER,
+    )
     from telemetry.time_series_db_interface import TimeSeriesDBInterface
-    from telemetry.core_logger import UniversalEventSchema  # For mock event creation
-    from telemetry.event_topics import BIAS_LOG_ENTRY_CREATED, API_CALL_SUCCESS, API_CALL_FAILURE, \
-        PROVIDER_FAILOVER  # For mock events
 except ImportError:
-    print("Warning: Failed to import core modules. Running postgres_timeseries_impl.py as a basic mock.")
-
+    print(
+        "Warning: Failed to import core modules. Running postgres_timeseries_impl.py as a basic mock."
+    )
 
     # Fallback mock classes if core framework is not fully available for testing this specific file
     class PostgreSQLConnectionManager:
-        def __init__(self): logging.warning("Mock PostgreSQLConnectionManager used."); self.dummy_conn_count = 0
+        def __init__(self):
+            logging.warning("Mock PostgreSQLConnectionManager used.")
+            self.dummy_conn_count = 0
 
-        async def get_connection(self): self.dummy_conn_count += 1; return f"dummy_conn_{self.dummy_conn_count}"
+        async def get_connection(self):
+            self.dummy_conn_count += 1
+            return f"dummy_conn_{self.dummy_conn_count}"
 
-        async def release_connection(self, conn): pass
+        async def release_connection(self, conn):
+            pass
 
-        async def close_all_connections(self): pass
+        async def close_all_connections(self):
+            pass
 
-        async def fetch_rows(self, query, *args): return []
+        async def fetch_rows(self, query, *args):
+            return []
 
-        async def execute_query(self, query, *args): pass
-
+        async def execute_query(self, query, *args):
+            pass
 
     class TimeSeriesDBInterface:
-        def __init__(self, conn_manager): pass
+        def __init__(self, conn_manager):
+            pass
 
-        async def initialize(self): logging.warning("Mock TimeSeriesDBInterface initialized."); pass
+        async def initialize(self):
+            logging.warning("Mock TimeSeriesDBInterface initialized.")
+            pass
 
-        async def close(self): pass
+        async def close(self):
+            pass
 
-        async def record_event(self, event_schema: Dict[str, Any]): pass
+        async def record_event(self, event_schema: Dict[str, Any]):
+            pass
 
-        async def query_events(self, event_type: str, start_time: datetime, end_time: datetime, limit: int = 1000) -> \
-        List[Dict[str, Any]]: return []
+        async def query_events(
+            self,
+            event_type: str,
+            start_time: datetime,
+            end_time: datetime,
+            limit: int = 1000,
+        ) -> List[Dict[str, Any]]:
+            return []
 
-        async def query_events_generator(self, event_type: str, start_time: datetime, end_time: datetime,
-                                         batch_size: int = 1000) -> Iterator[Dict[str, Any]]:
-                                            for item in []:
-                                                yield item
+        async def query_events_generator(
+            self,
+            event_type: str,
+            start_time: datetime,
+            end_time: datetime,
+            batch_size: int = 1000,
+        ) -> Iterator[Dict[str, Any]]:
+            for item in []:
+                yield item
 
-        async def aggregate_events(self, event_type: str, start_time: datetime, end_time: datetime,
-                                   aggregate_by: str) -> List[Dict[str, Any]]: return []
-
+        async def aggregate_events(
+            self,
+            event_type: str,
+            start_time: datetime,
+            end_time: datetime,
+            aggregate_by: str,
+        ) -> List[Dict[str, Any]]:
+            return []
 
     class UniversalEventSchema:
-        def __init__(self, event_type, event_source, timestamp_utc, severity, payload): pass
+        def __init__(
+            self, event_type, event_source, timestamp_utc, severity, payload
+        ):
+            pass
 
-        def model_dump(self): return {}  # Mock method
-
+        def model_dump(self):
+            return {}  # Mock method
 
     BIAS_LOG_ENTRY_CREATED = "bias.log_entry.created"
     API_CALL_SUCCESS = "api.call.success"
     API_CALL_FAILURE = "api.call.failure"
     PROVIDER_FAILOVER = "provider.failover"
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -92,7 +140,9 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
 
     def __init__(self, connection_manager: PostgreSQLConnectionManager):
         if not isinstance(connection_manager, PostgreSQLConnectionManager):
-            raise TypeError("connection_manager must be an instance of PostgreSQLConnectionManager")
+            raise TypeError(
+                "connection_manager must be an instance of PostgreSQLConnectionManager"
+            )
         self.db_manager = connection_manager
         logger.info("PostgreSQLTimeSeriesDB initialized.")
 
@@ -123,28 +173,53 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
             session_id, query_id, attempt_id, timestamp
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14);
         """
-        payload = event_schema.get('payload', {})
+        payload = event_schema.get("payload", {})
         try:
-            event_id = uuid.UUID(event_schema.get('event_id')) if event_schema.get('event_id') else uuid.uuid4()
-            correlation_id = uuid.UUID(payload.get('request_id')) if payload.get('request_id') else None
+            event_id = (
+                uuid.UUID(event_schema.get("event_id"))
+                if event_schema.get("event_id")
+                else uuid.uuid4()
+            )
+            correlation_id = (
+                uuid.UUID(payload.get("request_id"))
+                if payload.get("request_id")
+                else None
+            )
 
             # Extract common fields from payload for direct column mapping, if they exist
             # These fields are expected to be in UniversalEventSchema.payload
-            session_id_val = uuid.UUID(payload.get('session_id')) if payload.get('session_id') else None
-            query_id_val = uuid.UUID(payload.get('query_id')) if payload.get('query_id') else None
-            attempt_id_val = uuid.UUID(payload.get('attempt_id')) if payload.get('attempt_id') else None
-            duration_ms_val = payload.get('process_time_ms')
-            memory_usage_mb_val = payload.get('memory_usage_mb')
-            cpu_usage_percent_val = payload.get('cpu_usage_percent')
-            parent_event_id_val = uuid.UUID(event_schema.get('parent_event_id')) if event_schema.get(
-                'parent_event_id') else None
+            session_id_val = (
+                uuid.UUID(payload.get("session_id"))
+                if payload.get("session_id")
+                else None
+            )
+            query_id_val = (
+                uuid.UUID(payload.get("query_id"))
+                if payload.get("query_id")
+                else None
+            )
+            attempt_id_val = (
+                uuid.UUID(payload.get("attempt_id"))
+                if payload.get("attempt_id")
+                else None
+            )
+            duration_ms_val = payload.get("process_time_ms")
+            memory_usage_mb_val = payload.get("memory_usage_mb")
+            cpu_usage_percent_val = payload.get("cpu_usage_percent")
+            parent_event_id_val = (
+                uuid.UUID(event_schema.get("parent_event_id"))
+                if event_schema.get("parent_event_id")
+                else None
+            )
 
             await self.db_manager.execute_query(
                 query,
                 event_id,
-                event_schema.get('event_type'),
-                event_schema.get('event_topic'),  # Assuming UniversalEventSchema has event_topic or it can be derived
-                event_schema.get('event_source'),
+                event_schema.get("event_type"),
+                event_schema.get(
+                    "event_topic"
+                ),  # Assuming UniversalEventSchema has event_topic or it can be derived
+                event_schema.get("event_source"),
                 json.dumps(payload),  # Store full payload as JSONB
                 correlation_id,
                 parent_event_id_val,
@@ -154,18 +229,25 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
                 session_id_val,
                 query_id_val,
                 attempt_id_val,
-                datetime.fromisoformat(event_schema.get('timestamp_utc'))
+                datetime.fromisoformat(event_schema.get("timestamp_utc")),
             )
-            logger.debug(f"Recorded telemetry event: {event_schema.get('event_type')}, ID: {event_id}")
+            logger.debug(
+                f"Recorded telemetry event: {event_schema.get('event_type')}, ID: {event_id}"
+            )
         except Exception as e:
-            logger.error(f"Failed to record telemetry event {event_schema.get('event_type')}: {e}", exc_info=True)
+            logger.error(
+                f"Failed to record telemetry event {event_schema.get('event_type')}: {e}",
+                exc_info=True,
+            )
             # Depending on robustness needs, may re-raise or just log
 
-    async def query_events(self,
-                           event_type: str,
-                           start_time: datetime,
-                           end_time: datetime,
-                           limit: int = 1000) -> List[Dict[str, Any]]:
+    async def query_events(
+        self,
+        event_type: str,
+        start_time: datetime,
+        end_time: datetime,
+        limit: int = 1000,
+    ) -> List[Dict[str, Any]]:
         """
         Queries telemetry events of a specific type within a time range.
         Returns a list of event dictionaries.
@@ -195,25 +277,36 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
         LIMIT $4;
         """
         try:
-            records = await self.db_manager.fetch_rows(query, event_type, start_time, end_time, limit)
+            records = await self.db_manager.fetch_rows(
+                query, event_type, start_time, end_time, limit
+            )
             # Re-parse event_data (JSONB) into dictionary if it's a string, and map `id` to `event_id`
             for record in records:
-                if 'event_data' in record and isinstance(record['event_data'], str):
+                if "event_data" in record and isinstance(
+                    record["event_data"], str
+                ):
                     try:
-                        record['event_data'] = json.loads(record['event_data'])
+                        record["event_data"] = json.loads(record["event_data"])
                     except json.JSONDecodeError:
                         pass  # Keep as string if cannot decode
-            logger.debug(f"Fetched {len(records)} events of type {event_type}.")
+            logger.debug(
+                f"Fetched {len(records)} events of type {event_type}."
+            )
             return records
         except Exception as e:
-            logger.error(f"Failed to query events of type {event_type}: {e}", exc_info=True)
+            logger.error(
+                f"Failed to query events of type {event_type}: {e}",
+                exc_info=True,
+            )
             return []
 
-    async def query_events_generator(self,
-                                     event_type: str,
-                                     start_time: datetime,
-                                     end_time: datetime,
-                                     batch_size: int = 1000) -> Iterator[Dict[str, Any]]:
+    async def query_events_generator(
+        self,
+        event_type: str,
+        start_time: datetime,
+        end_time: datetime,
+        batch_size: int = 1000,
+    ) -> Iterator[Dict[str, Any]]:
         """
         A generator that yields telemetry events in batches to handle large datasets.
         """
@@ -244,16 +337,26 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
             LIMIT $4 OFFSET $5;
             """
             try:
-                records = await self.db_manager.fetch_rows(batch_query, event_type, start_time, end_time, batch_size,
-                                                           offset)
+                records = await self.db_manager.fetch_rows(
+                    batch_query,
+                    event_type,
+                    start_time,
+                    end_time,
+                    batch_size,
+                    offset,
+                )
                 if not records:
                     break  # No more records
 
                 for record in records:
                     # Re-parse event_data (JSONB) into dictionary if it's a string, and map `id` to `event_id`
-                    if 'event_data' in record and isinstance(record['event_data'], str):
+                    if "event_data" in record and isinstance(
+                        record["event_data"], str
+                    ):
                         try:
-                            record['event_data'] = json.loads(record['event_data'])
+                            record["event_data"] = json.loads(
+                                record["event_data"]
+                            )
                         except json.JSONDecodeError:
                             pass  # Keep as string if cannot decode
                     yield record  # Yield each individual event
@@ -262,14 +365,19 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
                 if len(records) < batch_size:
                     break  # Last batch was smaller than batch_size, so no more records
             except Exception as e:
-                logger.error(f"Failed to query events in batch for type {event_type}: {e}", exc_info=True)
+                logger.error(
+                    f"Failed to query events in batch for type {event_type}: {e}",
+                    exc_info=True,
+                )
                 break  # Stop generator on error
 
-    async def aggregate_events(self,
-                               event_type: str,
-                               start_time: datetime,
-                               end_time: datetime,
-                               aggregate_by: str) -> List[Dict[str, Any]]:
+    async def aggregate_events(
+        self,
+        event_type: str,
+        start_time: datetime,
+        end_time: datetime,
+        aggregate_by: str,
+    ) -> List[Dict[str, Any]]:
         """
         Aggregates telemetry events based on a specified time interval or attribute.
         """
@@ -302,11 +410,18 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
                 total_events DESC;
             """
             try:
-                results = await self.db_manager.fetch_rows(query, event_type, start_time, end_time)
-                logger.debug(f"Aggregated events by provider for type {event_type}. Results: {results}")
+                results = await self.db_manager.fetch_rows(
+                    query, event_type, start_time, end_time
+                )
+                logger.debug(
+                    f"Aggregated events by provider for type {event_type}. Results: {results}"
+                )
                 return results
             except Exception as e:
-                logger.error(f"Error aggregating events by provider for type {event_type}: {e}", exc_info=True)
+                logger.error(
+                    f"Error aggregating events by provider for type {event_type}: {e}",
+                    exc_info=True,
+                )
                 return []
         elif aggregate_by == "total":
             query = f"""
@@ -322,25 +437,43 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
                 event_type = $1 AND timestamp BETWEEN $2 AND $3;
             """
             try:
-                result = await self.db_manager.fetch_one(query, event_type, start_time, end_time)
+                result = await self.db_manager.fetch_one(
+                    query, event_type, start_time, end_time
+                )
                 # Ensure values are not None if no records, default to 0/empty
                 if result:
-                    result['total_requests'] = result['total_requests'] or 0
-                    result['total_cost_usd'] = result['total_cost_usd'] or 0.0
-                    result['total_failovers'] = result['total_failovers'] or 0
-                    result['avg_response_time_ms'] = result['avg_response_time_ms'] or 0.0
-                    result['latest_bias_score'] = result['latest_bias_score'] or 0.0
-                    logger.debug(f"Aggregated total events for type {event_type}. Result: {result}")
+                    result["total_requests"] = result["total_requests"] or 0
+                    result["total_cost_usd"] = result["total_cost_usd"] or 0.0
+                    result["total_failovers"] = result["total_failovers"] or 0
+                    result["avg_response_time_ms"] = (
+                        result["avg_response_time_ms"] or 0.0
+                    )
+                    result["latest_bias_score"] = (
+                        result["latest_bias_score"] or 0.0
+                    )
+                    logger.debug(
+                        f"Aggregated total events for type {event_type}. Result: {result}"
+                    )
                     return [result]
-                return [{
-                    'total_requests': 0, 'total_cost_usd': 0.0, 'total_failovers': 0,
-                    'avg_response_time_ms': 0.0, 'latest_bias_score': 0.0
-                }]
+                return [
+                    {
+                        "total_requests": 0,
+                        "total_cost_usd": 0.0,
+                        "total_failovers": 0,
+                        "avg_response_time_ms": 0.0,
+                        "latest_bias_score": 0.0,
+                    }
+                ]
             except Exception as e:
-                logger.error(f"Error aggregating total events for type {event_type}: {e}", exc_info=True)
+                logger.error(
+                    f"Error aggregating total events for type {event_type}: {e}",
+                    exc_info=True,
+                )
                 return []
         else:
-            logger.warning(f"Unsupported aggregation type: {aggregate_by}. Returning empty list.")
+            logger.warning(
+                f"Unsupported aggregation type: {aggregate_by}. Returning empty list."
+            )
             return []
 
         # Generic time-based aggregation for hour/day
@@ -362,29 +495,40 @@ class PostgreSQLTimeSeriesDB(TimeSeriesDBInterface):
             time_bucket ASC;
         """
         try:
-            results = await self.db_manager.fetch_rows(query, event_type, start_time, end_time)
+            results = await self.db_manager.fetch_rows(
+                query, event_type, start_time, end_time
+            )
             # Ensure numerical values are not None
             for row in results:
-                row['total_requests'] = row['total_requests'] or 0
-                row['successful_requests'] = row['successful_requests'] or 0
-                row['avg_response_time_ms'] = row['avg_response_time_ms'] or 0.0
-                row['total_cost_usd'] = row['total_cost_usd'] or 0.0
-                row['failover_count'] = row['failover_count'] or 0
-            logger.debug(f"Aggregated events by {aggregate_by} for type {event_type}. Results: {results}")
+                row["total_requests"] = row["total_requests"] or 0
+                row["successful_requests"] = row["successful_requests"] or 0
+                row["avg_response_time_ms"] = (
+                    row["avg_response_time_ms"] or 0.0
+                )
+                row["total_cost_usd"] = row["total_cost_usd"] or 0.0
+                row["failover_count"] = row["failover_count"] or 0
+            logger.debug(
+                f"Aggregated events by {aggregate_by} for type {event_type}. Results: {results}"
+            )
             return results
         except Exception as e:
-            logger.error(f"Error aggregating events by {aggregate_by} for type {event_type}: {e}", exc_info=True)
+            logger.error(
+                f"Error aggregating events by {aggregate_by} for type {event_type}: {e}",
+                exc_info=True,
+            )
             return []
 
 
 # Example Usage (for testing purposes only)
 async def main():
     print("Starting PostgreSQLTimeSeriesDB demo...")
-    os.environ['POSTGRES_USER'] = os.getenv('POSTGRES_USER', 'postgres')
-    os.environ['POSTGRES_PASSWORD'] = os.getenv('POSTGRES_PASSWORD', 'password')
-    os.environ['POSTGRES_DB'] = os.getenv('POSTGRES_DB', 'adaptive_mind_demo')
-    os.environ['POSTGRES_HOST'] = os.getenv('POSTGRES_HOST', 'localhost')
-    os.environ['POSTGRES_PORT'] = os.getenv('POSTGRES_PORT', '5432')
+    os.environ["POSTGRES_USER"] = os.getenv("POSTGRES_USER", "postgres")
+    os.environ["POSTGRES_PASSWORD"] = os.getenv(
+        "POSTGRES_PASSWORD", "password"
+    )
+    os.environ["POSTGRES_DB"] = os.getenv("POSTGRES_DB", "adaptive_mind_demo")
+    os.environ["POSTGRES_HOST"] = os.getenv("POSTGRES_HOST", "localhost")
+    os.environ["POSTGRES_PORT"] = os.getenv("POSTGRES_PORT", "5432")
 
     conn_manager = PostgreSQLConnectionManager()
     timeseries_db = PostgreSQLTimeSeriesDB(conn_manager)
@@ -400,30 +544,54 @@ async def main():
             event_source="framework.failover_engine",
             timestamp_utc=datetime.now(timezone.utc).isoformat(),
             severity="INFO",
-            payload={"request_id": str(uuid.uuid4()), "provider_used": "openai", "model_used": "gpt-4o",
-                     "response_time_ms": 250, "cost_estimate": 0.001, "success": True, "failover_occurred": False,
-                     "bias_score": 0.05}
+            payload={
+                "request_id": str(uuid.uuid4()),
+                "provider_used": "openai",
+                "model_used": "gpt-4o",
+                "response_time_ms": 250,
+                "cost_estimate": 0.001,
+                "success": True,
+                "failover_occurred": False,
+                "bias_score": 0.05,
+            },
         ).model_dump()
 
         event2 = UniversalEventSchema(
             event_type=BIAS_LOG_ENTRY_CREATED,
             event_topic="bias.ledger",
             event_source="resilience.bias_ledger",
-            timestamp_utc=(datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat(),
+            timestamp_utc=(
+                datetime.now(timezone.utc) - timedelta(minutes=1)
+            ).isoformat(),
             severity="WARNING",
-            payload={"request_id": str(uuid.uuid4()), "bias_type": "performance_bias", "severity_score": 0.7,
-                     "provider": "anthropic", "description": "High latency detected.", "mode": "hosted"}
+            payload={
+                "request_id": str(uuid.uuid4()),
+                "bias_type": "performance_bias",
+                "severity_score": 0.7,
+                "provider": "anthropic",
+                "description": "High latency detected.",
+                "mode": "hosted",
+            },
         ).model_dump()
 
         event3 = UniversalEventSchema(
             event_type=API_CALL_FAILURE,
             event_topic="api.call",
             event_source="framework.failover_engine",
-            timestamp_utc=(datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat(),
+            timestamp_utc=(
+                datetime.now(timezone.utc) - timedelta(minutes=2)
+            ).isoformat(),
             severity="ERROR",
-            payload={"request_id": str(uuid.uuid4()), "provider_used": "google", "model_used": "gemini-pro",
-                     "error_type": "rate_limit_exceeded", "success": False, "failover_occurred": True,
-                     "response_time_ms": 1500, "cost_estimate": 0.0}
+            payload={
+                "request_id": str(uuid.uuid4()),
+                "provider_used": "google",
+                "model_used": "gemini-pro",
+                "error_type": "rate_limit_exceeded",
+                "success": False,
+                "failover_occurred": True,
+                "response_time_ms": 1500,
+                "cost_estimate": 0.0,
+            },
         ).model_dump()
 
         await timeseries_db.record_event(event1)
@@ -436,12 +604,15 @@ async def main():
         events = await timeseries_db.query_events(
             event_type=API_CALL_SUCCESS,
             start_time=datetime.now(timezone.utc) - timedelta(hours=1),
-            end_time=datetime.now(timezone.utc) + timedelta(hours=1)
+            end_time=datetime.now(timezone.utc) + timedelta(hours=1),
         )
         for e in events:
-            print(f"  {e['event_type']} from {e['source_component']} at {e['timestamp_utc']}")
             print(
-                f"    Payload: {e['event_data'].get('provider_used')}, Latency: {e['event_data'].get('response_time_ms')}ms")
+                f"  {e['event_type']} from {e['source_component']} at {e['timestamp_utc']}"
+            )
+            print(
+                f"    Payload: {e['event_data'].get('provider_used')}, Latency: {e['event_data'].get('response_time_ms')}ms"
+            )
 
         # Test aggregating by hour
         print("\n--- Aggregating Events by Hour (last 2 hours) ---")
@@ -449,23 +620,26 @@ async def main():
             event_type=API_CALL_SUCCESS,
             start_time=datetime.now(timezone.utc) - timedelta(hours=2),
             end_time=datetime.now(timezone.utc) + timedelta(hours=1),
-            aggregate_by="hour"
+            aggregate_by="hour",
         )
         for agg in aggregated:
             print(
-                f"  Time Bucket: {agg['time_bucket']}, Total Requests: {agg['total_requests']}, Avg Latency: {agg['avg_response_time_ms']:.2f}")
+                f"  Time Bucket: {agg['time_bucket']}, Total Requests: {agg['total_requests']}, Avg Latency: {agg['avg_response_time_ms']:.2f}"
+            )
 
         # Test aggregating by provider
         print("\n--- Aggregating Events by Provider ---")
         aggregated_by_provider = await timeseries_db.aggregate_events(
-            event_type=API_CALL_SUCCESS,  # Using API_CALL_SUCCESS to test provider_used extraction
+            # Using API_CALL_SUCCESS to test provider_used extraction
+            event_type=API_CALL_SUCCESS,
             start_time=datetime.now(timezone.utc) - timedelta(hours=2),
             end_time=datetime.now(timezone.utc) + timedelta(hours=1),
-            aggregate_by="provider"
+            aggregate_by="provider",
         )
         for agg in aggregated_by_provider:
             print(
-                f"  Provider: {agg['aggregated_key']}, Total Requests: {agg['total_events']}, Total Cost: {agg['total_cost_usd']:.4f}")
+                f"  Provider: {agg['aggregated_key']}, Total Requests: {agg['total_events']}, Total Cost: {agg['total_cost_usd']:.4f}"
+            )
 
         # Test total aggregation
         print("\n--- Total Aggregation ---")
@@ -473,13 +647,14 @@ async def main():
             event_type=API_CALL_SUCCESS,
             start_time=datetime.now(timezone.utc) - timedelta(hours=2),
             end_time=datetime.now(timezone.utc) + timedelta(hours=1),
-            aggregate_by="total"
+            aggregate_by="total",
         )
         print(f"  Total: {total_agg[0]}")
 
-
     except Exception as e:
-        logger.error(f"An error occurred during TimeSeriesDB test: {e}", exc_info=True)
+        logger.error(
+            f"An error occurred during TimeSeriesDB test: {e}", exc_info=True
+        )
     finally:
         await timeseries_db.close()
         print("\nPostgreSQLTimeSeriesDB demo completed.")

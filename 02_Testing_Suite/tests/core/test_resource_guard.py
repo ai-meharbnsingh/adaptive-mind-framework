@@ -1,18 +1,18 @@
 # tests/core/test_resource_guard.py
 
 import time
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
+from antifragile_framework.core.exceptions import NoResourcesAvailableError
 from antifragile_framework.core.resource_guard import (
     MonitoredResource,
     ResourceGuard,
     ResourceState,
 )
-from antifragile_framework.core.exceptions import NoResourcesAvailableError
-
 
 # --- Fixtures ---
+
 
 @pytest.fixture
 def resource_config():
@@ -21,7 +21,7 @@ def resource_config():
         "cooldown": 10,
         "penalty": 0.5,
         "healing_interval": 20,
-        "healing_increment": 0.2
+        "healing_increment": 0.2,
     }
 
 
@@ -29,10 +29,15 @@ def resource_config():
 def guard(resource_config):
     """Provides a ResourceGuard with two keys and a fast test configuration."""
     keys = ["key-abc", "key-def"]
-    return ResourceGuard(provider_name="test_provider", api_keys=keys, resource_config=resource_config)
+    return ResourceGuard(
+        provider_name="test_provider",
+        api_keys=keys,
+        resource_config=resource_config,
+    )
 
 
 # --- Unit Tests ---
+
 
 def test_get_resource_context_manager_success(guard: ResourceGuard):
     """Tests the happy path of reserving and automatically releasing a resource."""
@@ -48,7 +53,9 @@ def test_get_resource_context_manager_success(guard: ResourceGuard):
     assert res1.state == ResourceState.AVAILABLE
 
 
-def test_get_resource_context_manager_failure_releases_without_penalty(guard: ResourceGuard):
+def test_get_resource_context_manager_failure_releases_without_penalty(
+    guard: ResourceGuard,
+):
     """
     Tests that if an exception occurs, the resource is released but NOT penalized
     by the context manager itself. Penalization is the caller's duty.
@@ -71,7 +78,10 @@ def test_resource_unavailable_error(guard: ResourceGuard):
     """Tests that NoResourcesAvailableError is raised when no resources are free."""
     with guard.get_resource():
         with guard.get_resource():
-            with pytest.raises(NoResourcesAvailableError, match="No healthy and available resources"):
+            with pytest.raises(
+                NoResourcesAvailableError,
+                match="No healthy and available resources",
+            ):
                 with guard.get_resource():
                     pass
 
@@ -87,13 +97,15 @@ def test_penalize_resource_method(guard: ResourceGuard):
     assert resource.state == ResourceState.COOLING_DOWN
 
 
-def test_health_score_healing(guard: ResourceGuard, monkeypatch, resource_config):
+def test_health_score_healing(
+    guard: ResourceGuard, monkeypatch, resource_config
+):
     """Tests that an available resource's health score recovers over time."""
     resources = guard.get_all_resources()
     res1 = resources[0]
 
     mock_time = MagicMock()
-    monkeypatch.setattr(time, 'monotonic', mock_time)
+    monkeypatch.setattr(time, "monotonic", mock_time)
 
     # Step 1: Penalize the resource at time 1000
     mock_time.return_value = 1000
@@ -115,16 +127,20 @@ def test_health_score_healing(guard: ResourceGuard, monkeypatch, resource_config
     # Check availability to trigger the healing logic within is_available -> _update_health
     res1.is_available()
 
-    assert res1.health_score == pytest.approx(0.5 + resource_config["healing_increment"])
+    assert res1.health_score == pytest.approx(
+        0.5 + resource_config["healing_increment"]
+    )
     assert res1.health_score <= 1.0
 
 
-def test_full_penalize_cooldown_and_recovery(guard: ResourceGuard, monkeypatch, resource_config):
+def test_full_penalize_cooldown_and_recovery(
+    guard: ResourceGuard, monkeypatch, resource_config
+):
     """Tests that a penalized resource is unavailable, then becomes available after cooldown."""
     resource_to_penalize = guard.get_all_resources()[0]
 
     mock_time = MagicMock()
-    monkeypatch.setattr(time, 'monotonic', mock_time)
+    monkeypatch.setattr(time, "monotonic", mock_time)
 
     # 1. Penalize at a specific time
     mock_time.return_value = 1000

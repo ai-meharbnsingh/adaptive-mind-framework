@@ -1,24 +1,25 @@
 # tests/core/test_circuit_breaker.py
 
-import pytest
-import time
 import threading
+import time
+
+import pytest
 from antifragile_framework.core.circuit_breaker import (
     CircuitBreaker,
-    CircuitBreakerState,
     CircuitBreakerError,
-    CircuitBreakerRegistry
+    CircuitBreakerRegistry,
+    CircuitBreakerState,
 )
 
-
 # --- Fixtures ---
+
 
 @pytest.fixture
 def breaker_config():
     """Provides a standard, fast configuration for testing circuit breakers."""
     return {
         "failure_threshold": 2,
-        "reset_timeout_seconds": 0.1  # Use a very short timeout for tests
+        "reset_timeout_seconds": 0.1,  # Use a very short timeout for tests
     }
 
 
@@ -29,6 +30,7 @@ def breaker(breaker_config):
 
 
 # --- State Transition and Basic Logic Tests ---
+
 
 def test_initial_state_is_closed(breaker: CircuitBreaker):
     assert breaker.state == CircuitBreakerState.CLOSED
@@ -42,7 +44,9 @@ def test_trips_to_open_after_threshold_failures(breaker: CircuitBreaker):
     breaker.record_failure()  # This should meet the threshold of 2
     assert breaker.state == CircuitBreakerState.OPEN
 
-    with pytest.raises(CircuitBreakerError, match="CircuitBreaker for 'test_service' is open."):
+    with pytest.raises(
+        CircuitBreakerError, match="CircuitBreaker for 'test_service' is open."
+    ):
         breaker.check()
 
 
@@ -76,7 +80,9 @@ def test_failure_in_half_open_state_reopens_circuit(breaker: CircuitBreaker):
     # Fail again
     breaker.record_failure()
     assert breaker.state == CircuitBreakerState.OPEN
-    with pytest.raises(CircuitBreakerError, match="CircuitBreaker for 'test_service' is open."):
+    with pytest.raises(
+        CircuitBreakerError, match="CircuitBreaker for 'test_service' is open."
+    ):
         breaker.check()
 
 
@@ -96,10 +102,15 @@ def test_success_in_half_open_state_closes_circuit(breaker: CircuitBreaker):
 
 # --- Edge Case and Validation Tests (From Audit Feedback) ---
 
+
 def test_invalid_thresholds_raise_error():
-    with pytest.raises(ValueError, match="Failure threshold must be positive."):
+    with pytest.raises(
+        ValueError, match="Failure threshold must be positive."
+    ):
         CircuitBreaker("test_service", failure_threshold=0)
-    with pytest.raises(ValueError, match="Failure threshold must be positive."):
+    with pytest.raises(
+        ValueError, match="Failure threshold must be positive."
+    ):
         CircuitBreaker("test_service", failure_threshold=-1)
 
     with pytest.raises(ValueError, match="Reset timeout must be positive."):
@@ -109,6 +120,7 @@ def test_invalid_thresholds_raise_error():
 
 
 # --- Thread Safety Tests (From Audit Feedback) ---
+
 
 def test_breaker_thread_safety_under_concurrent_failures():
     # High threshold to prevent tripping during the test
@@ -151,6 +163,7 @@ def test_registry_thread_safety_on_get_breaker():
 
 
 # --- Registry Tests ---
+
 
 def test_circuit_breaker_registry_creates_and_retrieves_breakers():
     registry = CircuitBreakerRegistry()

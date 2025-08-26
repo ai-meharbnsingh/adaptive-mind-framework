@@ -5,14 +5,14 @@ Demo Data Manager for Adaptive Mind Framework
 Manages demo scenarios, test data, and simulation data for demonstrations.
 """
 
-import asyncio
+
 import logging
 import random
 import uuid
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Any, Optional  # FIXED: Added missing imports
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional  # FIXED: Added missing imports
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class ScenarioType(Enum):
     """Types of demo scenarios"""
+
     GENERAL = "general"
     CUSTOMER_SERVICE = "customer_service"
     FRAUD_DETECTION = "fraud_detection"
@@ -31,6 +32,7 @@ class ScenarioType(Enum):
 @dataclass
 class DemoScenario:
     """Demo scenario configuration"""
+
     scenario_id: str
     name: str
     description: str
@@ -84,7 +86,9 @@ class DemoDataManager:
         except Exception as e:
             self.logger.error(f"Error during DemoDataManager shutdown: {e}")
 
-    def _load_default_scenarios(self) -> Dict[str, Any]:  # FIXED: Proper type annotation
+    def _load_default_scenarios(
+        self,
+    ) -> Dict[str, Any]:  # FIXED: Proper type annotation
         """Load default demo scenarios"""
         default_scenarios = {
             "general": DemoScenario(
@@ -95,21 +99,20 @@ class DemoDataManager:
                 prompts=[
                     "Explain the benefits of AI resilience frameworks",
                     "How does intelligent failover improve system reliability?",
-                    "What are the key features of antifragile AI systems?"
+                    "What are the key features of antifragile AI systems?",
                 ],
                 expected_providers=["openai", "anthropic", "google"],
                 success_criteria={
                     "max_response_time_ms": 2000,
                     "min_quality_score": 0.8,
-                    "max_cost_per_request": 0.01
+                    "max_cost_per_request": 0.01,
                 },
                 metadata={
                     "complexity": "basic",
                     "audience": "general",
-                    "duration_minutes": 5
-                }
+                    "duration_minutes": 5,
+                },
             ),
-
             "customer_service": DemoScenario(
                 scenario_id="customer_service",
                 name="Customer Service AI",
@@ -118,22 +121,21 @@ class DemoDataManager:
                 prompts=[
                     "Help me track my order #12345",
                     "I need to return a defective product",
-                    "What's your refund policy for digital items?"
+                    "What's your refund policy for digital items?",
                 ],
                 expected_providers=["openai", "anthropic"],
                 success_criteria={
                     "max_response_time_ms": 1500,
                     "min_quality_score": 0.9,
-                    "max_cost_per_request": 0.005
+                    "max_cost_per_request": 0.005,
                 },
                 metadata={
                     "complexity": "medium",
                     "audience": "business",
                     "duration_minutes": 10,
-                    "business_impact": "high"
-                }
+                    "business_impact": "high",
+                },
             ),
-
             "fraud_detection": DemoScenario(
                 scenario_id="fraud_detection",
                 name="Fraud Detection AI",
@@ -142,22 +144,21 @@ class DemoDataManager:
                 prompts=[
                     "Analyze this transaction: $5000 purchase from unusual location",
                     "Review account activity for suspicious patterns",
-                    "Generate fraud risk assessment report"
+                    "Generate fraud risk assessment report",
                 ],
                 expected_providers=["anthropic", "google"],
                 success_criteria={
                     "max_response_time_ms": 1000,
                     "min_quality_score": 0.95,
-                    "max_cost_per_request": 0.008
+                    "max_cost_per_request": 0.008,
                 },
                 metadata={
                     "complexity": "high",
                     "audience": "financial",
                     "duration_minutes": 15,
-                    "business_impact": "critical"
-                }
+                    "business_impact": "critical",
+                },
             ),
-
             "finance": DemoScenario(
                 scenario_id="finance",
                 name="Financial Services AI",
@@ -166,22 +167,21 @@ class DemoDataManager:
                 prompts=[
                     "Analyze market trends for Q4 investment strategy",
                     "Generate risk assessment for portfolio allocation",
-                    "Explain regulatory compliance requirements"
+                    "Explain regulatory compliance requirements",
                 ],
                 expected_providers=["anthropic", "openai"],
                 success_criteria={
                     "max_response_time_ms": 3000,
                     "min_quality_score": 0.92,
-                    "max_cost_per_request": 0.012
+                    "max_cost_per_request": 0.012,
                 },
                 metadata={
                     "complexity": "high",
                     "audience": "enterprise",
                     "duration_minutes": 20,
-                    "business_impact": "high"
-                }
+                    "business_impact": "high",
+                },
             ),
-
             "healthcare": DemoScenario(
                 scenario_id="healthcare",
                 name="Healthcare AI",
@@ -190,45 +190,55 @@ class DemoDataManager:
                 prompts=[
                     "Explain common symptoms of seasonal allergies",
                     "What are best practices for medication management?",
-                    "Describe preventive care recommendations"
+                    "Describe preventive care recommendations",
                 ],
                 expected_providers=["anthropic", "google"],
                 success_criteria={
                     "max_response_time_ms": 2500,
                     "min_quality_score": 0.95,
-                    "max_cost_per_request": 0.010
+                    "max_cost_per_request": 0.010,
                 },
                 metadata={
                     "complexity": "high",
                     "audience": "healthcare",
                     "duration_minutes": 25,
                     "business_impact": "critical",
-                    "safety_requirements": "high"
-                }
-            )
+                    "safety_requirements": "high",
+                },
+            ),
         }
 
         # Store scenarios
         for scenario_key, scenario in default_scenarios.items():
             self.scenarios[scenario_key] = scenario
 
-        self.logger.info(f"✅ Loaded {len(default_scenarios)} default demo scenarios")
+        self.logger.info(
+            f"✅ Loaded {len(default_scenarios)} default demo scenarios"
+        )
         return default_scenarios
 
     async def _initialize_simulation_data(self):
         """Initialize simulation data for demos"""
         try:
             # Historical performance data
-            self.simulation_data["historical_performance"] = self._generate_historical_performance()
+            self.simulation_data["historical_performance"] = (
+                self._generate_historical_performance()
+            )
 
             # Cost simulation data
-            self.simulation_data["cost_data"] = self._generate_cost_simulation_data()
+            self.simulation_data["cost_data"] = (
+                self._generate_cost_simulation_data()
+            )
 
             # Provider performance metrics
-            self.simulation_data["provider_metrics"] = self._generate_provider_metrics()
+            self.simulation_data["provider_metrics"] = (
+                self._generate_provider_metrics()
+            )
 
             # Bias simulation data
-            self.simulation_data["bias_events"] = self._generate_bias_simulation_data()
+            self.simulation_data["bias_events"] = (
+                self._generate_bias_simulation_data()
+            )
 
             self.logger.info("✅ Simulation data initialized")
 
@@ -247,13 +257,15 @@ class DemoDataManager:
             base_response_time = 250 + random.uniform(-50, 100)
             success_rate = 0.95 + random.uniform(-0.05, 0.05)
 
-            performance_data.append({
-                "timestamp": timestamp.isoformat(),
-                "avg_response_time_ms": round(base_response_time, 2),
-                "success_rate": round(success_rate, 4),
-                "requests_processed": random.randint(50, 200),
-                "cost_per_request": round(random.uniform(0.002, 0.008), 6)
-            })
+            performance_data.append(
+                {
+                    "timestamp": timestamp.isoformat(),
+                    "avg_response_time_ms": round(base_response_time, 2),
+                    "success_rate": round(success_rate, 4),
+                    "requests_processed": random.randint(50, 200),
+                    "cost_per_request": round(random.uniform(0.002, 0.008), 6),
+                }
+            )
 
         return performance_data
 
@@ -265,10 +277,10 @@ class DemoDataManager:
             "cost_by_provider": {
                 "openai": round(random.uniform(8.0, 12.0), 2),
                 "anthropic": round(random.uniform(6.0, 10.0), 2),
-                "google": round(random.uniform(4.0, 8.0), 2)
+                "google": round(random.uniform(4.0, 8.0), 2),
             },
             "cost_trend": "decreasing",
-            "projected_monthly_cost": round(random.uniform(450.0, 650.0), 2)
+            "projected_monthly_cost": round(random.uniform(450.0, 650.0), 2),
         }
 
     def _generate_provider_metrics(self) -> Dict[str, Dict[str, Any]]:
@@ -283,7 +295,7 @@ class DemoDataManager:
                 "cost_efficiency": round(random.uniform(0.7, 0.95), 3),
                 "reliability_score": round(random.uniform(0.85, 0.98), 3),
                 "total_requests": random.randint(100, 500),
-                "last_updated": datetime.now(timezone.utc).isoformat()
+                "last_updated": datetime.now(timezone.utc).isoformat(),
             }
 
         return metrics
@@ -296,15 +308,21 @@ class DemoDataManager:
         for i in range(10):  # 10 simulated bias events
             event_time = base_time + timedelta(hours=i * 1.2)
 
-            bias_events.append({
-                "event_id": str(uuid.uuid4()),
-                "timestamp": event_time.isoformat(),
-                "bias_type": random.choice(["cost_bias", "performance_bias", "reliability_bias"]),
-                "provider": random.choice(["openai", "anthropic", "google"]),
-                "impact_level": random.choice(["low", "medium", "high"]),
-                "confidence_score": round(random.uniform(0.7, 0.95), 3),
-                "description": f"Simulated bias event #{i + 1} for demonstration"
-            })
+            bias_events.append(
+                {
+                    "event_id": str(uuid.uuid4()),
+                    "timestamp": event_time.isoformat(),
+                    "bias_type": random.choice(
+                        ["cost_bias", "performance_bias", "reliability_bias"]
+                    ),
+                    "provider": random.choice(
+                        ["openai", "anthropic", "google"]
+                    ),
+                    "impact_level": random.choice(["low", "medium", "high"]),
+                    "confidence_score": round(random.uniform(0.7, 0.95), 3),
+                    "description": f"Simulated bias event #{i + 1} for demonstration",
+                }
+            )
 
         return bias_events
 
@@ -331,7 +349,9 @@ class DemoDataManager:
         """Add a custom demo scenario"""
         try:
             self.scenarios[scenario.scenario_id] = scenario
-            self.logger.info(f"✅ Added custom scenario: {scenario.scenario_id}")
+            self.logger.info(
+                f"✅ Added custom scenario: {scenario.scenario_id}"
+            )
             return True
         except Exception as e:
             self.logger.error(f"Error adding custom scenario: {e}")
@@ -347,12 +367,16 @@ class DemoDataManager:
             self.logger.error(f"Error updating simulation data: {e}")
             return False
 
-    async def get_scenario_success_criteria(self, scenario_id: str) -> Dict[str, Any]:
+    async def get_scenario_success_criteria(
+        self, scenario_id: str
+    ) -> Dict[str, Any]:
         """Get success criteria for a scenario"""
         scenario = self.scenarios.get(scenario_id)
         return scenario.success_criteria if scenario else {}
 
-    async def validate_scenario_result(self, scenario_id: str, result_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def validate_scenario_result(
+        self, scenario_id: str, result_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Validate demo result against scenario criteria"""
         criteria = await self.get_scenario_success_criteria(scenario_id)
         if not criteria:
@@ -368,7 +392,7 @@ class DemoDataManager:
             validation_results["response_time"] = {
                 "valid": time_valid,
                 "actual": response_time,
-                "threshold": criteria["max_response_time_ms"]
+                "threshold": criteria["max_response_time_ms"],
             }
             is_valid = is_valid and time_valid
 
@@ -379,7 +403,7 @@ class DemoDataManager:
             validation_results["quality"] = {
                 "valid": quality_valid,
                 "actual": quality_score,
-                "threshold": criteria["min_quality_score"]
+                "threshold": criteria["min_quality_score"],
             }
             is_valid = is_valid and quality_valid
 
@@ -390,23 +414,30 @@ class DemoDataManager:
             validation_results["cost"] = {
                 "valid": cost_valid,
                 "actual": cost,
-                "threshold": criteria["max_cost_per_request"]
+                "threshold": criteria["max_cost_per_request"],
             }
             is_valid = is_valid and cost_valid
 
         return {
             "valid": is_valid,
             "criteria_met": validation_results,
-            "overall_score": sum(1 for r in validation_results.values() if r["valid"]) / max(len(validation_results), 1)
+            "overall_score": sum(
+                1 for r in validation_results.values() if r["valid"]
+            )
+            / max(len(validation_results), 1),
         }
 
     async def get_demo_statistics(self) -> Dict[str, Any]:
         """Get overall demo statistics"""
         return {
             "total_scenarios": len(self.scenarios),
-            "scenario_types": list(set(s.scenario_type.value for s in self.scenarios.values())),
-            "total_prompts": sum(len(s.prompts) for s in self.scenarios.values()),
+            "scenario_types": list(
+                set(s.scenario_type.value for s in self.scenarios.values())
+            ),
+            "total_prompts": sum(
+                len(s.prompts) for s in self.scenarios.values()
+            ),
             "simulation_data_types": list(self.simulation_data.keys()),
             "is_initialized": self.is_initialized,
-            "last_updated": datetime.now(timezone.utc).isoformat()
+            "last_updated": datetime.now(timezone.utc).isoformat(),
         }

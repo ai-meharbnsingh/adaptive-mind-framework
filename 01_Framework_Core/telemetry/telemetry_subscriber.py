@@ -1,15 +1,15 @@
 # telemetry/telemetry_subscriber.py
 
-import asyncio
 import logging
 from datetime import datetime, timezone
+
+from telemetry import event_topics
+from telemetry.core_logger import UniversalEventSchema, core_logger
 from telemetry.event_bus import EventBus
 from telemetry.time_series_db_interface import TimeSeriesDBInterface
-from telemetry.core_logger import core_logger, UniversalEventSchema
-from telemetry import event_topics
-
 
 # THE ERRONEOUS SELF-IMPORT LINE HAS BEEN REMOVED FROM HERE
+
 
 class TelemetrySubscriber:
     """
@@ -17,11 +17,18 @@ class TelemetrySubscriber:
     to a time-series database.
     """
 
-    def __init__(self, event_bus: EventBus, db_interface: TimeSeriesDBInterface, log_level: int = logging.INFO):
+    def __init__(
+        self,
+        event_bus: EventBus,
+        db_interface: TimeSeriesDBInterface,
+        log_level: int = logging.INFO,
+    ):
         if not isinstance(event_bus, EventBus):
             raise TypeError("event_bus must be an instance of EventBus")
         if not isinstance(db_interface, TimeSeriesDBInterface):
-            raise TypeError("db_interface must be an instance of TimeSeriesDBInterface")
+            raise TypeError(
+                "db_interface must be an instance of TimeSeriesDBInterface"
+            )
 
         self.event_bus = event_bus
         self.db_interface = db_interface
@@ -32,7 +39,8 @@ class TelemetrySubscriber:
     def subscribe_to_all_events(self):
         """Subscribes the persistence handler to all defined event topics."""
         all_topics = [
-            topic for topic in event_topics.__dict__.values()
+            topic
+            for topic in event_topics.__dict__.values()
             if isinstance(topic, str) and not topic.startswith("__")
         ]
         for topic in all_topics:
@@ -45,7 +53,8 @@ class TelemetrySubscriber:
             timestamp_utc=datetime.now(timezone.utc).isoformat(),
             severity="INFO",
             payload={
-                "message": f"TelemetrySubscriber initialization complete. Subscribed to {len(self._subscribed_topics)} topics."}
+                "message": f"TelemetrySubscriber initialization complete. Subscribed to {len(self._subscribed_topics)} topics."
+            },
         )
         self.logger.log(init_event)
 
@@ -55,7 +64,7 @@ class TelemetrySubscriber:
         """
         try:
             event_data_with_name = event_data.copy()
-            event_data_with_name['event_name'] = event_name
+            event_data_with_name["event_name"] = event_name
             await self.db_interface.write_event(event_data_with_name)
 
             if self.log_level <= logging.DEBUG:
@@ -64,7 +73,10 @@ class TelemetrySubscriber:
                     event_source=self.__class__.__name__,
                     timestamp_utc=datetime.now(timezone.utc).isoformat(),
                     severity="DEBUG",
-                    payload={"event_name": event_name, "message": f"Successfully persisted event '{event_name}'."}
+                    payload={
+                        "event_name": event_name,
+                        "message": f"Successfully persisted event '{event_name}'.",
+                    },
                 )
                 self.logger.log(success_event)
         except Exception as e:
@@ -76,8 +88,8 @@ class TelemetrySubscriber:
                 payload={
                     "event_name": event_name,
                     "message": f"Failed to persist event '{event_name}' to time-series DB.",
-                    "error_details": str(e)
-                }
+                    "error_details": str(e),
+                },
             )
             self.logger.log(failure_event)
 

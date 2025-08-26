@@ -1,11 +1,13 @@
 # tests/test_claude_adapter.py
 
 import os
-import pytest
-from dotenv import load_dotenv
 
+import pytest
 from antifragile_framework.providers.api_abstraction_layer import ChatMessage
-from antifragile_framework.providers.provider_adapters.claude_adapter import ClaudeProvider
+from antifragile_framework.providers.provider_adapters.claude_adapter import (
+    ClaudeProvider,
+)
+from dotenv import load_dotenv
 
 # --- Test Setup ---
 
@@ -13,13 +15,15 @@ load_dotenv()
 
 claude_api_keys_str = os.getenv("ANTHROPIC_API_KEY")
 if claude_api_keys_str:
-    CLAUDE_API_KEYS = claude_api_keys_str.split(',')
+    CLAUDE_API_KEYS = claude_api_keys_str.split(",")
 else:
     CLAUDE_API_KEYS = []
 
 skip_if_no_key = pytest.mark.skipif(
-    not CLAUDE_API_KEYS, reason="ANTHROPIC_API_KEY environment variable not set."
+    not CLAUDE_API_KEYS,
+    reason="ANTHROPIC_API_KEY environment variable not set.",
 )
+
 
 # ==============================================================================
 # FIX: Fixture to ensure tests run in "production" mode (no mocking)
@@ -41,19 +45,27 @@ def claude_provider() -> ClaudeProvider:
 
     config = {
         "api_key": CLAUDE_API_KEYS[0],
-        "default_model": "claude-3-haiku-20240307"
+        "default_model": "claude-3-haiku-20240307",
     }
     return ClaudeProvider(config)
 
 
 # --- Test Cases ---
 
+
 @skip_if_no_key
 @pytest.mark.asyncio
-async def test_claude_agenerate_completion_success(claude_provider: ClaudeProvider):
+async def test_claude_agenerate_completion_success(
+    claude_provider: ClaudeProvider,
+):
     messages = [
-        ChatMessage(role="system", content="You are a helpful assistant who provides concise answers."),
-        ChatMessage(role="user", content="What is the color of the sky on a clear day?")
+        ChatMessage(
+            role="system",
+            content="You are a helpful assistant who provides concise answers.",
+        ),
+        ChatMessage(
+            role="user", content="What is the color of the sky on a clear day?"
+        ),
     ]
     response = await claude_provider.agenerate_completion(messages)
     assert response.success is True
@@ -62,8 +74,14 @@ async def test_claude_agenerate_completion_success(claude_provider: ClaudeProvid
 
 @skip_if_no_key
 @pytest.mark.asyncio
-async def test_claude_agenerate_no_system_prompt(claude_provider: ClaudeProvider):
-    messages = [ChatMessage(role="user", content="Simply respond with the word 'test'.")]
+async def test_claude_agenerate_no_system_prompt(
+    claude_provider: ClaudeProvider,
+):
+    messages = [
+        ChatMessage(
+            role="user", content="Simply respond with the word 'test'."
+        )
+    ]
     response = await claude_provider.agenerate_completion(messages)
     assert response.success is True
     assert "test" in response.content.lower()
@@ -71,17 +89,29 @@ async def test_claude_agenerate_no_system_prompt(claude_provider: ClaudeProvider
 
 @skip_if_no_key
 @pytest.mark.asyncio
-@pytest.mark.parametrize("test_model", ["claude-3-5-sonnet-20240620", "claude-3-haiku-20240307"])
-async def test_claude_model_override(claude_provider: ClaudeProvider, test_model: str):
-    messages = [ChatMessage(role="user", content=f"Confirm you are an Anthropic model.")]
-    response = await claude_provider.agenerate_completion(messages, model=test_model)
+@pytest.mark.parametrize(
+    "test_model", ["claude-3-5-sonnet-20240620", "claude-3-haiku-20240307"]
+)
+async def test_claude_model_override(
+    claude_provider: ClaudeProvider, test_model: str
+):
+    messages = [
+        ChatMessage(
+            role="user", content=f"Confirm you are an Anthropic model."
+        )
+    ]
+    response = await claude_provider.agenerate_completion(
+        messages, model=test_model
+    )
     assert response.success is True
     assert test_model in response.model_used
 
 
 @skip_if_no_key
 @pytest.mark.asyncio
-async def test_claude_bad_request_on_invalid_auth(claude_provider: ClaudeProvider):
+async def test_claude_bad_request_on_invalid_auth(
+    claude_provider: ClaudeProvider,
+):
     bad_config = {"api_key": "sk-ant-this_is_a_very_bad_key-12345"}
     bad_provider = ClaudeProvider(bad_config)
     messages = [ChatMessage(role="user", content="This will fail.")]
@@ -92,7 +122,9 @@ async def test_claude_bad_request_on_invalid_auth(claude_provider: ClaudeProvide
 
 @skip_if_no_key
 @pytest.mark.asyncio
-async def test_claude_agenerate_completion_returns_usage(claude_provider: ClaudeProvider):
+async def test_claude_agenerate_completion_returns_usage(
+    claude_provider: ClaudeProvider,
+):
     messages = [ChatMessage(role="user", content="What is 3 + 3?")]
     response = await claude_provider.agenerate_completion(messages)
 

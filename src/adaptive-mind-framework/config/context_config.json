@@ -1,0 +1,10 @@
+{
+  "max_changelog_lines": 200,
+  "git_pull_timeout_seconds": 60,
+  "git_rev_parse_timeout_seconds": 30,
+  "supported_phases": [0, 1, 2, 3, 4, 5, 6],
+  "required_files": ["context_summary.md", "changelog.md"],
+  "include_ai_output_summaries": false,
+  "ai_output_summary_lines": 50,
+  "default_output_filename": "session_context_latest.md"
+}

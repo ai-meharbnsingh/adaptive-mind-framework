@@ -1,8 +1,13 @@
 # tests/utils/test_error_parser.py
 
-import pytest
 from unittest.mock import Mock
-from antifragile_framework.utils.error_parser import ErrorParser, ErrorCategory, ErrorDetails
+
+import pytest
+from antifragile_framework.utils.error_parser import (
+    ErrorCategory,
+    ErrorDetails,
+    ErrorParser,
+)
 
 # Safe imports for provider SDKs
 try:
@@ -29,6 +34,7 @@ except ImportError:
 
 # --- Mocks for SDK Exceptions ---
 
+
 def create_mock_response(status_code, headers=None, json_body=None):
     response = Mock()
     response.status_code = status_code
@@ -39,24 +45,46 @@ def create_mock_response(status_code, headers=None, json_body=None):
 
 
 if OPENAI_AVAILABLE:
-    mock_openai_rate_limit = openai.RateLimitError("Rate limit",
-                                                   response=create_mock_response(429, headers={'retry-after': '20'}),
-                                                   body={})
-    mock_openai_content_policy = openai.BadRequestError("Content policy", response=create_mock_response(400),
-                                                        body={"error": {"code": "content_policy_violation"}})
-    mock_openai_bad_request = openai.BadRequestError("Invalid request", response=create_mock_response(400),
-                                                     body={"error": {"code": "invalid_request"}})
+    mock_openai_rate_limit = openai.RateLimitError(
+        "Rate limit",
+        response=create_mock_response(429, headers={"retry-after": "20"}),
+        body={},
+    )
+    mock_openai_content_policy = openai.BadRequestError(
+        "Content policy",
+        response=create_mock_response(400),
+        body={"error": {"code": "content_policy_violation"}},
+    )
+    mock_openai_bad_request = openai.BadRequestError(
+        "Invalid request",
+        response=create_mock_response(400),
+        body={"error": {"code": "invalid_request"}},
+    )
 
 if ANTHROPIC_AVAILABLE:
     anthropic_content_policy_body = {
-        'error': {'type': 'invalid_request_error', 'message': 'contains safety violations'}}
-    mock_anthropic_content_policy = anthropic.BadRequestError("Content policy", response=create_mock_response(400,
-                                                                                                              json_body=anthropic_content_policy_body),
-                                                              body=anthropic_content_policy_body)
-    anthropic_bad_request_body = {'error': {'type': 'invalid_request_error', 'message': 'Malformed'}}
-    mock_anthropic_bad_request = anthropic.BadRequestError("Invalid request", response=create_mock_response(400,
-                                                                                                            json_body=anthropic_bad_request_body),
-                                                           body=anthropic_bad_request_body)
+        "error": {
+            "type": "invalid_request_error",
+            "message": "contains safety violations",
+        }
+    }
+    mock_anthropic_content_policy = anthropic.BadRequestError(
+        "Content policy",
+        response=create_mock_response(
+            400, json_body=anthropic_content_policy_body
+        ),
+        body=anthropic_content_policy_body,
+    )
+    anthropic_bad_request_body = {
+        "error": {"type": "invalid_request_error", "message": "Malformed"}
+    }
+    mock_anthropic_bad_request = anthropic.BadRequestError(
+        "Invalid request",
+        response=create_mock_response(
+            400, json_body=anthropic_bad_request_body
+        ),
+        body=anthropic_bad_request_body,
+    )
 
 
 @pytest.fixture
@@ -78,7 +106,9 @@ def test_openai_classification(parser):
     assert details.category == ErrorCategory.FATAL
 
 
-@pytest.mark.skipif(not ANTHROPIC_AVAILABLE, reason="Anthropic SDK not installed")
+@pytest.mark.skipif(
+    not ANTHROPIC_AVAILABLE, reason="Anthropic SDK not installed"
+)
 def test_anthropic_classification(parser):
     details = parser.classify_error(mock_anthropic_content_policy, "anthropic")
     assert details.category == ErrorCategory.CONTENT_POLICY
@@ -86,7 +116,9 @@ def test_anthropic_classification(parser):
     details = parser.classify_error(mock_anthropic_bad_request, "anthropic")
     assert details.category == ErrorCategory.FATAL
 
-    rate_limit_error = anthropic.RateLimitError("Rate limit", response=create_mock_response(429), body={})
+    rate_limit_error = anthropic.RateLimitError(
+        "Rate limit", response=create_mock_response(429), body={}
+    )
     details = parser.classify_error(rate_limit_error, "anthropic")
     assert details.category == ErrorCategory.TRANSIENT
 

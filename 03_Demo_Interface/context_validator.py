@@ -5,15 +5,15 @@ Context Preservation Validator for Adaptive Mind Framework
 Validates context preservation during failovers and provider switches.
 """
 
-import asyncio
-import logging
-import uuid
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional, Tuple, Set
-from dataclasses import dataclass
-from enum import Enum
+
 import hashlib
 import json
+import logging
+import uuid
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class ContextElementType(Enum):
     """Types of context elements that can be validated"""
+
     CONVERSATION_HISTORY = "conversation_history"
     USER_PREFERENCES = "user_preferences"
     SESSION_VARIABLES = "session_variables"
@@ -35,6 +36,7 @@ class ContextElementType(Enum):
 
 class ValidationStatus(Enum):
     """Status of context validation"""
+
     PRESERVED = "preserved"
     PARTIALLY_PRESERVED = "partially_preserved"
     LOST = "lost"
@@ -45,6 +47,7 @@ class ValidationStatus(Enum):
 @dataclass
 class ContextElement:
     """Individual context element for validation"""
+
     element_type: ContextElementType
     content: Any
     checksum: str
@@ -56,6 +59,7 @@ class ContextElement:
 @dataclass
 class ValidationResult:
     """Result of context element validation"""
+
     element_type: ContextElementType
     status: ValidationStatus
     preservation_score: float
@@ -66,6 +70,7 @@ class ValidationResult:
 @dataclass
 class ContextSnapshot:
     """Complete context snapshot for validation"""
+
     snapshot_id: str
     timestamp: datetime
     elements: Dict[ContextElementType, ContextElement]
@@ -97,7 +102,7 @@ class ContextValidator:
             "excellent": 95.0,
             "good": 85.0,
             "acceptable": 75.0,
-            "poor": 60.0
+            "poor": 60.0,
         }
 
         # Element priorities (1-10 scale)
@@ -111,18 +116,23 @@ class ContextValidator:
             ContextElementType.MODEL_PARAMETERS: 5,
             ContextElementType.BUSINESS_CONTEXT: 7,
             ContextElementType.TEMPORAL_CONTEXT: 6,
-            ContextElementType.SEMANTIC_CONTEXT: 8
+            ContextElementType.SEMANTIC_CONTEXT: 8,
         }
 
         # Required elements (cannot be lost)
         self.required_elements = {
             ContextElementType.CONVERSATION_HISTORY,
             ContextElementType.PROMPT_CONTEXT,
-            ContextElementType.SAFETY_FILTERS
+            ContextElementType.SAFETY_FILTERS,
         }
 
-    async def create_context_snapshot(self, session_id: str, provider: str,
-                                      operation: str, context_data: Dict[str, Any]) -> str:
+    async def create_context_snapshot(
+        self,
+        session_id: str,
+        provider: str,
+        operation: str,
+        context_data: Dict[str, Any],
+    ) -> str:
         """
         Create a context snapshot for validation.
 
@@ -147,7 +157,9 @@ class ContextValidator:
 
                 if element_data or element_type in self.required_elements:
                     # Create checksum for integrity validation
-                    content_str = json.dumps(element_data, sort_keys=True, default=str)
+                    content_str = json.dumps(
+                        element_data, sort_keys=True, default=str
+                    )
                     checksum = hashlib.sha256(content_str.encode()).hexdigest()
 
                     element = ContextElement(
@@ -156,7 +168,7 @@ class ContextValidator:
                         checksum=checksum,
                         timestamp=timestamp,
                         priority=self.element_priorities.get(element_type, 5),
-                        is_required=element_type in self.required_elements
+                        is_required=element_type in self.required_elements,
                     )
 
                     elements[element_type] = element
@@ -168,21 +180,26 @@ class ContextValidator:
                 elements=elements,
                 session_id=session_id,
                 provider=provider,
-                operation=operation
+                operation=operation,
             )
 
             self.context_snapshots[snapshot_id] = snapshot
 
-            self.logger.info(f"📸 Context snapshot created: {snapshot_id} ({len(elements)} elements)")
+            self.logger.info(
+                f"📸 Context snapshot created: {snapshot_id} ({len(elements)} elements)"
+            )
             return snapshot_id
 
         except Exception as e:
             self.logger.error(f"❌ Failed to create context snapshot: {e}")
             return str(uuid.uuid4())  # Return dummy ID to prevent crashes
 
-    async def validate_context_preservation(self, before_snapshot_id: str,
-                                            after_context_data: Dict[str, Any],
-                                            operation_details: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def validate_context_preservation(
+        self,
+        before_snapshot_id: str,
+        after_context_data: Dict[str, Any],
+        operation_details: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """
         Validate context preservation between snapshots.
 
@@ -201,14 +218,19 @@ class ContextValidator:
             before_snapshot = self.context_snapshots.get(before_snapshot_id)
             if not before_snapshot:
                 return await self._generate_fallback_validation_result(
-                    "Snapshot not found", before_snapshot_id)
+                    "Snapshot not found", before_snapshot_id
+                )
 
             # Create after snapshot for comparison
             after_snapshot_id = await self.create_context_snapshot(
                 before_snapshot.session_id,
-                operation_details.get("target_provider", "unknown") if operation_details else "unknown",
+                (
+                    operation_details.get("target_provider", "unknown")
+                    if operation_details
+                    else "unknown"
+                ),
                 "post_validation",
-                after_context_data
+                after_context_data,
             )
 
             after_snapshot = self.context_snapshots[after_snapshot_id]
@@ -219,10 +241,15 @@ class ContextValidator:
             weighted_score = 0.0
             total_weight = 0
 
-            for element_type, before_element in before_snapshot.elements.items():
+            for (
+                element_type,
+                before_element,
+            ) in before_snapshot.elements.items():
                 after_element = after_snapshot.elements.get(element_type)
 
-                result = await self._validate_element(before_element, after_element)
+                result = await self._validate_element(
+                    before_element, after_element
+                )
                 validation_results.append(result)
 
                 # Calculate weighted scores
@@ -239,16 +266,24 @@ class ContextValidator:
                 average_score = weighted_average = 0.0
 
             # Determine overall status
-            overall_status = self._determine_overall_status(weighted_average, validation_results)
+            overall_status = self._determine_overall_status(
+                weighted_average, validation_results
+            )
 
             # Generate preservation analysis
-            preservation_analysis = self._analyze_preservation_patterns(validation_results)
+            preservation_analysis = self._analyze_preservation_patterns(
+                validation_results
+            )
 
             # Calculate business impact
-            business_impact = self._calculate_business_impact(validation_results, operation_details)
+            business_impact = self._calculate_business_impact(
+                validation_results, operation_details
+            )
 
             # Generate recommendations
-            recommendations = self._generate_improvement_recommendations(validation_results)
+            recommendations = self._generate_improvement_recommendations(
+                validation_results
+            )
 
             # Prepare comprehensive validation report
             validation_report = {
@@ -256,60 +291,89 @@ class ContextValidator:
                 "session_id": before_snapshot.session_id,
                 "validation_timestamp": validation_start_time.isoformat(),
                 "operation_details": operation_details or {},
-
                 # Overall Results
                 "overall_status": overall_status.value,
                 "preservation_score": round(weighted_average, 2),
                 "average_score": round(average_score, 2),
-                "preservation_grade": self._calculate_preservation_grade(weighted_average),
-
+                "preservation_grade": self._calculate_preservation_grade(
+                    weighted_average
+                ),
                 # Snapshot Information
                 "before_snapshot": {
                     "id": before_snapshot_id,
                     "timestamp": before_snapshot.timestamp.isoformat(),
                     "provider": before_snapshot.provider,
-                    "element_count": len(before_snapshot.elements)
+                    "element_count": len(before_snapshot.elements),
                 },
                 "after_snapshot": {
                     "id": after_snapshot_id,
                     "timestamp": after_snapshot.timestamp.isoformat(),
-                    "provider": getattr(after_snapshot, 'provider', 'unknown'),
-                    "element_count": len(after_snapshot.elements)
+                    "provider": getattr(after_snapshot, "provider", "unknown"),
+                    "element_count": len(after_snapshot.elements),
                 },
-
                 # Detailed Element Results
                 "element_validation_results": [
                     {
                         "element_type": result.element_type.value,
                         "status": result.status.value,
                         "preservation_score": result.preservation_score,
-                        "priority": self.element_priorities.get(result.element_type, 5),
-                        "is_required": result.element_type in self.required_elements,
+                        "priority": self.element_priorities.get(
+                            result.element_type, 5
+                        ),
+                        "is_required": result.element_type
+                        in self.required_elements,
                         "details": result.details,
-                        "recommendations": result.recommendations
+                        "recommendations": result.recommendations,
                     }
                     for result in validation_results
                 ],
-
                 # Analysis and Insights
                 "preservation_analysis": preservation_analysis,
                 "business_impact": business_impact,
                 "improvement_recommendations": recommendations,
-
                 # Performance Metrics
                 "validation_metrics": {
                     "total_elements_validated": len(validation_results),
                     "preserved_elements": len(
-                        [r for r in validation_results if r.status == ValidationStatus.PRESERVED]),
+                        [
+                            r
+                            for r in validation_results
+                            if r.status == ValidationStatus.PRESERVED
+                        ]
+                    ),
                     "partially_preserved_elements": len(
-                        [r for r in validation_results if r.status == ValidationStatus.PARTIALLY_PRESERVED]),
-                    "lost_elements": len([r for r in validation_results if r.status == ValidationStatus.LOST]),
+                        [
+                            r
+                            for r in validation_results
+                            if r.status == ValidationStatus.PARTIALLY_PRESERVED
+                        ]
+                    ),
+                    "lost_elements": len(
+                        [
+                            r
+                            for r in validation_results
+                            if r.status == ValidationStatus.LOST
+                        ]
+                    ),
                     "corrupted_elements": len(
-                        [r for r in validation_results if r.status == ValidationStatus.CORRUPTED]),
-                    "enhanced_elements": len([r for r in validation_results if r.status == ValidationStatus.ENHANCED]),
-                    "validation_duration_ms": (datetime.now(
-                        timezone.utc) - validation_start_time).total_seconds() * 1000
-                }
+                        [
+                            r
+                            for r in validation_results
+                            if r.status == ValidationStatus.CORRUPTED
+                        ]
+                    ),
+                    "enhanced_elements": len(
+                        [
+                            r
+                            for r in validation_results
+                            if r.status == ValidationStatus.ENHANCED
+                        ]
+                    ),
+                    "validation_duration_ms": (
+                        datetime.now(timezone.utc) - validation_start_time
+                    ).total_seconds()
+                    * 1000,
+                },
             }
 
             # Store validation in history
@@ -319,15 +383,24 @@ class ContextValidator:
             if len(self.validation_history) > 100:
                 self.validation_history = self.validation_history[-100:]
 
-            self.logger.info(f"✅ Context validation completed: {weighted_average:.1f}% preservation")
+            self.logger.info(
+                f"✅ Context validation completed: {weighted_average:.1f}% preservation"
+            )
             return validation_report
 
         except Exception as e:
-            self.logger.error(f"❌ Context validation failed: {e}", exc_info=True)
-            return await self._generate_fallback_validation_result(str(e), before_snapshot_id)
+            self.logger.error(
+                f"❌ Context validation failed: {e}", exc_info=True
+            )
+            return await self._generate_fallback_validation_result(
+                str(e), before_snapshot_id
+            )
 
-    async def _validate_element(self, before_element: ContextElement,
-                                after_element: Optional[ContextElement]) -> ValidationResult:
+    async def _validate_element(
+        self,
+        before_element: ContextElement,
+        after_element: Optional[ContextElement],
+    ) -> ValidationResult:
         """Validate individual context element preservation"""
         try:
             if not after_element:
@@ -340,14 +413,16 @@ class ContextValidator:
                         "issue": "Element completely missing after operation",
                         "before_checksum": before_element.checksum,
                         "after_checksum": None,
-                        "content_size_before": len(str(before_element.content)),
-                        "content_size_after": 0
+                        "content_size_before": len(
+                            str(before_element.content)
+                        ),
+                        "content_size_after": 0,
                     },
                     recommendations=[
                         "Implement element preservation safeguards",
                         "Add element backup/restore mechanism",
-                        "Review failover context transfer logic"
-                    ]
+                        "Review failover context transfer logic",
+                    ],
                 )
 
             # Compare checksums for exact preservation
@@ -359,16 +434,19 @@ class ContextValidator:
                     details={
                         "preservation_type": "exact_match",
                         "checksum_match": True,
-                        "content_size_before": len(str(before_element.content)),
+                        "content_size_before": len(
+                            str(before_element.content)
+                        ),
                         "content_size_after": len(str(after_element.content)),
-                        "size_change": 0
+                        "size_change": 0,
                     },
-                    recommendations=[]
+                    recommendations=[],
                 )
 
             # Perform content-based similarity analysis
             similarity_score = await self._calculate_content_similarity(
-                before_element.content, after_element.content)
+                before_element.content, after_element.content
+            )
 
             # Determine status based on similarity
             if similarity_score >= 95.0:
@@ -378,21 +456,21 @@ class ContextValidator:
                 status = ValidationStatus.PARTIALLY_PRESERVED
                 recommendations = [
                     "Review content transfer mechanism for higher fidelity",
-                    "Implement content validation checksums"
+                    "Implement content validation checksums",
                 ]
             elif similarity_score >= 50.0:
                 status = ValidationStatus.CORRUPTED
                 recommendations = [
                     "Critical: Implement robust content preservation",
                     "Add integrity validation during transfers",
-                    "Review serialization/deserialization logic"
+                    "Review serialization/deserialization logic",
                 ]
             else:
                 status = ValidationStatus.LOST
                 recommendations = [
                     "Urgent: Complete content preservation failure",
                     "Implement backup/restore mechanisms",
-                    "Review entire context transfer pipeline"
+                    "Review entire context transfer pipeline",
                 ]
 
             # Check for content enhancement
@@ -400,7 +478,7 @@ class ContextValidator:
                 status = ValidationStatus.ENHANCED
                 recommendations = [
                     "Content was enhanced during transfer",
-                    "Validate that enhancements are beneficial"
+                    "Validate that enhancements are beneficial",
                 ]
 
             return ValidationResult(
@@ -415,26 +493,33 @@ class ContextValidator:
                     "after_checksum": after_element.checksum,
                     "content_size_before": len(str(before_element.content)),
                     "content_size_after": len(str(after_element.content)),
-                    "size_change": len(str(after_element.content)) - len(str(before_element.content))
+                    "size_change": len(str(after_element.content))
+                    - len(str(before_element.content)),
                 },
-                recommendations=recommendations
+                recommendations=recommendations,
             )
 
         except Exception as e:
-            self.logger.error(f"Element validation failed for {before_element.element_type}: {e}")
+            self.logger.error(
+                f"Element validation failed for {before_element.element_type}: {e}"
+            )
             return ValidationResult(
                 element_type=before_element.element_type,
                 status=ValidationStatus.CORRUPTED,
                 preservation_score=0.0,
                 details={"error": str(e)},
-                recommendations=["Fix validation logic error"]
+                recommendations=["Fix validation logic error"],
             )
 
-    async def _calculate_content_similarity(self, before_content: Any, after_content: Any) -> float:
+    async def _calculate_content_similarity(
+        self, before_content: Any, after_content: Any
+    ) -> float:
         """Calculate similarity between content objects"""
         try:
             # Convert to strings for comparison
-            before_str = json.dumps(before_content, sort_keys=True, default=str)
+            before_str = json.dumps(
+                before_content, sort_keys=True, default=str
+            )
             after_str = json.dumps(after_content, sort_keys=True, default=str)
 
             if before_str == after_str:
@@ -451,7 +536,9 @@ class ContextValidator:
             intersection = len(before_chars.intersection(after_chars))
             union = len(before_chars.union(after_chars))
 
-            jaccard_similarity = (intersection / union) * 100 if union > 0 else 100.0
+            jaccard_similarity = (
+                (intersection / union) * 100 if union > 0 else 100.0
+            )
 
             # Calculate length similarity
             len_before = len(before_str)
@@ -459,10 +546,14 @@ class ContextValidator:
             max_len = max(len_before, len_after)
             min_len = min(len_before, len_after)
 
-            length_similarity = (min_len / max_len) * 100 if max_len > 0 else 100.0
+            length_similarity = (
+                (min_len / max_len) * 100 if max_len > 0 else 100.0
+            )
 
             # Weighted average of similarities
-            overall_similarity = (jaccard_similarity * 0.7) + (length_similarity * 0.3)
+            overall_similarity = (jaccard_similarity * 0.7) + (
+                length_similarity * 0.3
+            )
 
             return round(overall_similarity, 2)
 
@@ -470,12 +561,14 @@ class ContextValidator:
             self.logger.error(f"Content similarity calculation failed: {e}")
             return 50.0  # Default to moderate similarity on error
 
-    def _determine_overall_status(self, weighted_average: float,
-                                  results: List[ValidationResult]) -> ValidationStatus:
+    def _determine_overall_status(
+        self, weighted_average: float, results: List[ValidationResult]
+    ) -> ValidationStatus:
         """Determine overall validation status"""
         # Check for any lost required elements
         lost_required = any(
-            result.status == ValidationStatus.LOST and result.element_type in self.required_elements
+            result.status == ValidationStatus.LOST
+            and result.element_type in self.required_elements
             for result in results
         )
 
@@ -484,7 +577,8 @@ class ContextValidator:
 
         # Check for corruption in required elements
         corrupted_required = any(
-            result.status == ValidationStatus.CORRUPTED and result.element_type in self.required_elements
+            result.status == ValidationStatus.CORRUPTED
+            and result.element_type in self.required_elements
             for result in results
         )
 
@@ -499,7 +593,9 @@ class ContextValidator:
         else:
             return ValidationStatus.LOST
 
-    def _analyze_preservation_patterns(self, results: List[ValidationResult]) -> Dict[str, Any]:
+    def _analyze_preservation_patterns(
+        self, results: List[ValidationResult]
+    ) -> Dict[str, Any]:
         """Analyze patterns in preservation results"""
         # Group results by status
         status_groups = {}
@@ -511,40 +607,59 @@ class ContextValidator:
 
         # Analyze by priority
         high_priority_issues = [
-            result for result in results
-            if result.preservation_score < 90 and self.element_priorities.get(result.element_type, 5) >= 8
+            result
+            for result in results
+            if result.preservation_score < 90
+            and self.element_priorities.get(result.element_type, 5) >= 8
         ]
 
         # Identify most problematic elements
-        worst_performing = sorted(results, key=lambda x: x.preservation_score)[:3]
+        worst_performing = sorted(results, key=lambda x: x.preservation_score)[
+            :3
+        ]
 
         return {
-            "status_distribution": {status: len(results) for status, results in status_groups.items()},
+            "status_distribution": {
+                status: len(results)
+                for status, results in status_groups.items()
+            },
             "high_priority_issues_count": len(high_priority_issues),
             "worst_performing_elements": [
                 {
                     "element_type": result.element_type.value,
                     "score": result.preservation_score,
-                    "status": result.status.value
+                    "status": result.status.value,
                 }
-                for result in worst_performing if result.preservation_score < 100
+                for result in worst_performing
+                if result.preservation_score < 100
             ],
             "preservation_trend": self._calculate_preservation_trend(),
-            "common_failure_patterns": self._identify_failure_patterns(results)
+            "common_failure_patterns": self._identify_failure_patterns(
+                results
+            ),
         }
 
-    def _calculate_business_impact(self, results: List[ValidationResult],
-                                   operation_details: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    def _calculate_business_impact(
+        self,
+        results: List[ValidationResult],
+        operation_details: Optional[Dict[str, Any]],
+    ) -> Dict[str, Any]:
         """Calculate business impact of context preservation results"""
         # Critical element preservation
         critical_elements_preserved = sum(
-            1 for result in results
-            if result.element_type in self.required_elements and result.preservation_score >= 90
+            1
+            for result in results
+            if result.element_type in self.required_elements
+            and result.preservation_score >= 90
         )
 
-        total_critical_elements = len([
-            result for result in results if result.element_type in self.required_elements
-        ])
+        total_critical_elements = len(
+            [
+                result
+                for result in results
+                if result.element_type in self.required_elements
+            ]
+        )
 
         # Calculate impact scores
         user_experience_impact = self._calculate_ux_impact(results)
@@ -552,11 +667,20 @@ class ContextValidator:
         compliance_impact = self._calculate_compliance_impact(results)
 
         # Overall business impact
-        if critical_elements_preserved == total_critical_elements and user_experience_impact == "minimal":
+        if (
+            critical_elements_preserved == total_critical_elements
+            and user_experience_impact == "minimal"
+        ):
             overall_impact = "minimal"
-        elif user_experience_impact in ["low", "minimal"] and operational_impact == "low":
+        elif (
+            user_experience_impact in ["low", "minimal"]
+            and operational_impact == "low"
+        ):
             overall_impact = "low"
-        elif user_experience_impact == "moderate" or operational_impact == "moderate":
+        elif (
+            user_experience_impact == "moderate"
+            or operational_impact == "moderate"
+        ):
             overall_impact = "moderate"
         else:
             overall_impact = "high"
@@ -567,80 +691,98 @@ class ContextValidator:
             "operational_impact": operational_impact,
             "compliance_impact": compliance_impact,
             "critical_elements_preserved": f"{critical_elements_preserved}/{total_critical_elements}",
-            "business_continuity_score": self._calculate_continuity_score(results),
-            "recovery_recommendation": self._get_recovery_recommendation(overall_impact)
+            "business_continuity_score": self._calculate_continuity_score(
+                results
+            ),
+            "recovery_recommendation": self._get_recovery_recommendation(
+                overall_impact
+            ),
         }
 
-    def _generate_improvement_recommendations(self, results: List[ValidationResult]) -> List[Dict[str, Any]]:
+    def _generate_improvement_recommendations(
+        self, results: List[ValidationResult]
+    ) -> List[Dict[str, Any]]:
         """Generate actionable improvement recommendations"""
         recommendations = []
 
         # Analyze common issues
         low_score_elements = [r for r in results if r.preservation_score < 75]
-        lost_elements = [r for r in results if r.status == ValidationStatus.LOST]
-        corrupted_elements = [r for r in results if r.status == ValidationStatus.CORRUPTED]
+        lost_elements = [
+            r for r in results if r.status == ValidationStatus.LOST
+        ]
+        corrupted_elements = [
+            r for r in results if r.status == ValidationStatus.CORRUPTED
+        ]
 
         # Generate specific recommendations
         if lost_elements:
-            recommendations.append({
-                "priority": "Critical",
-                "category": "Element Loss Prevention",
-                "title": "Implement Element Backup/Restore",
-                "description": f"{len(lost_elements)} elements were completely lost during operation",
-                "action_items": [
-                    "Add pre-operation context backup",
-                    "Implement element-by-element validation",
-                    "Create automatic restore mechanisms"
-                ],
-                "estimated_effort": "High",
-                "business_value": "Critical system reliability"
-            })
+            recommendations.append(
+                {
+                    "priority": "Critical",
+                    "category": "Element Loss Prevention",
+                    "title": "Implement Element Backup/Restore",
+                    "description": f"{len(lost_elements)} elements were completely lost during operation",
+                    "action_items": [
+                        "Add pre-operation context backup",
+                        "Implement element-by-element validation",
+                        "Create automatic restore mechanisms",
+                    ],
+                    "estimated_effort": "High",
+                    "business_value": "Critical system reliability",
+                }
+            )
 
         if corrupted_elements:
-            recommendations.append({
-                "priority": "High",
-                "category": "Data Integrity",
-                "title": "Enhance Content Integrity Validation",
-                "description": f"{len(corrupted_elements)} elements were corrupted during transfer",
-                "action_items": [
-                    "Implement content checksums",
-                    "Add serialization validation",
-                    "Create integrity monitoring"
-                ],
-                "estimated_effort": "Medium",
-                "business_value": "Data accuracy and reliability"
-            })
+            recommendations.append(
+                {
+                    "priority": "High",
+                    "category": "Data Integrity",
+                    "title": "Enhance Content Integrity Validation",
+                    "description": f"{len(corrupted_elements)} elements were corrupted during transfer",
+                    "action_items": [
+                        "Implement content checksums",
+                        "Add serialization validation",
+                        "Create integrity monitoring",
+                    ],
+                    "estimated_effort": "Medium",
+                    "business_value": "Data accuracy and reliability",
+                }
+            )
 
         if low_score_elements:
-            recommendations.append({
-                "priority": "Medium",
-                "category": "Preservation Optimization",
-                "title": "Optimize Context Transfer Mechanisms",
-                "description": f"{len(low_score_elements)} elements have preservation scores below 75%",
-                "action_items": [
-                    "Review transfer algorithms",
-                    "Optimize serialization methods",
-                    "Implement smart preservation priorities"
-                ],
-                "estimated_effort": "Medium",
-                "business_value": "Improved user experience"
-            })
+            recommendations.append(
+                {
+                    "priority": "Medium",
+                    "category": "Preservation Optimization",
+                    "title": "Optimize Context Transfer Mechanisms",
+                    "description": f"{len(low_score_elements)} elements have preservation scores below 75%",
+                    "action_items": [
+                        "Review transfer algorithms",
+                        "Optimize serialization methods",
+                        "Implement smart preservation priorities",
+                    ],
+                    "estimated_effort": "Medium",
+                    "business_value": "Improved user experience",
+                }
+            )
 
         # Add general improvements if preservation is already good
         if not recommendations:
-            recommendations.append({
-                "priority": "Low",
-                "category": "Continuous Improvement",
-                "title": "Enhance Monitoring and Analytics",
-                "description": "Context preservation is performing well - focus on monitoring",
-                "action_items": [
-                    "Add predictive preservation analytics",
-                    "Implement real-time monitoring dashboards",
-                    "Create automated optimization"
-                ],
-                "estimated_effort": "Low",
-                "business_value": "Proactive optimization"
-            })
+            recommendations.append(
+                {
+                    "priority": "Low",
+                    "category": "Continuous Improvement",
+                    "title": "Enhance Monitoring and Analytics",
+                    "description": "Context preservation is performing well - focus on monitoring",
+                    "action_items": [
+                        "Add predictive preservation analytics",
+                        "Implement real-time monitoring dashboards",
+                        "Create automated optimization",
+                    ],
+                    "estimated_effort": "Low",
+                    "business_value": "Proactive optimization",
+                }
+            )
 
         return recommendations
 
@@ -686,13 +828,19 @@ class ContextValidator:
         else:
             return "stable"
 
-    def _identify_failure_patterns(self, results: List[ValidationResult]) -> List[str]:
+    def _identify_failure_patterns(
+        self, results: List[ValidationResult]
+    ) -> List[str]:
         """Identify common failure patterns"""
         patterns = []
 
         # Check for systematic issues
-        lost_count = len([r for r in results if r.status == ValidationStatus.LOST])
-        corrupted_count = len([r for r in results if r.status == ValidationStatus.CORRUPTED])
+        lost_count = len(
+            [r for r in results if r.status == ValidationStatus.LOST]
+        )
+        corrupted_count = len(
+            [r for r in results if r.status == ValidationStatus.CORRUPTED]
+        )
 
         if lost_count > len(results) * 0.3:
             patterns.append("high_element_loss_rate")
@@ -702,7 +850,8 @@ class ContextValidator:
 
         # Check for specific element type issues
         conversation_issues = any(
-            r.element_type == ContextElementType.CONVERSATION_HISTORY and r.preservation_score < 80
+            r.element_type == ContextElementType.CONVERSATION_HISTORY
+            and r.preservation_score < 80
             for r in results
         )
 
@@ -715,8 +864,12 @@ class ContextValidator:
         """Calculate user experience impact"""
         # Check conversation history preservation
         conv_result = next(
-            (r for r in results if r.element_type == ContextElementType.CONVERSATION_HISTORY),
-            None
+            (
+                r
+                for r in results
+                if r.element_type == ContextElementType.CONVERSATION_HISTORY
+            ),
+            None,
         )
 
         if conv_result and conv_result.preservation_score < 70:
@@ -726,14 +879,20 @@ class ContextValidator:
         else:
             return "minimal"
 
-    def _calculate_operational_impact(self, results: List[ValidationResult]) -> str:
+    def _calculate_operational_impact(
+        self, results: List[ValidationResult]
+    ) -> str:
         """Calculate operational impact"""
         required_preserved = sum(
-            1 for r in results
-            if r.element_type in self.required_elements and r.preservation_score >= 90
+            1
+            for r in results
+            if r.element_type in self.required_elements
+            and r.preservation_score >= 90
         )
 
-        total_required = len([r for r in results if r.element_type in self.required_elements])
+        total_required = len(
+            [r for r in results if r.element_type in self.required_elements]
+        )
 
         if required_preserved == total_required:
             return "low"
@@ -742,12 +901,18 @@ class ContextValidator:
         else:
             return "high"
 
-    def _calculate_compliance_impact(self, results: List[ValidationResult]) -> str:
+    def _calculate_compliance_impact(
+        self, results: List[ValidationResult]
+    ) -> str:
         """Calculate compliance impact"""
         # Check safety and security elements
         safety_result = next(
-            (r for r in results if r.element_type == ContextElementType.SAFETY_FILTERS),
-            None
+            (
+                r
+                for r in results
+                if r.element_type == ContextElementType.SAFETY_FILTERS
+            ),
+            None,
         )
 
         if safety_result and safety_result.preservation_score < 95:
@@ -755,14 +920,17 @@ class ContextValidator:
         else:
             return "low"
 
-    def _calculate_continuity_score(self, results: List[ValidationResult]) -> float:
+    def _calculate_continuity_score(
+        self, results: List[ValidationResult]
+    ) -> float:
         """Calculate business continuity score"""
         if not results:
             return 0.0
 
         # Weight by element priority
         weighted_sum = sum(
-            result.preservation_score * self.element_priorities.get(result.element_type, 5)
+            result.preservation_score
+            * self.element_priorities.get(result.element_type, 5)
             for result in results
         )
 
@@ -779,13 +947,16 @@ class ContextValidator:
             "minimal": "Continue normal operations - monitor for trends",
             "low": "Schedule preventive maintenance during next maintenance window",
             "moderate": "Plan context preservation improvements in next sprint",
-            "high": "Immediate action required - implement preservation safeguards"
+            "high": "Immediate action required - implement preservation safeguards",
         }
 
-        return recommendations.get(impact, "Assess and implement appropriate measures")
+        return recommendations.get(
+            impact, "Assess and implement appropriate measures"
+        )
 
-    async def _generate_fallback_validation_result(self, error: str,
-                                                   snapshot_id: str) -> Dict[str, Any]:
+    async def _generate_fallback_validation_result(
+        self, error: str, snapshot_id: str
+    ) -> Dict[str, Any]:
         """Generate fallback validation result when validation fails"""
         return {
             "validation_id": str(uuid.uuid4()),
@@ -798,15 +969,17 @@ class ContextValidator:
             "before_snapshot": {"id": snapshot_id, "status": "error"},
             "validation_metrics": {
                 "total_elements_validated": 0,
-                "validation_error": True
+                "validation_error": True,
             },
             "business_impact": {
                 "overall_impact": "unknown",
-                "recovery_recommendation": "Investigate validation system error"
-            }
+                "recovery_recommendation": "Investigate validation system error",
+            },
         }
 
-    async def get_validation_history(self, limit: int = 10) -> List[Dict[str, Any]]:
+    async def get_validation_history(
+        self, limit: int = 10
+    ) -> List[Dict[str, Any]]:
         """Get recent validation history"""
         return self.validation_history[-limit:]
 
@@ -822,7 +995,9 @@ class ContextValidator:
         avg_score = sum(scores) / len(scores) if scores else 0
 
         # Status distribution
-        statuses = [v.get("overall_status", "unknown") for v in recent_validations]
+        statuses = [
+            v.get("overall_status", "unknown") for v in recent_validations
+        ]
         status_counts = {}
         for status in statuses:
             status_counts[status] = status_counts.get(status, 0) + 1
@@ -833,16 +1008,20 @@ class ContextValidator:
             "preservation_trend": self._calculate_preservation_trend(),
             "status_distribution": status_counts,
             "total_validations": len(self.validation_history),
-            "analytics_timestamp": datetime.now(timezone.utc).isoformat()
+            "analytics_timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-    async def validate_simple_context(self, before_context: Dict[str, Any],
-                                      after_context: Dict[str, Any]) -> Dict[str, Any]:
+    async def validate_simple_context(
+        self, before_context: Dict[str, Any], after_context: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Simple context validation for quick checks"""
         try:
             # Create temporary snapshot
             snapshot_id = await self.create_context_snapshot(
-                "temp_session", "temp_provider", "simple_validation", before_context
+                "temp_session",
+                "temp_provider",
+                "simple_validation",
+                before_context,
             )
 
             # Validate preservation
@@ -854,7 +1033,7 @@ class ContextValidator:
                 "is_preserved": result["preservation_score"] >= 90.0,
                 "preservation_score": result["preservation_score"],
                 "preservation_grade": result["preservation_grade"],
-                "summary": f"Context preservation: {result['preservation_score']:.1f}%"
+                "summary": f"Context preservation: {result['preservation_score']:.1f}%",
             }
 
         except Exception as e:
@@ -863,5 +1042,5 @@ class ContextValidator:
                 "is_preserved": False,
                 "preservation_score": 0.0,
                 "preservation_grade": "F",
-                "summary": f"Validation error: {str(e)}"
+                "summary": f"Validation error: {str(e)}",
             }

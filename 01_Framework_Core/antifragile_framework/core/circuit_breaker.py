@@ -1,13 +1,14 @@
 # antifragile_framework/core/circuit_breaker.py
 
-import time
 import threading
+import time
 from enum import Enum, auto
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class CircuitBreakerState(Enum):
     """The possible states of the circuit breaker."""
+
     CLOSED = auto()
     OPEN = auto()
     HALF_OPEN = auto()
@@ -24,7 +25,12 @@ class CircuitBreakerError(Exception):
 class CircuitBreaker:
     """A stateful object that wraps calls to a service to prevent cascading failures."""
 
-    def __init__(self, service_name: str, failure_threshold: int = 5, reset_timeout_seconds: int = 60):
+    def __init__(
+        self,
+        service_name: str,
+        failure_threshold: int = 5,
+        reset_timeout_seconds: int = 60,
+    ):
         if failure_threshold <= 0:
             raise ValueError("Failure threshold must be positive.")
         if reset_timeout_seconds <= 0:
@@ -88,5 +94,7 @@ class CircuitBreakerRegistry:
             return self._breakers[service_name]
         with self._lock:
             if service_name not in self._breakers:
-                self._breakers[service_name] = CircuitBreaker(service_name=service_name, **kwargs)
+                self._breakers[service_name] = CircuitBreaker(
+                    service_name=service_name, **kwargs
+                )
             return self._breakers[service_name]

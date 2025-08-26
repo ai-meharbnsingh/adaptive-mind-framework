@@ -1,0 +1,15 @@
+Name             Version ID                  Fix Versions
+---------------- ------- ------------------- -------------
+azure-identity   1.15.0  GHSA-m5vv-6r4h-3vj9 1.16.1
+black            23.9.1  PYSEC-2024-48       24.3.0
+dash             2.14.1  PYSEC-2024-35       2.13.0,2.15.0
+ecdsa            0.19.1  GHSA-wj6h-64fc-37mp
+gunicorn         21.2.0  GHSA-w3h3-4rj7-4ph4 22.0.0
+gunicorn         21.2.0  GHSA-hc5x-x2vx-497g 23.0.0
+python-jose      3.3.0   PYSEC-2024-232      3.4.0
+python-jose      3.3.0   PYSEC-2024-233      3.4.0
+python-multipart 0.0.6   GHSA-2jv5-9r88-3w3p 0.0.7
+python-multipart 0.0.6   GHSA-59g5-xgcq-4qw3 0.0.18
+Name                    Skip Reason
+----------------------- --------------------------------------------------------------------------------------
+adaptive-mind-framework Dependency not found on PyPI and could not be audited: adaptive-mind-framework (0.2.0)

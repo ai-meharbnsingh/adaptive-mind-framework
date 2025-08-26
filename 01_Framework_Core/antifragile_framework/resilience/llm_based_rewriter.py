@@ -3,9 +3,13 @@
 import copy
 from typing import List, Optional
 
-from .prompt_rewriter import PromptRewriter
-from antifragile_framework.providers.api_abstraction_layer import LLMProvider, ChatMessage
 from antifragile_framework.core.exceptions import RewriteFailedError
+from antifragile_framework.providers.api_abstraction_layer import (
+    ChatMessage,
+    LLMProvider,
+)
+
+from .prompt_rewriter import PromptRewriter
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are an AI assistant specializing in content safety and compliance. "
@@ -21,7 +25,12 @@ class LLMBasedRewriter(PromptRewriter):
     A concrete implementation of PromptRewriter that uses an LLM to rephrase prompts.
     """
 
-    def __init__(self, llm_client: LLMProvider, model: str = "gpt-4o", system_prompt: Optional[str] = None):
+    def __init__(
+        self,
+        llm_client: LLMProvider,
+        model: str = "gpt-4o",
+        system_prompt: Optional[str] = None,
+    ):
         """
         Initializes the LLMBasedRewriter.
 
@@ -31,12 +40,16 @@ class LLMBasedRewriter(PromptRewriter):
             system_prompt: An optional custom system prompt to guide the rephrasing.
         """
         if not isinstance(llm_client, LLMProvider):
-            raise TypeError("llm_client must be an instance of a class that implements LLMProvider.")
+            raise TypeError(
+                "llm_client must be an instance of a class that implements LLMProvider."
+            )
         self.llm_client = llm_client
         self.model = model
         self.system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
 
-    def _create_meta_prompt(self, original_messages: List[ChatMessage]) -> List[ChatMessage]:
+    def _create_meta_prompt(
+        self, original_messages: List[ChatMessage]
+    ) -> List[ChatMessage]:
         """
         Creates a "meta-prompt" to instruct an LLM on how to rephrase the user's content.
         """
@@ -47,14 +60,18 @@ class LLMBasedRewriter(PromptRewriter):
                 break
 
         if not user_content_to_rephrase:
-            raise RewriteFailedError("No user content found in the messages to rephrase.")
+            raise RewriteFailedError(
+                "No user content found in the messages to rephrase."
+            )
 
         return [
             ChatMessage(role="system", content=self.system_prompt),
-            ChatMessage(role="user", content=user_content_to_rephrase)
+            ChatMessage(role="user", content=user_content_to_rephrase),
         ]
 
-    def _replace_last_user_message(self, original_messages: List[ChatMessage], new_content: str) -> List[ChatMessage]:
+    def _replace_last_user_message(
+        self, original_messages: List[ChatMessage], new_content: str
+    ) -> List[ChatMessage]:
         """
         Creates a new list of messages with the content of the last user message updated.
         """
@@ -68,7 +85,7 @@ class LLMBasedRewriter(PromptRewriter):
         return messages_copy
 
     async def rephrase_for_policy_compliance(
-            self, messages: List[ChatMessage]
+        self, messages: List[ChatMessage]
     ) -> List[ChatMessage]:
         """
         Rephrases the last user message in a list of messages to be more policy-compliant.
@@ -80,12 +97,16 @@ class LLMBasedRewriter(PromptRewriter):
                 messages=meta_prompt,
                 model=self.model,
                 max_tokens=1000,
-                temperature=0.3
+                temperature=0.3,
             )
 
             if not response.success or not response.content:
-                error_msg = response.error_message or "LLM returned no content."
-                raise RewriteFailedError(f"LLM API call for rephrasing failed: {error_msg}")
+                error_msg = (
+                    response.error_message or "LLM returned no content."
+                )
+                raise RewriteFailedError(
+                    f"LLM API call for rephrasing failed: {error_msg}"
+                )
 
             rephrased_content = response.content.strip()
             return self._replace_last_user_message(messages, rephrased_content)
@@ -93,4 +114,6 @@ class LLMBasedRewriter(PromptRewriter):
         except Exception as e:
             if isinstance(e, RewriteFailedError):
                 raise
-            raise RewriteFailedError(f"An unexpected error occurred during rephrasing: {e}") from e
+            raise RewriteFailedError(
+                f"An unexpected error occurred during rephrasing: {e}"
+            ) from e

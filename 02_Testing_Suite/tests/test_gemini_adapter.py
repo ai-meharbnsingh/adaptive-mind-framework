@@ -1,11 +1,13 @@
 # tests/test_gemini_adapter.py
 
 import os
-import pytest
-from dotenv import load_dotenv
 
+import pytest
 from antifragile_framework.providers.api_abstraction_layer import ChatMessage
-from antifragile_framework.providers.provider_adapters.gemini_adapter import GeminiProvider
+from antifragile_framework.providers.provider_adapters.gemini_adapter import (
+    GeminiProvider,
+)
+from dotenv import load_dotenv
 
 # --- Test Setup ---
 
@@ -16,6 +18,7 @@ gemini_api_key = os.getenv("GEMINI_API_KEY")
 skip_if_no_key = pytest.mark.skipif(
     not gemini_api_key, reason="GEMINI_API_KEY environment variable not set."
 )
+
 
 # ==============================================================================
 # FIX: Fixture to ensure tests run in "production" mode (no mocking)
@@ -37,19 +40,27 @@ def gemini_provider() -> GeminiProvider:
         pytest.skip("Skipping Gemini provider setup: No API key found.")
 
     config = {
-        "api_key": gemini_api_key.split(',')[0],  # Use the first key if multiple are present
-        "default_model": "gemini-1.5-flash-latest"
+        "api_key": gemini_api_key.split(",")[
+            0
+        ],  # Use the first key if multiple are present
+        "default_model": "gemini-1.5-flash-latest",
     }
     return GeminiProvider(config)
 
 
 # --- Test Cases ---
 
+
 @skip_if_no_key
 @pytest.mark.asyncio
-async def test_gemini_agenerate_completion_success(gemini_provider: GeminiProvider):
+async def test_gemini_agenerate_completion_success(
+    gemini_provider: GeminiProvider,
+):
     messages = [
-        ChatMessage(role="user", content="What is the main component of Earth's atmosphere?")
+        ChatMessage(
+            role="user",
+            content="What is the main component of Earth's atmosphere?",
+        )
     ]
     response = await gemini_provider.agenerate_completion(messages)
     assert response.success is True
@@ -60,27 +71,42 @@ async def test_gemini_agenerate_completion_success(gemini_provider: GeminiProvid
 @pytest.mark.asyncio
 async def test_gemini_with_system_prompt(gemini_provider: GeminiProvider):
     messages = [
-        ChatMessage(role="system", content="You are a poet. Respond only with a two-line rhyming poem."),
-        ChatMessage(role="user", content="Write a short poem about the moon.")
+        ChatMessage(
+            role="system",
+            content="You are a poet. Respond only with a two-line rhyming poem.",
+        ),
+        ChatMessage(role="user", content="Write a short poem about the moon."),
     ]
-    response = await gemini_provider.agenerate_completion(messages, temperature=0.5)
+    response = await gemini_provider.agenerate_completion(
+        messages, temperature=0.5
+    )
     assert response.success is True
-    assert len(response.content.strip().split('\n')) >= 2
+    assert len(response.content.strip().split("\n")) >= 2
 
 
 @skip_if_no_key
 @pytest.mark.asyncio
-@pytest.mark.parametrize("test_model", ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"])
-async def test_gemini_model_override(gemini_provider: GeminiProvider, test_model: str):
-    messages = [ChatMessage(role="user", content=f"Confirm you are a Google model.")]
-    response = await gemini_provider.agenerate_completion(messages, model=test_model)
+@pytest.mark.parametrize(
+    "test_model", ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest"]
+)
+async def test_gemini_model_override(
+    gemini_provider: GeminiProvider, test_model: str
+):
+    messages = [
+        ChatMessage(role="user", content=f"Confirm you are a Google model.")
+    ]
+    response = await gemini_provider.agenerate_completion(
+        messages, model=test_model
+    )
     assert response.success is True
     assert "google" in response.content.lower()
 
 
 @skip_if_no_key
 @pytest.mark.asyncio
-async def test_gemini_bad_request_on_invalid_auth(gemini_provider: GeminiProvider):
+async def test_gemini_bad_request_on_invalid_auth(
+    gemini_provider: GeminiProvider,
+):
     """
     Tests how the adapter handles a specific, predictable API error (bad API key).
     """
@@ -98,7 +124,9 @@ async def test_gemini_bad_request_on_invalid_auth(gemini_provider: GeminiProvide
 
 @skip_if_no_key
 @pytest.mark.asyncio
-async def test_gemini_agenerate_completion_returns_usage(gemini_provider: GeminiProvider):
+async def test_gemini_agenerate_completion_returns_usage(
+    gemini_provider: GeminiProvider,
+):
     """Verify that a successful completion response includes token usage data."""
     messages = [ChatMessage(role="user", content="What is 4 + 4?")]
     response = await gemini_provider.agenerate_completion(messages)

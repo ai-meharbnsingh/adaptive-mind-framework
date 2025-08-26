@@ -4,40 +4,50 @@
 Minimal Working Demo Backend for Adaptive Mind Framework - Session 8
 Simplified version to ensure startup success
 """
-
-import sys
-import os
+from pydantic import BaseModel, ConfigDict, Field
+from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import (
+    BackgroundTasks,
+    FastAPI,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+)
+from datetime import (
+    datetime,
+    timezone,
+    timedelta,
+)  # Added timedelta, removed duplicate
 import asyncio
+import json  # Add if not present
 import logging
 import random
+import sys
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add project paths
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "01_Framework_Core"))
 sys.path.insert(0, str(PROJECT_ROOT / "05_Database_Layer"))
 
-# Third-party imports
-from fastapi import FastAPI, HTTPException, BackgroundTasks, WebSocket, WebSocketDisconnect, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, Field, ConfigDict
 
-from typing import Dict, Any, Optional, List
-from pydantic import BaseModel, Field, ConfigDict
-from datetime import datetime
+# Third-party imports
 
 # --- Basic Logging Setup ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
 class BuyerKeyValidationRequest(BaseModel):
     """Request model for buyer API key validation"""
+
     model_config = ConfigDict(protected_namespaces=())
 
     session_id: str
@@ -46,6 +56,7 @@ class BuyerKeyValidationRequest(BaseModel):
 
 class BuyerKeyValidationResponse(BaseModel):
     """Response model for buyer API key validation"""
+
     model_config = ConfigDict(protected_namespaces=())
 
     success: bool
@@ -56,14 +67,19 @@ class BuyerKeyValidationResponse(BaseModel):
 
 class ConnectionTestRequest(BaseModel):
     """Request model for connection testing"""
+
     model_config = ConfigDict(protected_namespaces=())
 
     session_id: str
     api_keys: Dict[str, str]
+
+
 # --- Global Mock Classes (Defined Early) ---
+
 
 class ConnectionTestResponse(BaseModel):
     """Response model for connection testing"""
+
     model_config = ConfigDict(protected_namespaces=())
 
     success: bool
@@ -74,6 +90,7 @@ class ConnectionTestResponse(BaseModel):
 
 class EnhancedDemoRequest(BaseModel):
     """Enhanced demo request model with dual-mode support"""
+
     model_config = ConfigDict(protected_namespaces=())
 
     mode: str
@@ -83,18 +100,25 @@ class EnhancedDemoRequest(BaseModel):
     failover_scenario_key: Optional[str] = "primary_api_down"
     buyer_api_keys: Optional[Dict[str, str]] = None
     session_id: str
+
+
 class MockFailoverEngine:
-    def __init__(self, *args, **kwargs): pass
+    def __init__(self, *args, **kwargs):
+        pass
 
     async def execute_request(self, *args, **kwargs):
-        return type('MockResponse', (), {
-            'success': True,
-            'content': 'Mock response from demo backend',
-            'model_used': 'mock_model',
-            'latency_ms': 250.0,
-            'metadata': {'estimated_cost_usd': 0.001},
-            'usage': None
-        })()
+        return type(
+            "MockResponse",
+            (),
+            {
+                "success": True,
+                "content": "Mock response from demo backend",
+                "model_used": "mock_model",
+                "latency_ms": 250.0,
+                "metadata": {"estimated_cost_usd": 0.001},
+                "usage": None,
+            },
+        )()
 
 
 class MockDatabaseConnectionManager:
@@ -104,11 +128,14 @@ class MockDatabaseConnectionManager:
     async def initialize(self):
         logger.info("✅ Mock Database Connection Manager initialized")
 
-    async def get_connection(self): return None
+    async def get_connection(self):
+        return None
 
-    async def release_connection(self, conn): pass
+    async def release_connection(self, conn):
+        pass
 
-    async def close_all_connections(self): pass
+    async def close_all_connections(self):
+        pass
 
 
 class MockTimeSeriesDBInterface:
@@ -119,11 +146,14 @@ class MockTimeSeriesDBInterface:
     async def initialize(self):
         logger.info("✅ Mock TimeSeriesDB Interface initialized")
 
-    async def close(self): pass
+    async def close(self):
+        pass
 
-    async def record_event(self, *args, **kwargs): pass
+    async def record_event(self, *args, **kwargs):
+        pass
 
-    async def query_events(self, *args, **kwargs): return []
+    async def query_events(self, *args, **kwargs):
+        return []
 
 
 class EnhancedMockAPIKeyManager:
@@ -136,26 +166,36 @@ class EnhancedMockAPIKeyManager:
     async def validate_key_format(self, api_keys: Dict[str, str]) -> bool:
         """Mock key format validation"""
         for provider, key in api_keys.items():
-            if provider == 'openai' and not (key.startswith('sk-') and len(key) >= 20):
+            if provider == "openai" and not (
+                key.startswith("sk-") and len(key) >= 20
+            ):
                 return False
-            elif provider == 'anthropic' and not (key.startswith('sk-ant-') and len(key) >= 20):
+            elif provider == "anthropic" and not (
+                key.startswith("sk-ant-") and len(key) >= 20
+            ):
                 return False
-            elif provider == 'google' and not (key.startswith('AIza') and len(key) >= 20):
+            elif provider == "google" and not (
+                key.startswith("AIza") and len(key) >= 20
+            ):
                 return False
         return True
 
-    async def store_buyer_keys_securely(self, session_id: str, api_keys: Dict[str, str]) -> str:
+    async def store_buyer_keys_securely(
+        self, session_id: str, api_keys: Dict[str, str]
+    ) -> str:
         """Mock secure key storage"""
         audit_id = f"audit_{uuid.uuid4().hex[:8]}"
         self._mock_sessions[session_id] = {
             "audit_id": audit_id,
             "created_at": datetime.now(timezone.utc),
             "expires_at": datetime.now(timezone.utc) + timedelta(minutes=60),
-            "keys": api_keys.copy()
+            "keys": api_keys.copy(),
         }
         return audit_id
 
-    async def get_stored_keys(self, session_id: str) -> Optional[Dict[str, str]]:
+    async def get_stored_keys(
+        self, session_id: str
+    ) -> Optional[Dict[str, str]]:
         """Mock key retrieval"""
         if session_id in self._mock_sessions:
             session_data = self._mock_sessions[session_id]
@@ -163,14 +203,16 @@ class EnhancedMockAPIKeyManager:
                 return session_data["keys"]
         return None
 
-    async def get_session_info(self, session_id: str) -> Optional[Dict[str, Any]]:
+    async def get_session_info(
+        self, session_id: str
+    ) -> Optional[Dict[str, Any]]:
         """Mock session info retrieval"""
         if session_id in self._mock_sessions:
             session_data = self._mock_sessions[session_id]
             return {
                 "created_at": session_data["created_at"].isoformat(),
                 "expires_at": session_data["expires_at"].isoformat(),
-                "audit_id": session_data["audit_id"]
+                "audit_id": session_data["audit_id"],
             }
         return None
 
@@ -198,6 +240,7 @@ class DemoRequest(BaseModel):
 # Your existing DemoResponse model should already exist, but if not, here it is:
 class DemoResponse(BaseModel):
     """Response model for demo execution"""
+
     model_config = ConfigDict(protected_namespaces=())
 
     session_id: str
@@ -212,6 +255,27 @@ class DemoResponse(BaseModel):
     failover_occurred: bool = False
     context_preserved: bool = False
     failover_details: Optional[Dict[str, Any]] = None
+
+
+class MockComponent:
+    """Generic mock component for demo purposes"""
+
+    def __init__(self, name: str = "mock"):
+        self.name = name
+        self.status = "active"
+        self.initialized = True
+
+    def __getattr__(self, name):
+        """Return a callable mock for any attribute access"""
+        return lambda *args, **kwargs: None
+
+    async def initialize(self):
+        """Mock async initialization"""
+        pass
+
+    async def close(self):
+        """Mock async cleanup"""
+        pass
 
 
 # --- Demo Components Manager ---
@@ -258,7 +322,9 @@ async def lifespan(app: FastAPI):
         app.state.timeseries_db_interface = timeseries_db_interface
         app.state.background_tasks = []
 
-        logger.info("✅ Session 8 Demo Backend initialization complete (Minimal Mode)")
+        logger.info(
+            "✅ Session 8 Demo Backend initialization complete (Minimal Mode)"
+        )
         yield
 
     except Exception as e:
@@ -277,7 +343,7 @@ app = FastAPI(
     title="Adaptive Mind Framework - Session 8 Demo",
     description="Enterprise AI resilience demonstration",
     version="2.2.6-minimal",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -505,7 +571,7 @@ async def execute_demo(request: Request, body: DemoRequest):
                 "failover_scenario": "Enhanced Failover Demonstration",
                 "simulated_trigger": "Simulated provider failure",
                 "recovery_action": "Automatic failover to backup provider",
-                "context_preserved": True
+                "context_preserved": True,
             }
 
         return DemoResponse(
@@ -520,7 +586,7 @@ async def execute_demo(request: Request, body: DemoRequest):
             learning_applied=True,
             failover_occurred=body.enable_failover_demo,
             context_preserved=True,
-            failover_details=failover_details
+            failover_details=failover_details,
         )
 
     except Exception as e:
@@ -535,7 +601,7 @@ async def health_check():
         "status": "ok",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "session_8_features": "operational",
-        "demo_mode": "minimal"
+        "demo_mode": "minimal",
     }
 
 
@@ -548,30 +614,40 @@ async def dashboard_metrics():
         "cost_efficiency_percent": round(random.uniform(90, 98), 1),
         "system_uptime_percent": 99.97,
         "total_requests_processed": random.randint(800, 1200),
-        "avg_response_time_ms": round(random.uniform(200, 400), 1)
+        "avg_response_time_ms": round(random.uniform(200, 400), 1),
     }
 
-@app.post("/api/validate-buyer-keys", response_model=BuyerKeyValidationResponse)
-async def validate_buyer_keys(request: BuyerKeyValidationRequest, background_tasks: BackgroundTasks):
+
+@app.post(
+    "/api/validate-buyer-keys", response_model=BuyerKeyValidationResponse
+)
+async def validate_buyer_keys(
+    request: BuyerKeyValidationRequest, background_tasks: BackgroundTasks
+):
     """
     Validates buyer-provided API keys with enterprise security measures
     """
     try:
-        logger.info(f"🔐 Starting buyer key validation for session: {request.session_id}")
+        logger.info(
+            f"🔐 Starting buyer key validation for session: {request.session_id}"
+        )
 
         # Get components
         components = app.state.demo_components
         api_key_manager = components.api_key_manager
 
         # Basic format validation
-        format_validation = await api_key_manager.validate_key_format(request.api_keys)
+        format_validation = await api_key_manager.validate_key_format(
+            request.api_keys
+        )
         if not format_validation:
-            raise HTTPException(status_code=400, detail="Invalid API key format detected")
+            raise HTTPException(
+                status_code=400, detail="Invalid API key format detected"
+            )
 
         # Store keys securely (memory-only)
         security_audit_id = await api_key_manager.store_buyer_keys_securely(
-            request.session_id,
-            request.api_keys
+            request.session_id, request.api_keys
         )
 
         # Validate each key
@@ -579,11 +655,23 @@ async def validate_buyer_keys(request: BuyerKeyValidationRequest, background_tas
         for provider, key in request.api_keys.items():
             try:
                 # Basic format check (more detailed validation would happen in real usage)
-                if provider == 'openai' and key.startswith('sk-') and len(key) >= 20:
+                if (
+                    provider == "openai"
+                    and key.startswith("sk-")
+                    and len(key) >= 20
+                ):
                     valid_keys[provider] = True
-                elif provider == 'anthropic' and key.startswith('sk-ant-') and len(key) >= 20:
+                elif (
+                    provider == "anthropic"
+                    and key.startswith("sk-ant-")
+                    and len(key) >= 20
+                ):
                     valid_keys[provider] = True
-                elif provider == 'google' and key.startswith('AIza') and len(key) >= 20:
+                elif (
+                    provider == "google"
+                    and key.startswith("AIza")
+                    and len(key) >= 20
+                ):
                     valid_keys[provider] = True
                 else:
                     valid_keys[provider] = False
@@ -594,24 +682,31 @@ async def validate_buyer_keys(request: BuyerKeyValidationRequest, background_tas
 
         # Check if at least one key is valid
         if not any(valid_keys.values()):
-            raise HTTPException(status_code=400, detail="No valid API keys provided")
+            raise HTTPException(
+                status_code=400, detail="No valid API keys provided"
+            )
 
         # Log security audit event
-        background_tasks.add_task(log_security_audit, {
-            "event_type": "buyer_key_validation",
-            "session_id": request.session_id,
-            "audit_id": security_audit_id,
-            "providers_validated": list(request.api_keys.keys()),
-            "validation_results": valid_keys,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        })
+        background_tasks.add_task(
+            log_security_audit,
+            {
+                "event_type": "buyer_key_validation",
+                "session_id": request.session_id,
+                "audit_id": security_audit_id,
+                "providers_validated": list(request.api_keys.keys()),
+                "validation_results": valid_keys,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        )
 
-        logger.info(f"✅ Buyer key validation successful for session: {request.session_id}")
+        logger.info(
+            f"✅ Buyer key validation successful for session: {request.session_id}"
+        )
 
         return BuyerKeyValidationResponse(
             success=True,
             valid_keys=valid_keys,
-            security_audit_id=security_audit_id
+            security_audit_id=security_audit_id,
         )
 
     except HTTPException:
@@ -619,18 +714,21 @@ async def validate_buyer_keys(request: BuyerKeyValidationRequest, background_tas
     except Exception as e:
         logger.error(f"❌ Buyer key validation failed: {str(e)}")
         return BuyerKeyValidationResponse(
-            success=False,
-            valid_keys={},
-            error=str(e)
+            success=False, valid_keys={}, error=str(e)
         )
 
+
 @app.post("/api/test-buyer-connection", response_model=ConnectionTestResponse)
-async def test_buyer_connection(request: ConnectionTestRequest, background_tasks: BackgroundTasks):
+async def test_buyer_connection(
+    request: ConnectionTestRequest, background_tasks: BackgroundTasks
+):
     """
     Tests connection to AI providers using buyer's API keys
     """
     try:
-        logger.info(f"🚀 Starting connection test for session: {request.session_id}")
+        logger.info(
+            f"🚀 Starting connection test for session: {request.session_id}"
+        )
 
         # Get components
         components = app.state.demo_components
@@ -639,7 +737,9 @@ async def test_buyer_connection(request: ConnectionTestRequest, background_tasks
         # Retrieve stored keys
         stored_keys = await api_key_manager.get_stored_keys(request.session_id)
         if not stored_keys:
-            raise HTTPException(status_code=400, detail="No valid keys found for session")
+            raise HTTPException(
+                status_code=400, detail="No valid keys found for session"
+            )
 
         # Test connections
         test_results = {}
@@ -658,37 +758,47 @@ async def test_buyer_connection(request: ConnectionTestRequest, background_tasks
                     "status": "connected",
                     "response_time_ms": 250,
                     "quota_available": True,
-                    "rate_limit_remaining": 1000
+                    "rate_limit_remaining": 1000,
                 }
                 providers_tested.append(provider)
 
             except Exception as e:
-                logger.warning(f"Connection test failed for {provider}: {str(e)}")
-                test_results[provider] = {
-                    "status": "failed",
-                    "error": str(e)
-                }
+                logger.warning(
+                    f"Connection test failed for {provider}: {str(e)}"
+                )
+                test_results[provider] = {"status": "failed", "error": str(e)}
 
         # Check if at least one connection succeeded
-        successful_connections = [p for p, r in test_results.items() if r.get("status") == "connected"]
+        successful_connections = [
+            p
+            for p, r in test_results.items()
+            if r.get("status") == "connected"
+        ]
         if not successful_connections:
-            raise HTTPException(status_code=400, detail="All connection tests failed")
+            raise HTTPException(
+                status_code=400, detail="All connection tests failed"
+            )
 
         # Log security audit event
-        background_tasks.add_task(log_security_audit, {
-            "event_type": "connection_test",
-            "session_id": request.session_id,
-            "providers_tested": providers_tested,
-            "test_results": test_results,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        })
+        background_tasks.add_task(
+            log_security_audit,
+            {
+                "event_type": "connection_test",
+                "session_id": request.session_id,
+                "providers_tested": providers_tested,
+                "test_results": test_results,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        )
 
-        logger.info(f"✅ Connection test successful for session: {request.session_id}")
+        logger.info(
+            f"✅ Connection test successful for session: {request.session_id}"
+        )
 
         return ConnectionTestResponse(
             success=True,
             providers_tested=providers_tested,
-            test_results=test_results
+            test_results=test_results,
         )
 
     except HTTPException:
@@ -696,19 +806,21 @@ async def test_buyer_connection(request: ConnectionTestRequest, background_tasks
     except Exception as e:
         logger.error(f"❌ Connection test failed: {str(e)}")
         return ConnectionTestResponse(
-            success=False,
-            providers_tested=[],
-            test_results={},
-            error=str(e)
+            success=False, providers_tested=[], test_results={}, error=str(e)
         )
 
+
 @app.post("/api/execute-demo", response_model=DemoResponse)
-async def execute_enhanced_demo(request: EnhancedDemoRequest, background_tasks: BackgroundTasks):
+async def execute_enhanced_demo(
+    request: EnhancedDemoRequest, background_tasks: BackgroundTasks
+):
     """
     Enhanced demo execution with dual-mode support
     """
     try:
-        logger.info(f"🚀 Starting enhanced demo execution - Mode: {request.mode}, Session: {request.session_id}")
+        logger.info(
+            f"🚀 Starting enhanced demo execution - Mode: {request.mode}, Session: {request.session_id}"
+        )
 
         # Get components
         components = app.state.demo_components
@@ -720,7 +832,7 @@ async def execute_enhanced_demo(request: EnhancedDemoRequest, background_tasks: 
             "session_id": request.session_id,
             "use_case": request.use_case,
             "enable_failover_demo": request.enable_failover_demo,
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         # Handle API keys based on mode
@@ -732,20 +844,32 @@ async def execute_enhanced_demo(request: EnhancedDemoRequest, background_tasks: 
         elif request.mode == "evaluation":
             # Use buyer's keys
             if not request.buyer_api_keys:
-                raise HTTPException(status_code=400, detail="Buyer API keys required for evaluation mode")
+                raise HTTPException(
+                    status_code=400,
+                    detail="Buyer API keys required for evaluation mode",
+                )
 
             # Verify keys are still valid and stored
             api_key_manager = components.api_key_manager
-            stored_keys = await api_key_manager.get_stored_keys(request.session_id)
+            stored_keys = await api_key_manager.get_stored_keys(
+                request.session_id
+            )
             if not stored_keys:
-                raise HTTPException(status_code=400, detail="No valid buyer keys found. Please validate keys first.")
+                raise HTTPException(
+                    status_code=400,
+                    detail="No valid buyer keys found. Please validate keys first.",
+                )
 
             execution_context["api_source"] = "buyer"
             execution_context["buyer_key_providers"] = list(stored_keys.keys())
-            logger.info(f"Using buyer API keys for demo execution: {list(stored_keys.keys())}")
+            logger.info(
+                f"Using buyer API keys for demo execution: {list(stored_keys.keys())}"
+            )
 
         else:
-            raise HTTPException(status_code=400, detail=f"Invalid demo mode: {request.mode}")
+            raise HTTPException(
+                status_code=400, detail=f"Invalid demo mode: {request.mode}"
+            )
 
         # Execute the demo
         start_time = datetime.now()
@@ -755,7 +879,7 @@ async def execute_enhanced_demo(request: EnhancedDemoRequest, background_tasks: 
             prompt=request.prompt,
             use_case=request.use_case,
             enable_failover=request.enable_failover_demo,
-            execution_context=execution_context
+            execution_context=execution_context,
         )
 
         end_time = datetime.now()
@@ -768,17 +892,23 @@ async def execute_enhanced_demo(request: EnhancedDemoRequest, background_tasks: 
             response=demo_result.content,
             provider_used=demo_result.model_used,
             response_time_ms=response_time_ms,
-            cost_estimate=demo_result.metadata.get('estimated_cost_usd', 0.001),
+            cost_estimate=demo_result.metadata.get(
+                "estimated_cost_usd", 0.001
+            ),
             metrics={
                 "execution_context": execution_context,
                 "api_source": execution_context["api_source"],
                 "use_case": request.use_case,
-                "timestamp": execution_context["timestamp"]
+                "timestamp": execution_context["timestamp"],
             },
             bias_score=0.05,  # Mock bias score
             learning_applied=True,
-            failover_occurred=not demo_result.success if request.enable_failover_demo else False,
-            context_preserved=True
+            failover_occurred=(
+                not demo_result.success
+                if request.enable_failover_demo
+                else False
+            ),
+            context_preserved=True,
         )
 
         # Add failover details if applicable
@@ -787,23 +917,28 @@ async def execute_enhanced_demo(request: EnhancedDemoRequest, background_tasks: 
                 "trigger": request.failover_scenario_key,
                 "recovery_time_ms": 150,
                 "backup_provider": "claude",
-                "context_preservation_score": 0.98
+                "context_preservation_score": 0.98,
             }
 
         # Log execution audit event
-        background_tasks.add_task(log_security_audit, {
-            "event_type": "demo_execution",
-            "session_id": request.session_id,
-            "mode": request.mode,
-            "prompt_length": len(request.prompt),
-            "provider_used": demo_result.model_used,
-            "response_time_ms": response_time_ms,
-            "cost_estimate": enhanced_response.cost_estimate,
-            "failover_occurred": enhanced_response.failover_occurred,
-            "timestamp": execution_context["timestamp"]
-        })
+        background_tasks.add_task(
+            log_security_audit,
+            {
+                "event_type": "demo_execution",
+                "session_id": request.session_id,
+                "mode": request.mode,
+                "prompt_length": len(request.prompt),
+                "provider_used": demo_result.model_used,
+                "response_time_ms": response_time_ms,
+                "cost_estimate": enhanced_response.cost_estimate,
+                "failover_occurred": enhanced_response.failover_occurred,
+                "timestamp": execution_context["timestamp"],
+            },
+        )
 
-        logger.info(f"✅ Enhanced demo execution successful for session: {request.session_id}")
+        logger.info(
+            f"✅ Enhanced demo execution successful for session: {request.session_id}"
+        )
 
         return enhanced_response
 
@@ -811,7 +946,10 @@ async def execute_enhanced_demo(request: EnhancedDemoRequest, background_tasks: 
         raise
     except Exception as e:
         logger.error(f"❌ Enhanced demo execution failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Demo execution failed: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Demo execution failed: {str(e)}"
+        )
+
 
 @app.get("/api/session-status/{session_id}")
 async def get_session_status(session_id: str):
@@ -832,10 +970,14 @@ async def get_session_status(session_id: str):
             "session_id": session_id,
             "has_valid_keys": bool(stored_keys),
             "key_providers": list(stored_keys.keys()) if stored_keys else [],
-            "session_created": session_info.get("created_at") if session_info else None,
-            "expires_at": session_info.get("expires_at") if session_info else None,
+            "session_created": (
+                session_info.get("created_at") if session_info else None
+            ),
+            "expires_at": (
+                session_info.get("expires_at") if session_info else None
+            ),
             "security_level": "enterprise" if stored_keys else "standard",
-            "status": "active"
+            "status": "active",
         }
 
     except Exception as e:
@@ -845,8 +987,9 @@ async def get_session_status(session_id: str):
             "has_valid_keys": False,
             "key_providers": [],
             "status": "error",
-            "error": str(e)
+            "error": str(e),
         }
+
 
 @app.delete("/api/session/{session_id}")
 async def cleanup_session(session_id: str, background_tasks: BackgroundTasks):
@@ -861,27 +1004,26 @@ async def cleanup_session(session_id: str, background_tasks: BackgroundTasks):
         cleanup_result = await api_key_manager.cleanup_session(session_id)
 
         # Log cleanup audit
-        background_tasks.add_task(log_security_audit, {
-            "event_type": "session_cleanup",
-            "session_id": session_id,
-            "keys_removed": cleanup_result.get("keys_removed", 0),
-            "cleanup_successful": cleanup_result.get("success", False),
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        })
+        background_tasks.add_task(
+            log_security_audit,
+            {
+                "event_type": "session_cleanup",
+                "session_id": session_id,
+                "keys_removed": cleanup_result.get("keys_removed", 0),
+                "cleanup_successful": cleanup_result.get("success", False),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        )
 
         return {
             "success": True,
             "message": "Session cleaned up successfully",
-            "session_id": session_id
+            "session_id": session_id,
         }
 
     except Exception as e:
         logger.error(f"Failed to cleanup session: {str(e)}")
-        return {
-            "success": False,
-            "error": str(e),
-            "session_id": session_id
-        }
+        return {"success": False, "error": str(e), "session_id": session_id}
 
 
 @app.get("/api/health-security")
@@ -891,13 +1033,17 @@ async def health_check_security():
     """
     try:
         # Get components if available
-        components = getattr(app.state, 'demo_components', None)
+        components = getattr(app.state, "demo_components", None)
 
         # Check component health
         health_status = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "demo_backend": "healthy",
-            "api_key_manager": "healthy" if components and hasattr(components, 'api_key_manager') else "available",
+            "api_key_manager": (
+                "healthy"
+                if components and hasattr(components, "api_key_manager")
+                else "available"
+            ),
             "security_audit": "healthy",
             "dual_mode_support": "enabled",
             "enterprise_security": "enabled",
@@ -907,7 +1053,7 @@ async def health_check_security():
             "websocket_streaming": "enabled",
             "real_time_metrics": "enabled",
             "database_layer": "mock_initialized",
-            "telemetry_system": "operational"
+            "telemetry_system": "operational",
         }
 
         return health_status
@@ -919,8 +1065,9 @@ async def health_check_security():
             "status": "partial",
             "demo_backend": "healthy",
             "error": str(e),
-            "note": "Some components may not be fully initialized"
+            "note": "Some components may not be fully initialized",
         }
+
 
 # 3. ADD this helper function
 async def log_security_audit(audit_data: Dict[str, Any]):
@@ -929,7 +1076,8 @@ async def log_security_audit(audit_data: Dict[str, Any]):
     """
     try:
         logger.info(
-            f"🔒 Security Audit: {audit_data['event_type']} - Session: {audit_data.get('session_id', 'unknown')}")
+            f"🔒 Security Audit: {audit_data['event_type']} - Session: {audit_data.get('session_id', 'unknown')}"
+        )
 
         # In production, this would be sent to a secure audit system
         # For demo, we'll log to a structured format
@@ -938,7 +1086,7 @@ async def log_security_audit(audit_data: Dict[str, Any]):
             "event_type": audit_data["event_type"],
             "session_id": audit_data.get("session_id"),
             "details": audit_data,
-            "security_level": "enterprise"
+            "security_level": "enterprise",
         }
 
         # Log to structured format (in production, send to SIEM/audit system)
@@ -966,13 +1114,12 @@ async def websocket_endpoint(websocket: WebSocket):
                 "total_requests": random.randint(800, 1200),
                 "avg_response_time": round(random.uniform(150, 350), 1),
                 "failover_rate": round(random.uniform(0, 2), 2),
-                "security_level": "enterprise"
+                "security_level": "enterprise",
             }
 
-            await websocket.send_json({
-                "type": "metrics_update",
-                "data": metrics
-            })
+            await websocket.send_json(
+                {"type": "metrics_update", "data": metrics}
+            )
 
             # Wait 5 seconds before next update
             await asyncio.sleep(5)
@@ -985,6 +1132,8 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.close()
         except:
             pass
+
+
 # Additional CSS for demo results display
 DEMO_RESULT_STYLES = """
 <style>
@@ -1110,7 +1259,9 @@ DEMO_RESULT_STYLES = """
 if __name__ == "__main__":
     import uvicorn
 
-    logger.info("🚀 Starting Adaptive Mind Session 8 Demo Backend (Minimal Mode)...")
+    logger.info(
+        "🚀 Starting Adaptive Mind Session 8 Demo Backend (Minimal Mode)..."
+    )
     logger.info("🌐 Access demo at: http://localhost:8000")
 
     uvicorn.run(
@@ -1118,5 +1269,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         reload=True,
-        log_level="info"
+        log_level="info",
     )

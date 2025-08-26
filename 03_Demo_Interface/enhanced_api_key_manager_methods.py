@@ -15,13 +15,13 @@ Author: Adaptive Mind Framework Team
 Version: 1.0
 """
 
-import uuid
-import hashlib
-import secrets
-from datetime import datetime, timedelta, timezone
-from typing import Dict, Any, Optional
 import asyncio
+import hashlib
 import logging
+import secrets
+import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,8 @@ async def store_buyer_keys_securely(self, session_id: str, api_keys: Dict[str, s
         # Set up automatic expiration
         await self._schedule_key_expiration(session_id)
 
-        logger.info(f"🔐 Buyer keys stored securely for session: {session_id} (Audit ID: {audit_id})")
+        logger.info(
+            f"🔐 Buyer keys stored securely for session: {session_id} (Audit ID: {audit_id})")
 
         return audit_id
 
@@ -126,7 +127,8 @@ async def get_session_info(self, session_id: str) -> Optional[Dict[str, Any]]:
         metadata["last_accessed"] = metadata["last_accessed"].isoformat()
 
         # Add current status
-        metadata["is_expired"] = datetime.now(timezone.utc) > session_data["metadata"]["expires_at"]
+        metadata["is_expired"] = datetime.now(
+            timezone.utc) > session_data["metadata"]["expires_at"]
         metadata["time_remaining_minutes"] = max(0,
                                                  (session_data["metadata"]["expires_at"] - datetime.now(
                                                      timezone.utc)).total_seconds() / 60
@@ -220,7 +222,8 @@ async def validate_key_format(self, api_keys: Dict[str, str]) -> bool:
 
             # Check prefix
             if not key.startswith(rules['prefix']):
-                logger.warning(f"Invalid prefix for {provider}: expected '{rules['prefix']}'")
+                logger.warning(
+                    f"Invalid prefix for {provider}: expected '{rules['prefix']}'")
                 return False
 
             # Check length
@@ -230,7 +233,8 @@ async def validate_key_format(self, api_keys: Dict[str, str]) -> bool:
                 return False
 
             # Check for obvious test/placeholder keys
-            placeholder_patterns = ['test', 'demo', 'placeholder', 'example', 'fake']
+            placeholder_patterns = ['test', 'demo',
+                                    'placeholder', 'example', 'fake']
             key_lower = key.lower()
             if any(pattern in key_lower for pattern in placeholder_patterns):
                 logger.warning(f"Placeholder key detected for {provider}")
@@ -258,7 +262,8 @@ async def _schedule_key_expiration(self, session_id: str):
         task = asyncio.create_task(expire_keys())
         self._key_expiration_tasks[session_id] = task
 
-        logger.info(f"⏰ Scheduled key expiration for session: {session_id} ({self.key_lifetime_minutes} minutes)")
+        logger.info(
+            f"⏰ Scheduled key expiration for session: {session_id} ({self.key_lifetime_minutes} minutes)")
 
     except Exception as e:
         logger.error(f"Failed to schedule key expiration: {str(e)}")
@@ -276,7 +281,8 @@ def _encrypt_key(self, key: str) -> str:
     key_bytes = key.encode('utf-8')
 
     # Simple XOR with salt for demo (NOT secure for production)
-    encrypted_bytes = bytes(a ^ b for a, b in zip(key_bytes, salt * (len(key_bytes) // len(salt) + 1)))
+    encrypted_bytes = bytes(a ^ b for a, b in zip(
+        key_bytes, salt * (len(key_bytes) // len(salt) + 1)))
 
     # Combine salt and encrypted data
     combined = salt + encrypted_bytes
@@ -300,7 +306,8 @@ def _decrypt_key(self, encrypted_key: str) -> str:
         encrypted_bytes = combined[16:]
 
         # Simple XOR with salt for demo (NOT secure for production)
-        decrypted_bytes = bytes(a ^ b for a, b in zip(encrypted_bytes, salt * (len(encrypted_bytes) // len(salt) + 1)))
+        decrypted_bytes = bytes(a ^ b for a, b in zip(
+            encrypted_bytes, salt * (len(encrypted_bytes) // len(salt) + 1)))
 
         return decrypted_bytes.decode('utf-8')
 
@@ -426,7 +433,8 @@ async def extend_session_lifetime(self, session_id: str, additional_minutes: int
         # Schedule new expiration
         await self._schedule_key_expiration(session_id)
 
-        logger.info(f"⏰ Extended session lifetime: {session_id} (+{additional_minutes} minutes)")
+        logger.info(
+            f"⏰ Extended session lifetime: {session_id} (+{additional_minutes} minutes)")
 
         return True
 
@@ -447,7 +455,8 @@ def __init__(self):
     self._access_patterns = {}
     self._failed_attempts = {}
 
-    logger.info("🔐 Enhanced APIKeyManager initialized with enterprise security features")
+    logger.info(
+        "🔐 Enhanced APIKeyManager initialized with enterprise security features")
 
 
 async def log_security_event(self, event_type: str, session_id: str, details: Dict[str, Any]):
@@ -470,7 +479,8 @@ async def log_security_event(self, event_type: str, session_id: str, details: Di
         if len(self._security_events) > 1000:
             self._security_events = self._security_events[-1000:]
 
-        logger.info(f"🔒 Security event logged: {event_type} for session {session_id}")
+        logger.info(
+            f"🔒 Security event logged: {event_type} for session {session_id}")
 
     except Exception as e:
         logger.error(f"Failed to log security event: {str(e)}")

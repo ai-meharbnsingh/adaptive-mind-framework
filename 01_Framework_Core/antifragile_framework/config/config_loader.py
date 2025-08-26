@@ -1,29 +1,35 @@
 # antifragile_framework/config/config_loader.py
 
-import yaml
 import json
-import os
 import logging
-from typing import Dict, Any, Optional
-from pydantic import ValidationError
+import os
+from typing import Any, Dict, Optional
 
+import yaml
 from antifragile_framework.config.schemas import ProviderProfiles
+from pydantic import ValidationError
 
 log = logging.getLogger(__name__)
 
 
-def _get_config_path(default_filename: str, provided_path: Optional[str] = None) -> str:
+def _get_config_path(
+    default_filename: str, provided_path: Optional[str] = None
+) -> str:
     """Helper function to determine the absolute path for a configuration file."""
     if provided_path:
         return provided_path
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     # Assumes /config is a direct child of /antifragile_framework, which is in the project root
-    project_root = os.path.abspath(os.path.join(current_dir, '..', '..'))
-    return os.path.join(project_root, 'antifragile_framework', 'config', default_filename)
+    project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
+    return os.path.join(
+        project_root, "antifragile_framework", "config", default_filename
+    )
 
 
-def load_resilience_config(config_path: Optional[str] = None) -> Dict[str, Any]:
+def load_resilience_config(
+    config_path: Optional[str] = None,
+) -> Dict[str, Any]:
     """
     Loads the resilience framework configuration from a YAML file.
 
@@ -41,32 +47,40 @@ def load_resilience_config(config_path: Optional[str] = None) -> Dict[str, Any]:
     if config_path is None:
         # Check for fast config first if FAST_DEMO_MODE is set
         if os.getenv("FAST_DEMO_MODE") == "true":
-            fast_config_path = _get_config_path('resilience_config_fast.yaml')
+            fast_config_path = _get_config_path("resilience_config_fast.yaml")
             if os.path.exists(fast_config_path):
                 config_path = fast_config_path
 
-
-
-    abs_config_path = _get_config_path('resilience_config.yaml', config_path)
+    abs_config_path = _get_config_path("resilience_config.yaml", config_path)
 
     if not os.path.exists(abs_config_path):
         log.error(f"Resilience config file not found at: {abs_config_path}")
-        raise FileNotFoundError(f"Resilience config file not found at: {abs_config_path}")
+        raise FileNotFoundError(
+            f"Resilience config file not found at: {abs_config_path}"
+        )
 
     try:
-        with open(abs_config_path, 'r', encoding='utf-8') as file:
+        with open(abs_config_path, "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
-            log.info(f"Successfully loaded resilience config from {abs_config_path}")
+            log.info(
+                f"Successfully loaded resilience config from {abs_config_path}"
+            )
             return config
     except yaml.YAMLError as e:
-        log.error(f"Error parsing resilience config YAML file {abs_config_path}: {e}")
+        log.error(
+            f"Error parsing resilience config YAML file {abs_config_path}: {e}"
+        )
         raise
     except Exception as e:
-        log.error(f"An unexpected error occurred while loading resilience config from {abs_config_path}: {e}")
+        log.error(
+            f"An unexpected error occurred while loading resilience config from {abs_config_path}: {e}"
+        )
         raise
 
 
-def load_provider_profiles(config_path: Optional[str] = None) -> ProviderProfiles:
+def load_provider_profiles(
+    config_path: Optional[str] = None,
+) -> ProviderProfiles:
     """
     Loads and validates the provider profiles configuration from a JSON file.
 
@@ -84,30 +98,44 @@ def load_provider_profiles(config_path: Optional[str] = None) -> ProviderProfile
         FileNotFoundError: If the config file does not exist.
         ValueError: If the JSON is malformed or fails schema validation.
     """
-    abs_config_path = _get_config_path('provider_profiles.json', config_path)
+    abs_config_path = _get_config_path("provider_profiles.json", config_path)
 
     if not os.path.exists(abs_config_path):
         log.error(f"Provider profiles file not found at: {abs_config_path}")
-        raise FileNotFoundError(f"Provider profiles file not found at: {abs_config_path}")
+        raise FileNotFoundError(
+            f"Provider profiles file not found at: {abs_config_path}"
+        )
 
     try:
-        with open(abs_config_path, 'r', encoding='utf-8') as file:
+        with open(abs_config_path, "r", encoding="utf-8") as file:
             data = json.load(file)
 
         validated_profiles = ProviderProfiles.model_validate(data)
-        log.info(f"Successfully loaded and validated provider profiles from {abs_config_path}")
+        log.info(
+            f"Successfully loaded and validated provider profiles from {abs_config_path}"
+        )
         return validated_profiles
 
     except json.JSONDecodeError as e:
-        log.error(f"Error parsing provider profiles JSON file {abs_config_path}: {e}")
-        raise ValueError(f"Invalid JSON in provider profiles file: {abs_config_path}") from e
+        log.error(
+            f"Error parsing provider profiles JSON file {abs_config_path}: {e}"
+        )
+        raise ValueError(
+            f"Invalid JSON in provider profiles file: {abs_config_path}"
+        ) from e
 
     except ValidationError as e:
-        log.error(f"Schema validation failed for provider profiles file {abs_config_path}. Errors: {e}")
-        raise ValueError("Provider profiles configuration is invalid. Please check the format.") from e
+        log.error(
+            f"Schema validation failed for provider profiles file {abs_config_path}. Errors: {e}"
+        )
+        raise ValueError(
+            "Provider profiles configuration is invalid. Please check the format."
+        ) from e
 
     except Exception as e:
-        log.error(f"An unexpected error occurred while loading provider profiles from {abs_config_path}: {e}")
+        log.error(
+            f"An unexpected error occurred while loading provider profiles from {abs_config_path}: {e}"
+        )
         raise
 
 

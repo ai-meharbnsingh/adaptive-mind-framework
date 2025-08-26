@@ -1,15 +1,15 @@
 # tests/telemetry/test_telemetry_subscriber.py
 
-import pytest
 import asyncio
 import logging
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
-from telemetry.event_bus import EventBus
-from telemetry.time_series_db_interface import TimeSeriesDBInterface
-from telemetry.telemetry_subscriber import TelemetrySubscriber
+import pytest
 from telemetry import event_topics
 from telemetry.core_logger import UniversalEventSchema
+from telemetry.event_bus import EventBus
+from telemetry.telemetry_subscriber import TelemetrySubscriber
+from telemetry.time_series_db_interface import TimeSeriesDBInterface
 
 
 @pytest.fixture
@@ -28,7 +28,9 @@ def mock_db_interface():
 @pytest.fixture(autouse=True)
 def mock_logger():
     # Patch the singleton instance directly where it's imported
-    with patch('telemetry.telemetry_subscriber.core_logger') as mock_logger_instance:
+    with patch(
+        "telemetry.telemetry_subscriber.core_logger"
+    ) as mock_logger_instance:
         yield mock_logger_instance
 
 
@@ -42,13 +44,17 @@ async def test_subscriber_initialization(mock_event_bus, mock_db_interface):
 
 
 @pytest.mark.asyncio
-async def test_subscribe_to_all_events(mock_event_bus, mock_db_interface, mock_logger):
+async def test_subscribe_to_all_events(
+    mock_event_bus, mock_db_interface, mock_logger
+):
     """Test that the subscriber correctly subscribes to all defined topics."""
     subscriber = TelemetrySubscriber(mock_event_bus, mock_db_interface)
     subscriber.subscribe_to_all_events()
 
     all_topic_values = {
-        v for v in vars(event_topics).values() if isinstance(v, str) and not v.startswith('__')
+        v
+        for v in vars(event_topics).values()
+        if isinstance(v, str) and not v.startswith("__")
     }
 
     assert set(subscriber.get_subscribed_topics()) == all_topic_values
@@ -71,12 +77,14 @@ async def test_persist_event_success(mock_event_bus, mock_db_interface):
 
     call_args, _ = mock_db_interface.write_event.call_args
     persisted_data = call_args[0]
-    assert persisted_data['event_name'] == event_name
-    assert persisted_data['key'] == "value"
+    assert persisted_data["event_name"] == event_name
+    assert persisted_data["key"] == "value"
 
 
 @pytest.mark.asyncio
-async def test_persist_event_db_failure_is_handled_gracefully(mock_event_bus, mock_db_interface, mock_logger):
+async def test_persist_event_db_failure_is_handled_gracefully(
+    mock_event_bus, mock_db_interface, mock_logger
+):
     """Test that a DB failure is handled gracefully without raising an exception."""
     subscriber = TelemetrySubscriber(mock_event_bus, mock_db_interface)
 
@@ -95,8 +103,8 @@ async def test_persist_event_db_failure_is_handled_gracefully(mock_event_bus, mo
 
     assert isinstance(logged_event, UniversalEventSchema)
     assert logged_event.severity == "ERROR"
-    assert "Failed to persist event" in logged_event.payload['message']
-    assert logged_event.payload['error_details'] == str(db_error)
+    assert "Failed to persist event" in logged_event.payload["message"]
+    assert logged_event.payload["error_details"] == str(db_error)
 
 
 @pytest.mark.asyncio
@@ -105,13 +113,15 @@ async def test_persist_event_db_failure_is_handled_gracefully(mock_event_bus, mo
     [
         (logging.DEBUG, True),
         (logging.INFO, False),
-    ]
+    ],
 )
 async def test_success_logging_is_configurable(
-        mock_event_bus, mock_db_interface, mock_logger, log_level, expect_log_call
+    mock_event_bus, mock_db_interface, mock_logger, log_level, expect_log_call
 ):
     """Test that debug-level success logging is controlled by the log_level parameter."""
-    subscriber = TelemetrySubscriber(mock_event_bus, mock_db_interface, log_level=log_level)
+    subscriber = TelemetrySubscriber(
+        mock_event_bus, mock_db_interface, log_level=log_level
+    )
 
     await subscriber.persist_event("test.event.success", {"key": "value"})
 

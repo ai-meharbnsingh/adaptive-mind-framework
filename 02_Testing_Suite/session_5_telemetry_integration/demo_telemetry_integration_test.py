@@ -7,7 +7,6 @@ Tests that the existing demo system can properly integrate with telemetry.
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add the project root to Python path
@@ -23,16 +22,19 @@ def test_demo_backend_telemetry_integration():
         # Import demo backend (correct path)
         sys.path.insert(0, str(project_root / "03_Demo_Interface"))
         from demo_backend import app
+
         print("✅ Demo backend import successful")
 
         # Test telemetry imports in demo context
-        from telemetry.core_logger import core_logger, UniversalEventSchema
-        from telemetry.event_bus import event_bus
         from telemetry import event_topics
+        from telemetry.core_logger import UniversalEventSchema, core_logger
+        from telemetry.event_bus import event_bus
+
         print("✅ Telemetry imports in demo context successful")
 
         # Test creating a demo telemetry event
         from datetime import datetime, timezone
+
         demo_event = UniversalEventSchema(
             event_type="DEMO_TELEMETRY_TEST",
             event_source="DemoIntegrationTest",
@@ -41,13 +43,15 @@ def test_demo_backend_telemetry_integration():
             payload={
                 "demo_integration": True,
                 "session": "Session 5 - Step 4",
-                "test_type": "demo_backend_integration"
-            }
+                "test_type": "demo_backend_integration",
+            },
         )
 
         # Test logging and publishing
         core_logger.log(demo_event)
-        event_bus.publish(event_topics.API_REQUEST_START, demo_event.model_dump())
+        event_bus.publish(
+            event_topics.API_REQUEST_START, demo_event.model_dump()
+        )
         print("✅ Demo telemetry event creation and publishing successful")
 
         return True
@@ -64,20 +68,21 @@ def test_framework_demo_complete_integration():
     try:
         # Test framework core with telemetry
         from antifragile_framework.core.failover_engine import FailoverEngine
-        from antifragile_framework.resilience.bias_ledger import BiasLedger
         from antifragile_framework.core.learning_engine import LearningEngine
+        from antifragile_framework.resilience.bias_ledger import BiasLedger
+
         print("✅ Framework core imports successful")
 
         # Test telemetry components
-        from telemetry.time_series_db_interface import TimeSeriesDBInterface
-        from telemetry.event_bus import event_bus
         from telemetry.core_logger import core_logger
+        from telemetry.event_bus import event_bus
+        from telemetry.time_series_db_interface import TimeSeriesDBInterface
+
         print("✅ Telemetry components accessible to framework")
 
         # Test creating a basic database interface (SQLite for testing)
         db_interface = TimeSeriesDBInterface(
-            db_url="sqlite:///:memory:",
-            table_name="demo_telemetry_test"
+            db_url="sqlite:///:memory:", table_name="demo_telemetry_test"
         )
         print("✅ Database interface creation successful")
 
@@ -86,9 +91,7 @@ def test_framework_demo_complete_integration():
         print("✅ LearningEngine with database interface successful")
 
         # Test bias ledger with telemetry (correct constructor)
-        bias_ledger = BiasLedger(
-            event_bus=event_bus
-        )
+        bias_ledger = BiasLedger(event_bus=event_bus)
         print("✅ BiasLedger with telemetry components successful")
 
         return True
@@ -96,6 +99,7 @@ def test_framework_demo_complete_integration():
     except Exception as e:
         print(f"❌ Complete integration test failed: {e}")
         import traceback
+
         print(f"Traceback: {traceback.format_exc()}")
         return False
 
@@ -106,8 +110,14 @@ def main():
     print("=" * 60)
 
     tests = [
-        ("Demo Backend + Telemetry Integration", test_demo_backend_telemetry_integration),
-        ("Complete Framework + Demo + Telemetry", test_framework_demo_complete_integration)
+        (
+            "Demo Backend + Telemetry Integration",
+            test_demo_backend_telemetry_integration,
+        ),
+        (
+            "Complete Framework + Demo + Telemetry",
+            test_framework_demo_complete_integration,
+        ),
     ]
 
     passed_tests = 0
@@ -124,7 +134,9 @@ def main():
             print(f"❌ {test_name} - FAILED")
 
     print("\n" + "=" * 60)
-    print(f"📊 DEMO INTEGRATION RESULTS: {passed_tests}/{total_tests} tests passed")
+    print(
+        f"📊 DEMO INTEGRATION RESULTS: {passed_tests}/{total_tests} tests passed"
+    )
 
     if passed_tests == total_tests:
         print("🎉 DEMO INTEGRATION WITH TELEMETRY - FULLY SUCCESSFUL!")

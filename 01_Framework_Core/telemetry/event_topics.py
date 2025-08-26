@@ -13,7 +13,7 @@ API_REQUEST_END = "api.request.end"
 API_CALL_ATTEMPT = "api.call.attempt"
 API_CALL_SUCCESS = "api.call.success"
 API_CALL_FAILURE = "api.call.failure"
-API_SERVICE_UNAVAILABLE = "api.service.unavailable" # All providers failed
+API_SERVICE_UNAVAILABLE = "api.service.unavailable"  # All providers failed
 
 # ==============================================================================
 # Resilience Mechanism Events
@@ -36,22 +36,31 @@ MODEL_SKIPPED_DUE_TO_COST = "model.skipped.cost_cap"
 LEARNING_FEEDBACK_PUBLISHED = "learning.feedback.published"
 BIAS_LOG_ENTRY_CREATED = "bias.log_entry.created"
 BIAS_DETECTED = "bias.detected"
-LEARNING_MODEL_UPDATE = "learning_model.update" # When an internal learning model is updated
+LEARNING_MODEL_UPDATE = (
+    "learning_model.update"  # When an internal learning model is updated
+)
 
 # ==============================================================================
 # Resource & System Health Events
 # ==============================================================================
 RESOURCE_PENALIZED = "resource.penalized"
 RESOURCE_HEALTH_RESTORED = "resource.health.restored"
-SYSTEM_HEALTH_SNAPSHOT = "system.health.snapshot" # Periodic snapshot of system health
-API_UNHANDLED_ERROR = "api.unhandled.error" # For unexpected exceptions at the API boundary
+SYSTEM_HEALTH_SNAPSHOT = (
+    "system.health.snapshot"  # Periodic snapshot of system health
+)
+API_UNHANDLED_ERROR = (
+    "api.unhandled.error"  # For unexpected exceptions at the API boundary
+)
 
 # ==============================================================================
 # Session 8 Demo Specific Events (for demo_backend metrics logging)
 # ==============================================================================
-DEMO_METRIC_RECORDED = "demo.metric.recorded" # Used by RealTimeMetricsCollector for demo executions
-DEMO_PROVIDER_STATUS_CHANGE = "demo.provider.status_change" # For the demo's ranking system
-DEMO_RANKING_UPDATED = "demo.ranking.updated" # For the demo's ranking system
+# Used by RealTimeMetricsCollector for demo executions
+DEMO_METRIC_RECORDED = "demo.metric.recorded"
+DEMO_PROVIDER_STATUS_CHANGE = (
+    "demo.provider.status_change"  # For the demo's ranking system
+)
+DEMO_RANKING_UPDATED = "demo.ranking.updated"  # For the demo's ranking system
 
 # ==============================================================================
 # Other General Event Topics

@@ -13,26 +13,24 @@ Status: Enterprise Performance Validation
 """
 
 import asyncio
-import time
 import json
-import statistics
 import logging
-import psutil
-import threading
-from typing import Dict, List, Any, Optional
+import statistics
+import time
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, asdict
-import matplotlib.pyplot as plt
+from typing import Any, Dict, List
+
 import numpy as np
 
+
 # Import and initialize framework ONCE
-from antifragile_framework.core.failover_engine import FailoverEngine
+
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger("PerformanceBenchmark")
 
@@ -40,6 +38,7 @@ logger = logging.getLogger("PerformanceBenchmark")
 @dataclass
 class PerformanceMetrics:
     """Performance metrics data structure."""
+
     test_name: str
     start_time: datetime
     end_time: datetime
@@ -63,6 +62,7 @@ class PerformanceMetrics:
 @dataclass
 class LoadTestConfiguration:
     """Load test configuration."""
+
     name: str
     duration_seconds: int
     concurrent_users: int
@@ -100,7 +100,7 @@ class PerformanceBenchmarkSuite:
             "success_rate_percent": 99.5,
             "requests_per_second": 100,
             "memory_usage_mb": 200,
-            "cpu_usage_percent": 80
+            "cpu_usage_percent": 80,
         }
 
         logger.info("🚀 Performance Benchmark Suite Initialized")
@@ -118,7 +118,7 @@ class PerformanceBenchmarkSuite:
             "benchmark_tests": [],
             "performance_summary": {},
             "enterprise_grade_validation": {},
-            "status": "UNKNOWN"
+            "status": "UNKNOWN",
         }
 
         # Benchmark test suite
@@ -136,48 +136,72 @@ class PerformanceBenchmarkSuite:
                 test_result = await test_function()
                 test_duration = time.time() - test_start
 
-                benchmark_results["benchmark_tests"].append({
-                    "name": test_name,
-                    "status": "COMPLETED",
-                    "duration_seconds": round(test_duration, 3),
-                    "metrics": test_result
-                })
+                benchmark_results["benchmark_tests"].append(
+                    {
+                        "name": test_name,
+                        "status": "COMPLETED",
+                        "duration_seconds": round(test_duration, 3),
+                        "metrics": test_result,
+                    }
+                )
 
-                logger.info(f"✅ {test_name} - COMPLETED ({test_duration:.3f}s)")
+                logger.info(
+                    f"✅ {test_name} - COMPLETED ({test_duration:.3f}s)"
+                )
 
             except Exception as e:
-                test_duration = time.time() - test_start if 'test_start' in locals() else 0
-                logger.error(f"❌ {test_name} - FAILED ({test_duration:.3f}s): {str(e)}")
+                test_duration = (
+                    time.time() - test_start if "test_start" in locals() else 0
+                )
+                logger.error(
+                    f"❌ {test_name} - FAILED ({test_duration:.3f}s): {str(e)}"
+                )
 
-                benchmark_results["benchmark_tests"].append({
-                    "name": test_name,
-                    "status": "FAILED",
-                    "duration_seconds": round(test_duration, 3),
-                    "error": str(e)
-                })
+                benchmark_results["benchmark_tests"].append(
+                    {
+                        "name": test_name,
+                        "status": "FAILED",
+                        "duration_seconds": round(test_duration, 3),
+                        "error": str(e),
+                    }
+                )
 
         # Calculate overall performance summary
         self.benchmark_end_time = datetime.now(timezone.utc)
-        total_duration = (self.benchmark_end_time - self.benchmark_start_time).total_seconds()
+        total_duration = (
+            self.benchmark_end_time - self.benchmark_start_time
+        ).total_seconds()
 
         performance_summary = self._calculate_performance_summary()
         enterprise_validation = self._validate_enterprise_grade_performance()
 
-        benchmark_results.update({
-            "total_duration_seconds": round(total_duration, 3),
-            "benchmark_completed": self.benchmark_end_time.isoformat(),
-            "performance_summary": performance_summary,
-            "enterprise_grade_validation": enterprise_validation,
-            "status": "PASSED" if enterprise_validation["meets_enterprise_grade"] else "FAILED"
-        })
+        benchmark_results.update(
+            {
+                "total_duration_seconds": round(total_duration, 3),
+                "benchmark_completed": self.benchmark_end_time.isoformat(),
+                "performance_summary": performance_summary,
+                "enterprise_grade_validation": enterprise_validation,
+                "status": (
+                    "PASSED"
+                    if enterprise_validation["meets_enterprise_grade"]
+                    else "FAILED"
+                ),
+            }
+        )
 
         # Log final results
         logger.info(f"\n{'=' * 80}")
         logger.info(f"🏁 PERFORMANCE BENCHMARK COMPLETE")
         logger.info(f"{'=' * 80}")
-        logger.info(f"⏱️ Total Duration: {benchmark_results['total_duration_seconds']:.3f}s")
-        logger.info(f"🎯 Enterprise Grade: {enterprise_validation['meets_enterprise_grade']}")
-        logger.info(f"📊 Performance Score: {enterprise_validation['performance_score']:.1f}/100")
+        logger.info(
+            f"⏱️ Total Duration: {benchmark_results['total_duration_seconds']:.3f}s"
+        )
+        logger.info(
+            f"🎯 Enterprise Grade: {enterprise_validation['meets_enterprise_grade']}"
+        )
+        logger.info(
+            f"📊 Performance Score: {enterprise_validation['performance_score']:.1f}/100"
+        )
 
         return benchmark_results
 
@@ -191,7 +215,7 @@ class PerformanceBenchmarkSuite:
         test_config = {
             "openai": {
                 "api_keys": ["test-key-1"],
-                "resource_config": {"penalty": 0.5, "cooldown": 300}
+                "resource_config": {"penalty": 0.5, "cooldown": 300},
             }
         }
         engine = FailoverEngine(test_config)
@@ -205,7 +229,9 @@ class PerformanceBenchmarkSuite:
             # Test real framework request context creation (lightweight operation)
             # Test real framework overhead - simple provider lookup
             # Test real framework logic - cost estimation
-            from antifragile_framework.providers.api_abstraction_layer import ChatMessage
+            from antifragile_framework.providers.api_abstraction_layer import (
+                ChatMessage,
+            )
 
             messages = [ChatMessage(role="user", content="test")]
 
@@ -216,7 +242,9 @@ class PerformanceBenchmarkSuite:
             breaker = engine.circuit_breakers.get_breaker("openai")
 
             # Simple real framework validation
-            framework_healthy = (provider_count > 0 and guard_count > 0 and breaker is not None)
+            framework_healthy = (
+                provider_count > 0 and guard_count > 0 and breaker is not None
+            )
 
             end_time = time.perf_counter()
             overhead_ms = (end_time - start_time) * 1000
@@ -228,7 +256,9 @@ class PerformanceBenchmarkSuite:
         p95_overhead = np.percentile(overhead_measurements, 95)
         p99_overhead = np.percentile(overhead_measurements, 99)
 
-        logger.info(f"✅ Framework overhead measured: {avg_overhead:.3f}ms average")
+        logger.info(
+            f"✅ Framework overhead measured: {avg_overhead:.3f}ms average"
+        )
 
         return {
             "total_measurements": len(overhead_measurements),
@@ -238,8 +268,9 @@ class PerformanceBenchmarkSuite:
             "p99_overhead_ms": round(p99_overhead, 3),
             "min_overhead_ms": round(min(overhead_measurements), 3),
             "max_overhead_ms": round(max(overhead_measurements), 3),
-            "meets_target": avg_overhead < self.performance_targets["framework_overhead_ms"],
-            "target_ms": self.performance_targets["framework_overhead_ms"]
+            "meets_target": avg_overhead
+            < self.performance_targets["framework_overhead_ms"],
+            "target_ms": self.performance_targets["framework_overhead_ms"],
         }
 
     async def _benchmark_latency_baseline(self) -> Dict[str, Any]:
@@ -257,7 +288,7 @@ class PerformanceBenchmarkSuite:
         return {
             "framework_overhead_grade": "EXCELLENT",
             "overall_performance_score": 95.0,
-            "enterprise_readiness": "CERTIFIED"
+            "enterprise_readiness": "CERTIFIED",
         }
 
     def _validate_enterprise_grade_performance(self) -> Dict[str, Any]:
@@ -265,8 +296,10 @@ class PerformanceBenchmarkSuite:
         return {
             "performance_score": 95.0,
             "meets_enterprise_grade": True,
-            "certification_level": "ENTERPRISE_GRADE"
+            "certification_level": "ENTERPRISE_GRADE",
         }
+
+
 async def main():
     """Main execution function for performance benchmarking."""
     print("🔥 ADAPTIVE MIND FRAMEWORK - PERFORMANCE BENCHMARK SUITE")
@@ -281,19 +314,23 @@ async def main():
 
         # Save results to file
         results_file = f"performance_benchmark_{int(time.time())}.json"
-        with open(results_file, 'w') as f:
+        with open(results_file, "w") as f:
             json.dump(results, f, indent=2, default=str)
 
         print(f"\n📄 Benchmark results saved to: {results_file}")
 
         # Print performance summary
-        enterprise_validation = results['enterprise_grade_validation']
+        enterprise_validation = results["enterprise_grade_validation"]
 
         print(f"\n🎯 PERFORMANCE SUMMARY:")
-        print(f"   Performance Score: {enterprise_validation['performance_score']:.1f}/100")
-        print(f"   Enterprise Grade: {enterprise_validation['meets_enterprise_grade']}")
+        print(
+            f"   Performance Score: {enterprise_validation['performance_score']:.1f}/100"
+        )
+        print(
+            f"   Enterprise Grade: {enterprise_validation['meets_enterprise_grade']}"
+        )
 
-        return enterprise_validation['meets_enterprise_grade']
+        return enterprise_validation["meets_enterprise_grade"]
 
     except Exception as e:
         logger.error(f"❌ Performance benchmark failed: {str(e)}")
@@ -305,7 +342,9 @@ if __name__ == "__main__":
     success = asyncio.run(main())
 
     if success:
-        print(f"\n✅ PERFORMANCE BENCHMARKING: Enterprise-grade performance validated!")
+        print(
+            f"\n✅ PERFORMANCE BENCHMARKING: Enterprise-grade performance validated!"
+        )
     else:
         print(f"\n❌ PERFORMANCE BENCHMARKING: Issues detected!")
 

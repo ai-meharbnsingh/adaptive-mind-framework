@@ -47,6 +47,7 @@ class TelemetrySubscriber:
 
         init_event = UniversalEventSchema(
             event_type="TELEMETRY_SUBSCRIBER_INIT",
+            event_topic="telemetry.system",  # ADDED: Missing required field
             event_source=self.__class__.__name__,
             timestamp_utc=datetime.now(timezone.utc).isoformat(),
             severity="INFO",
@@ -68,6 +69,7 @@ class TelemetrySubscriber:
             if self.log_level <= logging.DEBUG:
                 success_event = UniversalEventSchema(
                     event_type="EVENT_PERSISTENCE_SUCCESS",
+                    event_topic="telemetry.persistence",  # ADDED: Missing required field
                     event_source=self.__class__.__name__,
                     timestamp_utc=datetime.now(timezone.utc).isoformat(),
                     severity="DEBUG",
@@ -80,6 +82,7 @@ class TelemetrySubscriber:
         except Exception as e:
             failure_event = UniversalEventSchema(
                 event_type="EVENT_PERSISTENCE_FAILURE",
+                event_topic="telemetry.persistence",  # ADDED: Missing required field
                 event_source=self.__class__.__name__,
                 timestamp_utc=datetime.now(timezone.utc).isoformat(),
                 severity="ERROR",

@@ -172,6 +172,51 @@ class CoreLogger:
             "CRITICAL",
         )
 
+    # Add this method to your CoreLogger class in 01_Framework_Core/telemetry/core_logger.py
+
+    def log(self, event_schema: "UniversalEventSchema") -> str:
+        """
+        Log a UniversalEventSchema directly.
+        This method is called by BiasLedger and other components.
+
+        Args:
+            event_schema: UniversalEventSchema instance to log
+
+        Returns:
+            event_id: Unique ID of the logged event
+        """
+        try:
+            # Extract event details from the schema
+            if hasattr(event_schema, 'model_dump'):
+                # If it's a Pydantic model, convert to dict
+                event_dict = event_schema.model_dump()
+            elif isinstance(event_schema, dict):
+                # If it's already a dict, use it directly
+                event_dict = event_schema
+            else:
+                # If it's an object with attributes, extract them
+                event_dict = {
+                    'event_type': getattr(event_schema, 'event_type', 'unknown.event'),
+                    'event_topic': getattr(event_schema, 'event_topic', 'unknown.topic'),
+                    'event_source': getattr(event_schema, 'event_source', 'unknown.source'),
+                    'severity': getattr(event_schema, 'severity', 'INFO'),
+                    'payload': getattr(event_schema, 'payload', {}),
+                    'parent_event_id': getattr(event_schema, 'parent_event_id', None),
+                }
+
+            # Use the existing log_event method
+            return self.log_event(
+                event_type=event_dict.get('event_type', 'unknown.event'),
+                event_topic=event_dict.get('event_topic', 'unknown.topic'),
+                payload=event_dict.get('payload', {}),
+                severity=event_dict.get('severity', 'INFO'),
+                parent_event_id=event_dict.get('parent_event_id')
+            )
+
+        except Exception as e:
+            self.logger.error(f"Failed to log UniversalEventSchema: {e}")
+            return str(uuid.uuid4())
+
 
 # Global logger instance
 core_logger = CoreLogger("CoreFramework")

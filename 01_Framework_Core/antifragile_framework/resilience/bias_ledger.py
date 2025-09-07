@@ -4,18 +4,69 @@
 import hashlib
 import json
 import logging
+import uuid
 from datetime import datetime, timezone
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, Dict, List, Optional
+import sys
+from pathlib import Path
 
-from antifragile_framework.config.schemas import CostProfile, ProviderProfiles
+# FIXED: Add proper path setup for telemetry imports
+CURRENT_DIR = Path(__file__).parent
+PROJECT_ROOT = CURRENT_DIR.parent.parent.parent.parent  # Go up to project root
+TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
+
+sys.path.insert(0, str(TELEMETRY_PATH))
+
+# Now import telemetry modules with the correct path
+try:
+    from telemetry import event_topics
+    from telemetry.core_logger import UniversalEventSchema, core_logger
+    from telemetry.event_bus import EventBus
+except ImportError as e:
+    # Fallback for testing environments
+    import warnings
+
+    warnings.warn(f"Could not import telemetry modules: {e}")
+
+
+    class MockEventTopics:
+        BIAS_LOG_ENTRY_CREATED = "bias.log_entry.created"
+
+
+    event_topics = MockEventTopics()
+
+
+    class MockLogger:
+        def log_event(self, *args, **kwargs):
+            pass
+
+        def log(self, *args, **kwargs):
+            pass
+
+
+    core_logger = MockLogger()
+
+
+    class MockEventBus:
+        def publish(self, *args, **kwargs):
+            pass
+
+
+    EventBus = MockEventBus
+
+
+    class MockEventSchema:
+        def __init__(self, *args, **kwargs):
+            pass
+
+
+    UniversalEventSchema = MockEventSchema
+from pydantic import BaseModel, Field
+# Continue with your other imports (config, provider schemas, etc.)
+from antifragile_framework.config.schemas import ProviderProfiles
 from antifragile_framework.core.schemas import RequestContext
 from antifragile_framework.providers.api_abstraction_layer import CompletionResponse
-
-from pydantic import BaseModel, Field
-from telemetry import event_topics
-from telemetry.core_logger import UniversalEventSchema, core_logger
-from telemetry.event_bus import EventBus
 
 log = logging.getLogger(__name__)
 
@@ -296,6 +347,7 @@ class BiasLedger:
                 )  # Use model_dump_json for Decimal serialization
                 event_schema = UniversalEventSchema(
                     event_type=event_topics.BIAS_LOG_ENTRY_CREATED,
+                    event_topic="bias.ledger",
                     event_source=self.__class__.__name__,
                     timestamp_utc=entry.timestamp_utc,
                     severity="INFO",
@@ -321,6 +373,7 @@ class BiasLedger:
             self.logger.log(
                 UniversalEventSchema(
                     event_type="BIAS_LEDGER_FAILURE",
+                    event_topic="bias.ledger",
                     event_source=self.__class__.__name__,
                     timestamp_utc=datetime.now(timezone.utc).isoformat(),
                     severity="CRITICAL",

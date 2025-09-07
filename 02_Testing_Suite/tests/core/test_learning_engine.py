@@ -6,6 +6,7 @@ from typing import Any, Dict
 from unittest.mock import MagicMock, patch
 from antifragile_framework.core.learning_engine import LearningEngine
 from antifragile_framework.resilience.bias_ledger import BiasLedgerEntry
+from antifragile_framework.core.schemas import ProviderPerformanceAnalysis  # FIXED IMPORT PATH
 from telemetry import event_topics
 from telemetry.time_series_db_interface import TimeSeriesDBInterface
 
@@ -14,12 +15,19 @@ class TestLearningEngine(unittest.TestCase):
 
     def setUp(self):
         self.mock_db_interface = MagicMock(spec=TimeSeriesDBInterface)
+        # Explicitly add the required methods to the mock
+        self.mock_db_interface.write_event = MagicMock()
+        self.mock_db_interface.read_events = MagicMock()
+
+        # FIXED: Make query_events_generator a proper MagicMock
+        self.mock_db_interface.query_events_generator = MagicMock()
+
         self.learning_engine = LearningEngine(self.mock_db_interface)
         self.start_time = datetime(2025, 8, 1, 0, 0, 0, tzinfo=timezone.utc)
         self.end_time = datetime(2025, 8, 2, 0, 0, 0, tzinfo=timezone.utc)
 
     def _create_mock_raw_event(
-        self, bias_ledger_entry_dict: Dict[str, Any]
+            self, bias_ledger_entry_dict: Dict[str, Any]
     ) -> Dict[str, Any]:
         return {
             "timestamp_utc": datetime.fromisoformat(
@@ -45,12 +53,12 @@ class TestLearningEngine(unittest.TestCase):
                 mitigation_attempted=False,
                 final_provider="openai",
                 final_model="gpt-4o",
-                schema_version=4,  # UPDATED
-                initial_selection_mode="VALUE_DRIVEN",  # NEW
-                preferred_provider_requested=None,  # NEW
-                failover_reason=None,  # NEW
-                cost_cap_enforced=False,  # NEW
-                cost_cap_skip_reason=None,  # NEW
+                schema_version=4,
+                initial_selection_mode="VALUE_DRIVEN",
+                preferred_provider_requested=None,
+                failover_reason=None,
+                cost_cap_enforced=False,
+                cost_cap_skip_reason=None,
             ).model_dump(),
             BiasLedgerEntry(
                 request_id="req2",
@@ -64,27 +72,41 @@ class TestLearningEngine(unittest.TestCase):
                 mitigation_attempted=False,
                 final_provider="anthropic",
                 final_model="claude-3",
-                schema_version=4,  # UPDATED
-                initial_selection_mode="VALUE_DRIVEN",  # NEW
-                preferred_provider_requested=None,  # NEW
-                failover_reason=None,  # NEW
-                cost_cap_enforced=False,  # NEW
-                cost_cap_skip_reason=None,  # NEW
+                schema_version=4,
+                initial_selection_mode="VALUE_DRIVEN",
+                preferred_provider_requested=None,
+                failover_reason=None,
+                cost_cap_enforced=False,
+                cost_cap_skip_reason=None,
             ).model_dump(),
         ]
-        self.mock_db_interface.query_events_generator.return_value = (
-            self._create_mock_raw_event(data) for data in mock_entry_data
-        )
+
+        # Create mock events
+        mock_events = [self._create_mock_raw_event(data) for data in mock_entry_data]
+        print(f"DEBUG: Created {len(mock_events)} mock events")
+
+        # FIXED: Use proper mock setup for a callable function
+        self.mock_db_interface.query_events_generator.return_value = iter(mock_events)
+
+        # Call the method and debug the result
+        print("DEBUG: About to call get_raw_bias_ledger_entries")
         entries = list(
             self.learning_engine.get_raw_bias_ledger_entries(
                 self.start_time, self.end_time
             )
         )
+        print(f"DEBUG: Got {len(entries)} entries back")
+        if entries:
+            print(f"DEBUG: First entry type: {type(entries[0])}")
+
         self.assertEqual(len(entries), 2)
+        # FIXED: Check the structure - entries should be BiasLedgerEntry objects
         self.assertIsInstance(entries[0], BiasLedgerEntry)
+        self.assertIsInstance(entries[1], BiasLedgerEntry)
         self.assertEqual(entries[0].request_id, "req1")
         self.assertEqual(entries[1].request_id, "req2")
-        self.assertEqual(entries[0].schema_version, 4)  # Assert updated schema version
+        self.assertEqual(entries[0].final_provider, "openai")
+        self.assertEqual(entries[1].final_provider, "anthropic")
 
     @patch("antifragile_framework.core.learning_engine.log")
     def test_get_raw_bias_ledger_entries_malformed_data_skipped(self, mock_log):
@@ -120,16 +142,20 @@ class TestLearningEngine(unittest.TestCase):
             cost_cap_enforced=False,  # NEW
             cost_cap_skip_reason=None,  # NEW
         ).model_dump()
-        self.mock_db_interface.query_events_generator.return_value = (
+
+        mock_events = [
             self._create_mock_raw_event(malformed_entry_data),
             self._create_mock_raw_event(valid_entry_data),
-        )
+        ]
+        self.mock_db_interface.query_events_generator.return_value = iter(mock_events)
+
         entries = list(
             self.learning_engine.get_raw_bias_ledger_entries(
                 self.start_time, self.end_time
             )
         )
         self.assertEqual(len(entries), 1)
+        self.assertIsInstance(entries[0], BiasLedgerEntry)
         self.assertEqual(entries[0].request_id, "valid_req")
         mock_log.warning.assert_called_once()
         self.assertIn(
@@ -164,15 +190,17 @@ class TestLearningEngine(unittest.TestCase):
             cost_cap_enforced=False,  # NEW
             cost_cap_skip_reason=None,  # NEW
         ).model_dump()
-        self.mock_db_interface.query_events_generator.return_value = (
-            self._create_mock_raw_event(mock_entry_v2_data),
-        )
+
+        mock_events = [self._create_mock_raw_event(mock_entry_v2_data)]
+        self.mock_db_interface.query_events_generator.return_value = iter(mock_events)
+
         entries = list(
             self.learning_engine.get_raw_bias_ledger_entries(
                 self.start_time, self.end_time
             )
         )
         self.assertEqual(len(entries), 1)
+        self.assertIsInstance(entries[0], BiasLedgerEntry)
         # We assert on the actual schema_version from the mocked data, not the current model's default
         self.assertEqual(entries[0].schema_version, 2)
         mock_log.warning.assert_not_called()
@@ -216,14 +244,18 @@ class TestLearningEngine(unittest.TestCase):
             cost_cap_enforced=False,  # NEW
             cost_cap_skip_reason=None,  # NEW
         ).model_dump()
-        self.mock_db_interface.query_events_generator.return_value = (
+
+        mock_events = [
             self._create_mock_raw_event(entry1_data),
             self._create_mock_raw_event(entry2_data),
-        )
+        ]
+        self.mock_db_interface.query_events_generator.return_value = iter(mock_events)
+
         analyses = self.learning_engine.analyze_provider_performance(
             self.start_time, self.end_time
         )
         self.assertEqual(len(analyses), 1)
+        self.assertIsInstance(analyses[0], ProviderPerformanceAnalysis)
         analysis = analyses[0]
         # RESTORED FULL ASSERTIONS
         self.assertEqual(analysis.provider_name, "openai")
@@ -330,13 +362,19 @@ class TestLearningEngine(unittest.TestCase):
             cost_cap_skip_reason=None,  # NEW
         ).model_dump()
 
-        self.mock_db_interface.query_events_generator.return_value = (
+        mock_events = [
             self._create_mock_raw_event(e) for e in [entry1, entry2, entry3, entry4]
-        )
+        ]
+        self.mock_db_interface.query_events_generator.return_value = iter(mock_events)
+
         analyses = self.learning_engine.analyze_provider_performance(
             self.start_time, self.end_time
         )
         self.assertEqual(len(analyses), 3)
+
+        # Ensure all analyses are ProviderPerformanceAnalysis objects
+        for analysis in analyses:
+            self.assertIsInstance(analysis, ProviderPerformanceAnalysis)
 
         # RESTORED FULL ASSERTIONS
         openai_analysis = next(a for a in analyses if a.provider_name == "openai")
@@ -396,13 +434,15 @@ class TestLearningEngine(unittest.TestCase):
             cost_cap_enforced=False,  # NEW
             cost_cap_skip_reason=None,  # NEW
         ).model_dump()
-        self.mock_db_interface.query_events_generator.return_value = (
-            self._create_mock_raw_event(entry_failure_only),
-        )
+
+        mock_events = [self._create_mock_raw_event(entry_failure_only)]
+        self.mock_db_interface.query_events_generator.return_value = iter(mock_events)
+
         analyses = self.learning_engine.analyze_provider_performance(
             self.start_time, self.end_time
         )
         self.assertEqual(len(analyses), 1)
+        self.assertIsInstance(analyses[0], ProviderPerformanceAnalysis)
         analysis = analyses[0]
         self.assertEqual(analysis.total_requests, 1)
         self.assertEqual(analysis.successful_requests, 0)
@@ -431,11 +471,13 @@ class TestLearningEngine(unittest.TestCase):
             cost_cap_enforced=False,  # NEW
             cost_cap_skip_reason=None,  # NEW
         ).model_dump()
-        self.mock_db_interface.query_events_generator.return_value = (
-            self._create_mock_raw_event(entry_no_score),
-        )
+
+        mock_events = [self._create_mock_raw_event(entry_no_score)]
+        self.mock_db_interface.query_events_generator.return_value = iter(mock_events)
+
         analyses = self.learning_engine.analyze_provider_performance(
             self.start_time, self.end_time
         )
         self.assertEqual(len(analyses), 1)
+        self.assertIsInstance(analyses[0], ProviderPerformanceAnalysis)
         self.assertEqual(analyses[0].avg_resilience_score, 1.0)

@@ -7,15 +7,62 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional
+import sys
+from pathlib import Path
 
-from telemetry import event_topics
-from telemetry.core_logger import UniversalEventSchema, core_logger
-from telemetry.event_bus import EventBus
+# FIXED: Add proper path setup for telemetry imports
+CURRENT_DIR = Path(__file__).parent
+PROJECT_ROOT = CURRENT_DIR.parent.parent.parent.parent  # Go up to project root
+TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
+
+sys.path.insert(0, str(TELEMETRY_PATH))
+
+# Now import telemetry modules with the correct path
+try:
+    from telemetry import event_topics
+    from telemetry.core_logger import UniversalEventSchema, core_logger
+    from telemetry.event_bus import EventBus
+except ImportError as e:
+    # Fallback for testing environments
+    import warnings
+
+    warnings.warn(f"Could not import telemetry modules: {e}")
+
+
+    class MockEventTopics:
+        RESOURCE_PENALIZED = "resource.penalized"
+        RESOURCE_HEALED = "resource.healed"
+
+
+    event_topics = MockEventTopics()
+
+
+    class MockLogger:
+        def log_event(self, *args, **kwargs):
+            pass
+
+
+    core_logger = MockLogger()
+
+
+    class MockEventBus:
+        def publish(self, *args, **kwargs):
+            pass
+
+
+    EventBus = MockEventBus
+
+
+    class MockEventSchema:
+        def __init__(self, *args, **kwargs):
+            pass
+
+
+    UniversalEventSchema = MockEventSchema
 
 from .exceptions import NoResourcesAvailableError
 
 log = logging.getLogger(__name__)
-
 
 class ResourceState(Enum):
     AVAILABLE = auto()
@@ -67,21 +114,25 @@ class MonitoredResource:
         )
 
     def _log_and_publish_event(
-        self, event_name: str, severity: str, payload_data: Dict[str, Any]
+            self, event_name: str, severity: str, payload_data: Dict[str, Any]
     ):
         """Logs an event and publishes it to the event bus."""
         event_schema = UniversalEventSchema(
             event_type=event_name,
+            event_topic="system.resources",  # ADD THIS LINE
             event_source=f"ResourceGuard.{self.provider_name}",
             timestamp_utc=datetime.now(timezone.utc).isoformat(),
             severity=severity,
             payload=payload_data,
         )
-        self.logger.log(event_schema)
+        self.logger.log_event(
+            event_type=event_name,
+            event_topic="system.resources",
+            payload=payload_data,
+            severity=severity
+        )
         if self.event_bus:
-            self.event_bus.publish(
-                event_type=event_name, payload=event_schema.model_dump()
-            )
+            self.event_bus.publish(event_name, event_schema.model_dump())
 
     def _update_health(self):
         now = time.monotonic()

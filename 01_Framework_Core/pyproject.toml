@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antifragile-framework"
+version = "0.2.0" # Use your project's current version
+description = "An antifragile framework for managing multiple AI providers with built-in telemetry."
+readme = "README.md" # If you have a README in 01_Framework_Core, otherwise remove or adjust
+requires-python = ">=3.10" # Adjust if your project supports older Python versions
+dependencies = [
+    # List any direct dependencies of the 'antifragile_framework' package itself here
+    # (e.g., if core framework files directly import a specific library)
+    # However, for now, we assume most are in the main requirements.txt
+]
+
+[project.urls]
+"Homepage" = "https://github.com/ai-meharbnsingh/adaptive-mind-framework" # Use your actual GitHub URL
+
+[tool.setuptools.packages.find]
+where = ["."] # Search for packages in the current directory (01_Framework_Core)
+include = ["antifragile_framework*"] # Only include your main package

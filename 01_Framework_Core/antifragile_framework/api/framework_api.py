@@ -122,27 +122,21 @@ async def lifespan(app: FastAPI):
     """
     Manages the application's lifespan, initializing all core components.
     """
-    core_logger.log(
-        UniversalEventSchema(
-            event_type="api.startup.begin",
-            event_source="framework_api.lifespan",
-            timestamp_utc=datetime.now(timezone.utc).isoformat(),
-            severity="INFO",
-            payload={"message": "Initializing Adaptive Mind components..."},
-        )
+    core_logger.log_event(
+        event_type="api.startup.begin",
+        event_topic="api.lifecycle",
+        payload={"message": "Initializing Adaptive Mind components..."},
+        severity="INFO"
     )
 
     is_perf_mode = os.getenv("PERFORMANCE_TEST_MODE", "False").lower() == "true"
     if is_perf_mode:
         print("[OK] Lifespan: PERFORMANCE_TEST_MODE is 'True'. Init mocks.")
-        core_logger.log(
-            UniversalEventSchema(
-                event_type="api.startup.mode",
-                event_source="framework_api.lifespan",
-                timestamp_utc=datetime.now(timezone.utc).isoformat(),
-                severity="WARNING",
-                payload={"message": "PERFORMANCE_TEST_MODE is active."},
-            )
+        core_logger.log_event(
+            event_type="api.startup.mode",
+            event_topic="api.lifecycle",
+            payload={"message": "PERFORMANCE_TEST_MODE is active."},
+            severity="WARNING"
         )
     else:
         print("[INFO] Lifespan: PERFORMANCE_TEST_MODE not set. Init production.")
@@ -150,14 +144,11 @@ async def lifespan(app: FastAPI):
     try:
         provider_profiles = load_provider_profiles()
     except (FileNotFoundError, ValueError) as e:
-        core_logger.log(
-            UniversalEventSchema(
-                event_type="api.startup.failure",
-                event_source="framework_api.lifespan",
-                timestamp_utc=datetime.now(timezone.utc).isoformat(),
-                severity="CRITICAL",
-                payload={"error": f"Failed to load provider profiles: {e}"},
-            )
+        core_logger.log_event(
+            event_type="api.startup.failure",
+            event_topic="api.errors",
+            payload={"error": f"Failed to load provider profiles: {e}"},
+            severity="CRITICAL"
         )
         sys.exit(f"CRITICAL ERROR: Invalid provider profiles. Error: {e}")
 
@@ -175,14 +166,11 @@ async def lifespan(app: FastAPI):
         event_topics.LEARNING_FEEDBACK_PUBLISHED,
         learning_subscriber.handle_event,
     )
-    core_logger.log(
-        UniversalEventSchema(
-            event_type="api.startup.wiring",
-            event_source="framework_api.lifespan",
-            timestamp_utc=datetime.now(timezone.utc).isoformat(),
-            severity="INFO",
-            payload={"message": "Online learning subscriber connected to event bus."},
-        )
+    core_logger.log_event(
+        event_type="api.startup.wiring",
+        event_topic="system.setup",
+        payload={"message": "Online learning subscriber connected to event bus."},
+        severity="INFO"
     )
 
     # ==============================================================================
@@ -200,24 +188,18 @@ async def lifespan(app: FastAPI):
     app.state.failover_engine = failover_engine
     app.state.ranking_engine = ranking_engine
 
-    core_logger.log(
-        UniversalEventSchema(
-            event_type="api.startup.end",
-            event_source="framework_api.lifespan",
-            timestamp_utc=datetime.now(timezone.utc).isoformat(),
-            severity="INFO",
-            payload={"message": "Adaptive Mind API initialization complete."},
-        )
+    core_logger.log_event(
+        event_type="api.startup.end",
+        event_topic="api.lifecycle",
+        payload={"message": "Adaptive Mind API initialization complete."},
+        severity="INFO"
     )
     yield
-    core_logger.log(
-        UniversalEventSchema(
-            event_type="api.shutdown",
-            event_source="framework_api.lifespan",
-            timestamp_utc=datetime.now(timezone.utc).isoformat(),
-            severity="INFO",
-            payload={"message": "Adaptive Mind API shutting down."},
-        )
+    core_logger.log_event(
+        event_type="api.shutdown",
+        event_topic="api.lifecycle",
+        payload={"message": "Adaptive Mind API shutting down."},
+        severity="INFO"
     )
     event_bus.shutdown()
 
@@ -235,18 +217,15 @@ async def all_providers_failed_exception_handler(
     request: Request, exc: AllProvidersFailedError
 ):
     request_id = getattr(request.state, "request_id", "N/A")
-    core_logger.log(
-        UniversalEventSchema(
-            event_type=event_topics.API_SERVICE_UNAVAILABLE,
-            event_source="framework_api.exception_handler",
-            timestamp_utc=datetime.now(timezone.utc).isoformat(),
-            severity="ERROR",
-            payload={
-                "request_id": request_id,
-                "error": str(exc),
-                "client_host": (request.client.host if request.client else "N/A"),
-            },
-        )
+    core_logger.log_event(
+        event_type=event_topics.API_SERVICE_UNAVAILABLE,
+        event_topic="api.errors",
+        payload={
+            "request_id": request_id,
+            "error": str(exc),
+            "client_host": (request.client.host if request.client else "N/A"),
+        },
+        severity="ERROR"
     )
     return JSONResponse(
         status_code=503,
@@ -258,19 +237,16 @@ async def all_providers_failed_exception_handler(
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
     request_id = getattr(request.state, "request_id", "N/A")
-    core_logger.log(
-        UniversalEventSchema(
-            event_type=event_topics.API_UNHANDLED_ERROR,
-            event_source="framework_api.exception_handler",
-            timestamp_utc=datetime.now(timezone.utc).isoformat(),
-            severity="CRITICAL",
-            payload={
-                "request_id": request_id,
-                "error_type": type(exc).__name__,
-                "error_details": str(exc),
-                "client_host": (request.client.host if request.client else "N/A"),
-            },
-        )
+    core_logger.log_event(
+        event_type=event_topics.API_UNHANDLED_ERROR,
+        event_topic="api.errors",
+        payload={
+            "request_id": request_id,
+            "error_type": type(exc).__name__,
+            "error_details": str(exc),
+            "client_host": (request.client.host if request.client else "N/A"),
+        },
+        severity="CRITICAL"
     )
     return JSONResponse(
         status_code=500,
@@ -283,34 +259,28 @@ async def logging_and_request_id_middleware(request: Request, call_next):
     request_id = str(uuid.uuid4())
     request.state.request_id = request_id
     start_time = time.time()
-    core_logger.log(
-        UniversalEventSchema(
-            event_type=event_topics.API_REQUEST_START,
-            event_source="framework_api.middleware",
-            timestamp_utc=datetime.now(timezone.utc).isoformat(),
-            severity="INFO",
-            payload={
-                "request_id": request_id,
-                "client_host": (request.client.host if request.client else "N/A"),
-                "method": request.method,
-                "path": request.url.path,
-            },
-        )
+    core_logger.log_event(
+        event_type=event_topics.API_REQUEST_START,
+        event_topic="api.requests",
+        payload={
+            "request_id": request_id,
+            "client_host": (request.client.host if request.client else "N/A"),
+            "method": request.method,
+            "path": request.url.path,
+        },
+        severity="INFO"
     )
     response = await call_next(request)
     process_time = (time.time() - start_time) * 1000
-    core_logger.log(
-        UniversalEventSchema(
-            event_type=event_topics.API_REQUEST_END,
-            event_source="framework_api.middleware",
-            timestamp_utc=datetime.now(timezone.utc).isoformat(),
-            severity="INFO",
-            payload={
-                "request_id": request_id,
-                "status_code": response.status_code,
-                "process_time_ms": round(process_time, 2),
-            },
-        )
+    core_logger.log_event(
+        event_type=event_topics.API_REQUEST_END,
+        event_topic="api.requests",
+        payload={
+            "request_id": request_id,
+            "status_code": response.status_code,
+            "process_time_ms": round(process_time, 2),
+        },
+        severity="INFO"
     )
     response.headers["X-Request-ID"] = request_id
     return response

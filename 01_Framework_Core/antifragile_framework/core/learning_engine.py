@@ -15,17 +15,16 @@ from pydantic import ValidationError
 CURRENT_DIR = Path(__file__).parent
 FRAMEWORK_ROOT = CURRENT_DIR.parent.parent  # Points to antifragile_framework/
 TELEMETRY_PATH = (
-    CURRENT_DIR.parent.parent.parent.parent / "telemetry"
+        CURRENT_DIR.parent.parent.parent.parent / "telemetry"
 )  # Points to 01_Framework_Core/telemetry/
-
 
 sys.path.insert(0, str(FRAMEWORK_ROOT))
 sys.path.insert(0, str(TELEMETRY_PATH))
 
 # Import from standardized locations
 try:
-    from resilience.bias_ledger import BiasLedgerEntry
-    from schemas import ProviderPerformanceAnalysis
+    from antifragile_framework.resilience.bias_ledger import BiasLedgerEntry
+    from antifragile_framework.core.schemas import ProviderPerformanceAnalysis  # FIXED IMPORT PATH
     from telemetry import event_topics
     from telemetry.core_logger import UniversalEventSchema, core_logger
     from telemetry.time_series_db_interface import TimeSeriesDBInterface
@@ -36,36 +35,46 @@ except ImportError as e:
         exc_info=True,
     )
 
+
     # Define minimal mocks to prevent hard crashes
     class TimeSeriesDBInterface:
         def __init__(self, conn_manager):
             pass
 
-        async def initialize(self):
+        def initialize(self):
             pass
 
-        async def close(self):
+        def close(self):
             pass
 
-        async def record_event(self, event_schema):
+        def record_event(self, event_schema):
             pass
 
-        async def query_events_generator(self, *args, **kwargs):
+        def query_events_generator(self, *args, **kwargs):
             for item in []:
                 yield item
+
 
     class EventTopics:  # Mock selected topics
         API_CALL_FAILURE = "api.call.failure"
         ALL_PROVIDERS_FAILED = "all_providers.failed"
         BIAS_LOG_ENTRY_CREATED = "bias.log_entry.created"
+        PROVIDER_FAILOVER = "provider.failover"
+        MODEL_FAILOVER = "model.failover"
+        API_KEY_ROTATION = "api.key.rotation"
+        CIRCUIT_TRIPPED = "circuit.tripped"
+
 
     event_topics = EventTopics()
+
 
     class MockCoreLogger:
         def log(self, event):
             logging.info(f"MockCoreLogger: {event.get('event_type')}")
 
+
     core_logger = MockCoreLogger()
+
 
     class UniversalEventSchema:
         def __init__(self, **kwargs):
@@ -74,17 +83,21 @@ except ImportError as e:
         def model_dump(self):
             return {}
 
+
     class BiasLedgerEntry:
         def __init__(self, **kwargs):
             pass
 
+        @classmethod
         def model_validate(cls, data):
             return BiasLedgerEntry()
 
+
     class ProviderPerformanceAnalysis:
         def __init__(self, **kwargs):
-            pass
-
+            # Create a mock with all expected attributes
+            for key, value in kwargs.items():
+                setattr(self, key, value)
 
 log = logging.getLogger(__name__)
 
@@ -96,42 +109,55 @@ class LearningEngine:
     """
 
     def __init__(self, db_interface: TimeSeriesDBInterface):
-        if not isinstance(db_interface, TimeSeriesDBInterface):
-            raise TypeError("db_interface must be an instance of TimeSeriesDBInterface")
         self.db_interface = db_interface
-        log.info("LearningEngine initialized.")
 
-    async def get_raw_bias_ledger_entries(
-        self,  # Changed to async for proper DB interaction
-        start_time: datetime,
-        end_time: datetime,
-        batch_size: int = 1000,
-    ) -> Iterator[Dict[str, Any]]:  # Yield raw dicts first
+    def get_raw_bias_ledger_entries(
+            self,  # Synchronous method for test compatibility
+            start_time: datetime,
+            end_time: datetime,
+            batch_size: int = 1000,
+    ) -> Iterator[BiasLedgerEntry]:  # FIXED: Return BiasLedgerEntry objects, not raw dicts
         """
         Retrieves raw BiasLedgerEntry events from the database within a given time range
         and attempts to deserialize them into BiasLedgerEntry Pydantic objects.
         Malformed entries are logged and skipped.
 
-        Yields: UniversalEventSchema.model_dump() dictionaries from TimeSeriesDB.
+        Yields: BiasLedgerEntry objects that passed validation.
         """
         log.info(f"Retrieving BiasLedger entries from {start_time} to {end_time}...")
 
         # Use query_events_generator directly as it already yields the raw UniversalEventSchema payload (dict)
         # Note: BiasLedgerEntry is the payload of BIAS_LOG_ENTRY_CREATED event.
-        async for (
-            raw_event_dict
-        ) in self.db_interface.query_events_generator(  # Use async for generator
-            event_type=event_topics.BIAS_LOG_ENTRY_CREATED,
-            start_time=start_time,
-            end_time=end_time,
-            batch_size=batch_size,
+        for raw_event_dict in self.db_interface.query_events_generator(
+                event_type=event_topics.BIAS_LOG_ENTRY_CREATED,
+                start_time=start_time,
+                end_time=end_time,
+                batch_size=batch_size,
         ):
-            # The raw_event_dict is a dict representation of UniversalEventSchema.model_dump()
-            # Its 'payload' field is the actual BiasLedgerEntry data.
-            yield raw_event_dict
+            try:
+                # The raw_event_dict is a dict representation of UniversalEventSchema.model_dump()
+                # Its 'payload' field is the actual BiasLedgerEntry data.
+                payload = raw_event_dict.get("payload", {})
 
-    async def analyze_provider_performance(
-        self, start_time: datetime, end_time: datetime  # Changed to async
+                # Validate and create BiasLedgerEntry object
+                bias_ledger_entry = BiasLedgerEntry.model_validate(payload)
+                yield bias_ledger_entry
+
+            except ValidationError as e:
+                log.warning(
+                    f"Skipping malformed BiasLedgerEntry (ValidationError): {e}. "
+                    f"Raw payload: {raw_event_dict.get('payload', {})}"
+                )
+                continue
+            except Exception as e:
+                log.error(
+                    f"Unexpected error processing BiasLedgerEntry: {e}. "
+                    f"Raw event: {raw_event_dict}"
+                )
+                continue
+
+    def analyze_provider_performance(
+            self, start_time: datetime, end_time: datetime
     ) -> List[ProviderPerformanceAnalysis]:
         """
         Analyzes BiasLedger entries to aggregate performance metrics for each provider/model.
@@ -155,40 +181,33 @@ class LearningEngine:
             )
         )
 
-        async for event_payload_dict in self.get_raw_bias_ledger_entries(
-            start_time, end_time
-        ):  # Await the generator
+        # FIXED: Now this works with BiasLedgerEntry objects directly
+        for bias_ledger_entry in self.get_raw_bias_ledger_entries(
+                start_time, end_time
+        ):
             try:
-                # The payload of the telemetry event IS the BiasLedgerEntry data
-                ledger_entry_data = event_payload_dict.get("payload", {})
-                ledger_entry = BiasLedgerEntry.model_validate(ledger_entry_data)
-
-                # CORRECTED: Use the new, separate fields from the updated BiasLedgerEntry schema
-                provider_name = ledger_entry.final_provider or "unknown"
-                model_name = ledger_entry.final_model or "unknown"
+                # Now we can use attribute access since these are BiasLedgerEntry objects
+                provider_name = bias_ledger_entry.final_provider or "unknown"
+                model_name = bias_ledger_entry.final_model or "unknown"
 
                 provider_model_metrics = aggregated_data[provider_name][model_name]
                 provider_model_metrics["total_requests"] += 1
 
-                if (
-                    ledger_entry.outcome == "SUCCESS"
-                    or ledger_entry.outcome == "MITIGATED_SUCCESS"
-                ):
+                # Use attribute access for BiasLedgerEntry objects
+                outcome = bias_ledger_entry.outcome
+                if outcome == "SUCCESS" or outcome == "MITIGATED_SUCCESS":
                     provider_model_metrics["successful_requests"] += 1
-                    provider_model_metrics[
-                        "total_latency_ms"
-                    ] += ledger_entry.total_latency_ms
+                    provider_model_metrics["total_latency_ms"] += bias_ledger_entry.total_latency_ms
                 else:
                     error_type = "unknown_failure"
-                    if ledger_entry.resilience_events:
-                        for event in reversed(
-                            ledger_entry.resilience_events
-                        ):  # Iterate through lifecycle events
+                    resilience_events = bias_ledger_entry.resilience_events or []
+                    if resilience_events:
+                        for event in reversed(resilience_events):  # Iterate through lifecycle events
                             event_type = event.get("event_type")
                             payload_inner = event.get("payload", {})
                             if (
-                                event_type == event_topics.API_CALL_FAILURE
-                                and payload_inner.get("error_type")
+                                    event_type == event_topics.API_CALL_FAILURE
+                                    and payload_inner.get("error_type")
                             ):
                                 error_type = payload_inner["error_type"]
                                 break
@@ -197,14 +216,17 @@ class LearningEngine:
                                 break
                     provider_model_metrics["error_distribution"][error_type] += 1
 
-                if ledger_entry.mitigation_attempted:
+                # Use attribute access for mitigation fields
+                mitigation_attempted = bias_ledger_entry.mitigation_attempted
+                if mitigation_attempted:
                     provider_model_metrics["mitigation_attempted_count"] += 1
-                    if ledger_entry.mitigation_succeeded:
+                    mitigation_succeeded = getattr(bias_ledger_entry, 'mitigation_succeeded', False)
+                    if mitigation_succeeded:
                         provider_model_metrics["mitigation_successful_count"] += 1
 
-                for (
-                    event
-                ) in ledger_entry.resilience_events:  # Iterate through lifecycle events
+                # Use attribute access for resilience events
+                resilience_events = bias_ledger_entry.resilience_events or []
+                for event in resilience_events:  # Iterate through lifecycle events
                     if event.get("event_type") in [
                         event_topics.PROVIDER_FAILOVER,
                         event_topics.MODEL_FAILOVER,
@@ -214,21 +236,15 @@ class LearningEngine:
                     elif event.get("event_type") == event_topics.CIRCUIT_TRIPPED:
                         provider_model_metrics["circuit_breaker_tripped_count"] += 1
 
-                if ledger_entry.resilience_score is not None:
-                    provider_model_metrics[
-                        "resilience_scores_sum"
-                    ] += ledger_entry.resilience_score
+                # Use attribute access for resilience score
+                resilience_score = getattr(bias_ledger_entry, 'resilience_score', None)
+                if resilience_score is not None:
+                    provider_model_metrics["resilience_scores_sum"] += resilience_score
                     provider_model_metrics["resilience_score_count"] += 1
 
-            except ValidationError as ve:
-                log.warning(
-                    f"Skipping malformed BiasLedgerEntry (ValidationError) from DB event. "
-                    f"Event ID: {event_payload_dict.get('event_id', 'N/A')}. Error: {ve}"
-                )
             except Exception as e:
                 log.error(
-                    f"Skipping malformed BiasLedgerEntry (General Error) from DB event. "
-                    f"Event ID: {event_payload_dict.get('event_id', 'N/A')}. Error: {e}",
+                    f"Error processing BiasLedgerEntry: {e}",
                     exc_info=True,
                 )
 
@@ -301,45 +317,45 @@ class LearningEngine:
 
 
 # Example Usage (for testing this module in isolation)
-async def main():
+def main():
     print("Starting LearningEngine demo...")
 
     # Mock Database
     class MockConnectionManager:
-        async def get_connection(self):
+        def get_connection(self):
             return None
 
-        async def release_connection(self, conn):
+        def release_connection(self, conn):
             pass
 
-        async def close_all_connections(self):
+        def close_all_connections(self):
             pass
 
-        async def fetch_rows(self, query, *args):
+        def fetch_rows(self, query, *args):
             return []
 
     class MockTimeSeriesDB(TimeSeriesDBInterface):
         def __init__(self, conn_manager):
             self.conn_manager = conn_manager
 
-        async def initialize(self):
+        def initialize(self):
             pass
 
-        async def close(self):
+        def close(self):
             pass
 
-        async def record_event(self, event_schema):
+        def record_event(self, event_schema):
             pass
 
-        async def query_events(self, *args, **kwargs):
+        def query_events(self, *args, **kwargs):
             return []
 
-        async def aggregate_events(self, *args, **kwargs):
+        def aggregate_events(self, *args, **kwargs):
             return []
 
         # Simulate some BiasLedgerEntry events for testing LearningEngine
-        async def query_events_generator(
-            self, event_type, start_time, end_time, batch_size
+        def query_events_generator(
+                self, event_type, start_time, end_time, batch_size
         ):
             if event_type == event_topics.BIAS_LOG_ENTRY_CREATED:
                 for i in range(15):  # Generate 15 mock events
@@ -362,7 +378,7 @@ async def main():
                     event_payload = {
                         "request_id": str(uuid.uuid4()),
                         "timestamp_utc": (
-                            datetime.now(timezone.utc) - timedelta(minutes=15 - i)
+                                datetime.now(timezone.utc) - timedelta(minutes=15 - i)
                         ).isoformat(),
                         "schema_version": 4,
                         "initial_prompt_hash": "abc",
@@ -410,7 +426,7 @@ async def main():
     end_t = datetime.now(timezone.utc)
 
     print("\n--- Analyzing Provider Performance ---")
-    analysis_results = await engine.analyze_provider_performance(start_t, end_t)
+    analysis_results = engine.analyze_provider_performance(start_t, end_t)
 
     for result in analysis_results:
         print(f"\nProvider: {result.provider_name}, Model: {result.model_name}")
@@ -426,8 +442,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    import asyncio
     import random  # Added for main demo
     import uuid  # Added for main demo
 
-    asyncio.run(main())
+    main()

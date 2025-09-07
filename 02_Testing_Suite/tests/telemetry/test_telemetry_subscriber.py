@@ -1,9 +1,23 @@
-# tests/telemetry/test_telemetry_subscriber.py
+# Fixed version for 02_Testing_Suite/tests/telemetry/test_telemetry_subscriber.py
+# Replace the entire file content with this:
 
 import logging
+import sys
+from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+
+# WORKING: Use the same path setup that worked in test_simple_telemetry.py
+CURRENT_DIR = Path(__file__).parent
+PROJECT_ROOT = CURRENT_DIR.parent.parent.parent
+TELEMETRY_PATH = PROJECT_ROOT / "01_Framework_Core" / "telemetry"
+
+# Add to sys.path
+sys.path.insert(0, str(TELEMETRY_PATH))
+sys.path.insert(0, str(PROJECT_ROOT / "01_Framework_Core"))
+
+# Now import telemetry modules
 from telemetry import event_topics
 from telemetry.core_logger import UniversalEventSchema
 from telemetry.event_bus import EventBus

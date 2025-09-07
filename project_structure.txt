@@ -2,7 +2,7 @@ PROJECT STRUCTURE
 ==================================================
 Project: Adaptive_Mind
 Location: D:\Users\OMEN\Final_MULTI AI ANTIFRAGILE\PRoject Working\Adaptive_Mind
-Generated: 2025-08-26 20:17:07
+Generated: 2025-09-07 15:16:21
 Max Depth: 5
 
 📁 Adaptive_Mind/
@@ -141,6 +141,11 @@ Max Depth: 5
 │   │   │   ├── 📄 __init__.py
 │   │   │   └── 📄 error_parser.py
 │   │   └── 📄 __init__.py
+│   ├── 📁 antifragile_framework.egg-info
+│   │   ├── 📄 dependency_links.txt
+│   │   ├── 📄 PKG-INFO
+│   │   ├── 📄 SOURCES.txt
+│   │   └── 📄 top_level.txt
 │   ├── 📁 core
 │   │   ├── 📄 __init__.py
 │   │   └── 📄 provider_ranking_engine.py
@@ -154,7 +159,8 @@ Max Depth: 5
 │   │   ├── 📄 event_topics.py
 │   │   ├── 📄 telemetry_subscriber.py
 │   │   └── 📄 time_series_db_interface.py
-│   └── 📄 __init__.py
+│   ├── 📄 __init__.py
+│   └── 📄 pyproject.toml
 ├── 📁 02_Testing_Suite
 │   ├── 📁 .pytest_cache
 │   │   ├── 📁 v
@@ -499,110 +505,6 @@ Max Depth: 5
 │   ├── 📄 show_structure_py.html
 │   ├── 📄 status.json
 │   └── 📄 style.css
-├── 📁 src
-│   └── 📁 adaptive-mind-framework
-│       ├── 📁 adaptive_mind_framework.egg-info
-│       │   ├── 📄 dependency_links.txt
-│       │   ├── 📄 PKG-INFO
-│       │   ├── 📄 SOURCES.txt
-│       │   └── 📄 top_level.txt
-│       ├── 📁 ai_output
-│       │   └── 📁 AdaptiveMindProjectAssistant
-│       │       ├── 📄 2025-08-05_Full_Project_Remediation_Audits.md
-│       │       ├── 📄 2025-08-05_Phase1_OpenAI_Adapter_Audit.md
-│       │       ├── 📄 2025-08-06_Phase1_Claude_Adapter_Audit.md
-│       │       ├── 📄 2025-08-06_Phase1_OpenAI_Adapter_Audit.md
-│       │       └── 📄 2025-08-14_LearningEngine_Offline_Analysis_Design_and_Implementation.md
-│       ├── 📁 antifragile_framework
-│       │   ├── 📁 api
-│       │   │   ├── 📄 __init__.py
-│       │   │   └── 📄 framework_api.py
-│       │   ├── 📁 config
-│       │   │   ├── 📄 __init__.py
-│       │   │   ├── 📄 config_loader.py
-│       │   │   ├── 📄 provider_profiles.json
-│       │   │   ├── 📄 resilience_config.yaml
-│       │   │   └── 📄 schemas.py
-│       │   ├── 📁 core
-│       │   │   ├── 📄 __init__.py
-│       │   │   ├── 📄 circuit_breaker.py
-│       │   │   ├── 📄 exceptions.py
-│       │   │   ├── 📄 failover_engine.py
-│       │   │   ├── 📄 learning_engine.py
-│       │   │   ├── 📄 online_learning_subscriber.py
-│       │   │   ├── 📄 provider_ranking_engine.py
-│       │   │   ├── 📄 resource_guard.py
-│       │   │   └── 📄 schemas.py
-│       │   ├── 📁 providers
-│       │   │   ├── 📁 provider_adapters
-│       │   │   ├── 📄 __init__.py
-│       │   │   ├── 📄 api_abstraction_layer.py
-│       │   │   ├── 📄 checkkkk.md
-│       │   │   └── 📄 provider_registry.py
-│       │   ├── 📁 resilience
-│       │   │   ├── 📄 __init__.py
-│       │   │   ├── 📄 bias_ledger.py
-│       │   │   ├── 📄 llm_based_rewriter.py
-│       │   │   └── 📄 prompt_rewriter.py
-│       │   ├── 📁 utils
-│       │   │   ├── 📄 __init__.py
-│       │   │   └── 📄 error_parser.py
-│       │   └── 📄 __init__.py
-│       ├── 📁 config
-│       │   └── 📄 context_config.json
-│       ├── 📁 docs
-│       │   ├── 📁 commercial
-│       │   │   └── 📄 framework_overview.md
-│       │   ├── 📄 performance_benchmarking.md
-│       │   ├── 📄 README_learning_engine.md
-│       │   ├── 📄 README_phase0.md
-│       │   └── 📄 README_phase1.md
-│       ├── 📁 performance_tests
-│       │   ├── 📄 locustfile.py
-│       │   └── 📄 validate_baseline.py
-│       ├── 📁 scripts
-│       │   ├── 📄 prepare_session_context.py
-│       │   └── 📄 test_prepare_context.py
-│       ├── 📁 telemetry
-│       │   ├── 📄 core_logger.py
-│       │   ├── 📄 event_bus.py
-│       │   ├── 📄 event_topics.py
-│       │   ├── 📄 telemetry_subscriber.py
-│       │   └── 📄 time_series_db_interface.py
-│       ├── 📁 tests
-│       │   ├── 📁 api
-│       │   │   └── 📄 test_e2e_resilience.py
-│       │   ├── 📁 config
-│       │   │   └── 📄 test_config_loader.py
-│       │   ├── 📁 core
-│       │   │   ├── 📄 test_circuit_breaker.py
-│       │   │   ├── 📄 test_failover_engine.py
-│       │   │   ├── 📄 test_learning_engine.py
-│       │   │   └── 📄 test_resource_guard.py
-│       │   ├── 📁 resilience
-│       │   │   ├── 📄 test_bias_ledger.py
-│       │   │   └── 📄 test_llm_based_rewriter.py
-│       │   ├── 📁 telemetry
-│       │   │   └── 📄 test_telemetry_subscriber.py
-│       │   ├── 📁 utils
-│       │   │   └── 📄 test_error_parser.py
-│       │   ├── 📄 test_claude_adapter.py
-│       │   ├── 📄 test_gemini_adapter.py
-│       │   └── 📄 test_openai_adapter.py
-│       ├── 📄 changelog.md
-│       ├── 📄 check_file.py
-│       ├── 📄 context_summary.md
-│       ├── 📄 debug_mock_issue.py
-│       ├── 📄 main.py
-│       ├── 📄 pyproject.toml
-│       ├── 📄 README.md
-│       ├── 📄 requirements.txt
-│       ├── 📄 run_server.py
-│       ├── 📄 server_errors.md
-│       ├── 📄 session_context_latest.md
-│       ├── 📄 show_structure.py
-│       ├── 📄 verify_keys.py
-│       └── 📄 xx.md
 ├── 📁 static
 │   ├── 📁 css
 │   ├── 📁 images
@@ -613,9 +515,9 @@ Max Depth: 5
 │       ├── 📄 dual_mode_interface.js
 │       └── 📄 roi_calculator.js
 ├── 📄 .coverage
-├── 📄 chk.md
-├── 📄 CLaude Session 14.md
+├── 📄 0001-Phase-2C-F401-cleanup-complete-78-29-violations-62.8.patch
 ├── 📄 Complete Master Document Adaptive MInd.md
+├── 📄 conftest.py
 ├── 📄 DEVELOPMENT_LOG.md
 ├── 📄 img.png
 ├── 📄 img_1.png
@@ -631,6 +533,7 @@ Max Depth: 5
 ├── 📄 performance_benchmark_1755316267.json
 ├── 📄 performance_benchmark_1756192674.json
 ├── 📄 project_structure.txt
+├── 📄 pytest.ini
 ├── 📄 README.md
 ├── 📄 requirements.txt
 ├── 📄 show_structure.py
@@ -639,5 +542,5 @@ Max Depth: 5
 └── 📄 video.html
 
 ==================================================
-Total items displayed: 631
+Total items displayed: 534
 Generated by Project Structure Generator

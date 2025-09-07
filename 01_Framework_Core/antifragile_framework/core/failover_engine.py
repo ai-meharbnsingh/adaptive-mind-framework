@@ -145,28 +145,55 @@ class FailoverEngine:
         log.info("Resilience score penalties loaded and validated successfully.")
 
     def _record_lifecycle_event(
-        self,
-        context: RequestContext,
-        event_name: str,
-        severity: str,
-        payload_data: Dict[str, Any],
+            self,
+            context: RequestContext,
+            event_name: str,
+            severity: str,
+            payload_data: Dict[str, Any],
     ):
         timestamp = datetime.now(timezone.utc).isoformat()
         context.lifecycle_events.append(
             {"timestamp": timestamp, "event_name": event_name, **payload_data}
         )
+
+        # Map event types to appropriate topics
+        event_topic = self._get_event_topic(event_name)
+
         event_schema = UniversalEventSchema(
             event_type=event_name,
+            event_topic=event_topic,  # ADD THIS LINE
             event_source=self.__class__.__name__,
             timestamp_utc=timestamp,
             severity=severity,
             payload={"request_id": context.request_id, **payload_data},
         )
-        self.logger.log(event_schema)
+
+        # Fix the logger call - use log_event instead of log
+        self.logger.log_event(
+            event_type=event_name,
+            event_topic=event_topic,
+            payload={"request_id": context.request_id, **payload_data},
+            severity=severity
+        )
+
         if self.event_bus:
             self.event_bus.publish(
                 event_type=event_name, payload=event_schema.model_dump()
             )
+
+    def _get_event_topic(self, event_type: str) -> str:
+        """Map event types to appropriate topics"""
+        topic_mapping = {
+            "api_key.rotation": "resilience.failover",
+            "model.failover": "resilience.failover",
+            "provider.failover": "resilience.failover",
+            "circuit.tripped": "system.health",
+            "model.skipped.cost_cap": "cost.management",
+            "prompt.humanization.attempt": "content.policy",
+            "prompt.humanization.success": "content.policy",
+            "prompt.humanization.failure": "content.policy",
+        }
+        return topic_mapping.get(event_type, "system.general")
 
     def _calculate_resilience_score(
         self, context: RequestContext, final_outcome: str
